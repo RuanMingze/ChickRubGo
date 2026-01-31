@@ -583,6 +583,19 @@
                     <option value="all">全部显示</option>
                 </select>
             </div>
+            <div class="setting-item">
+                <label for="search-engine">搜索引擎：</label>
+                <select id="search-engine" onchange="updateCustomSearchInput()">
+                    <option value="https://cn.bing.com/search?q=%text%">必应搜索</option>
+                    <option value="https://www.baidu.com/s?wd=%text%">百度搜索</option>
+                    <option value="custom">自定义</option>
+                </select>
+            </div>
+            <div class="setting-item" id="custom-search-container" style="display: none;">
+                <label for="custom-search-url">自定义搜索引擎URL：</label>
+                <input type="text" id="custom-search-url" placeholder="例如: https://example.com/search?q=%text%" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                <small style="display: block; margin-top: 5px;">提示: 使用 %text% 作为搜索词的占位符</small>
+            </div>
             <button class="close-settings" id="close-settings">关闭</button>
         </div>
     </div>
@@ -711,8 +724,25 @@
                 return;
             }
 
-            // 拼接Bing搜索URL，编码特殊字符
-            const searchUrl = `https://cn.bing.com/search?q=${encodeURIComponent(keyword)}`;
+            // 获取当前选择的搜索引擎
+            const searchEngineSelect = document.getElementById('search-engine');
+            let searchUrl;
+            
+            if (searchEngineSelect.value === 'custom') {
+                // 如果选择了自定义搜索引擎
+                const customUrl = document.getElementById('custom-search-url').value.trim();
+                if (customUrl) {
+                    // 替换 %text% 占位符为实际搜索词
+                    searchUrl = customUrl.replace('%text%', encodeURIComponent(keyword));
+                } else {
+                    // 如果自定义URL为空，使用默认的必应搜索
+                    searchUrl = `https://cn.bing.com/search?q=${encodeURIComponent(keyword)}`;
+                }
+            } else {
+                // 使用预设的搜索引擎
+                searchUrl = searchEngineSelect.value.replace('%text%', encodeURIComponent(keyword));
+            }
+            
             // 新标签页打开
             window.open(searchUrl, '_blank');
             // 清空输入框
@@ -811,12 +841,17 @@
         const showWallpaperCheckbox = document.getElementById('show-wallpaper');
         const showNewsCheckbox = document.getElementById('show-news');
         const newsCountSelect = document.getElementById('news-count');
+        const searchEngineSelect = document.getElementById('search-engine');
+        const customSearchUrlInput = document.getElementById('custom-search-url');
+        const customSearchContainer = document.getElementById('custom-search-container');
         
         // 从localStorage加载初始设置
         function loadSettings() {
             const savedShowWallpaper = localStorage.getItem('showWallpaper');
             const savedShowNews = localStorage.getItem('showNews');
             const savedNewsCount = localStorage.getItem('newsCount');
+            const savedSearchEngine = localStorage.getItem('searchEngine');
+            const savedCustomSearchUrl = localStorage.getItem('customSearchUrl');
             
             if (savedShowWallpaper !== null) {
                 showWallpaperCheckbox.checked = savedShowWallpaper === 'true';
@@ -829,6 +864,20 @@
             if (savedNewsCount) {
                 newsCountSelect.value = savedNewsCount;
             }
+            
+            if (savedSearchEngine) {
+                searchEngineSelect.value = savedSearchEngine;
+                // 如果选择的是自定义引擎，需要显示自定义输入框
+                if (savedSearchEngine === 'custom' && savedCustomSearchUrl) {
+                    customSearchContainer.style.display = 'block';
+                    customSearchUrlInput.value = savedCustomSearchUrl;
+                } else {
+                    customSearchContainer.style.display = 'none';
+                }
+            }
+            
+            // 更新自定义搜索输入框的显示状态
+            updateCustomSearchInput();
         }
         
         // 保存设置到localStorage
@@ -836,6 +885,8 @@
             localStorage.setItem('showWallpaper', showWallpaperCheckbox.checked);
             localStorage.setItem('showNews', showNewsCheckbox.checked);
             localStorage.setItem('newsCount', newsCountSelect.value);
+            localStorage.setItem('searchEngine', searchEngineSelect.value);
+            localStorage.setItem('customSearchUrl', customSearchUrlInput.value);
         }
         
         // 应用设置
@@ -913,6 +964,28 @@
             if (showWallpaperCheckbox.checked) {
                 loadWallpaper();
             }
+        });
+        
+        // 显示/隐藏自定义搜索URL输入框
+        function updateCustomSearchInput() {
+            if (searchEngineSelect.value === 'custom') {
+                customSearchContainer.style.display = 'block';
+            } else {
+                customSearchContainer.style.display = 'none';
+            }
+            // 保存设置
+            saveSettings();
+        }
+        
+        // 监听搜索引擎选择变化
+        searchEngineSelect.addEventListener('change', (e) => {
+            updateCustomSearchInput();
+            saveSettings();
+        });
+        
+        // 监听自定义搜索URL输入变化
+        customSearchUrlInput.addEventListener('input', (e) => {
+            saveSettings();
         });
         
         // 初始化设置
