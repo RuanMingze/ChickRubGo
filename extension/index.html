@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChickRubGo - 智能搜索引擎</title>
-    <link rel="icon" type="image/png" href="./favicon.png">
     <style>
         body, html {
             margin: 0;
@@ -21,6 +20,39 @@
     </style>
 </head>
 <body>
-    <iframe src="https://ruanmingze.github.io/ChickRubGo/index.html" title="ChickRubGo搜索引擎"></iframe>
+    <iframe id="main-frame" src="https://ruanmingze.github.io/ChickRubGo/" title="ChickRubGo搜索引擎"></iframe>
+    <script>
+        const iframe = document.getElementById('main-frame');
+        const primaryUrl = 'https://ruanmingze.github.io/ChickRubGo/';
+        const backupUrl = 'https://chickrubgo.kesug.com/';
+        let currentUrl = primaryUrl;
+        let loadTimeout;
+
+        function checkLoad() {
+            clearTimeout(loadTimeout);
+            loadTimeout = setTimeout(() => {
+                if (currentUrl === primaryUrl) {
+                    console.log('主站点加载超时，切换到备用站点');
+                    currentUrl = backupUrl;
+                    iframe.src = backupUrl;
+                }
+            }, 5000);
+        }
+
+        iframe.addEventListener('load', () => {
+            clearTimeout(loadTimeout);
+            console.log('页面加载成功:', currentUrl);
+        });
+
+        iframe.addEventListener('error', () => {
+            console.log('加载失败，切换到备用站点');
+            if (currentUrl === primaryUrl) {
+                currentUrl = backupUrl;
+                iframe.src = backupUrl;
+            }
+        });
+
+        checkLoad();
+    </script>
 </body>
 </html>

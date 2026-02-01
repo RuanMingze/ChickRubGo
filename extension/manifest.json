@@ -12,9 +12,11 @@
     "newtab": "index.html"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "cookies"
   ],
   "host_permissions": [
-    "https://ruanmingze.github.io/*"
+    "https://ruanmingze.github.io/*",
+    "https://chickrubgo.kesug.com/*"
   ]
 }
