@@ -11,9 +11,12 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
+  "background": {
+    "service_worker": "background.js"
+  },
   "permissions": [
     "storage",
-    "cookies"
+    "management"
   ],
   "host_permissions": [
     "https://ruanmingze.github.io/*",

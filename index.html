@@ -534,7 +534,7 @@
     </div>
 
     <script>
-        async function loadWallpaper() {
+        async function loadWallpaper(skipCache = false) {
             const loading = document.getElementById('loading');
             loading.style.display = 'flex';
 
@@ -545,7 +545,7 @@
             const currentTime = Date.now();
             const isExpired = savedWallpaperTime && (currentTime - parseInt(savedWallpaperTime)) > FIVE_DAYS;
 
-            if (savedWallpaperBase64 && !isExpired) {
+            if (!skipCache && savedWallpaperBase64 && !isExpired) {
                 document.body.style.backgroundImage = `url(${savedWallpaperBase64})`;
                 loading.style.display = 'none';
                 return;
@@ -723,7 +723,7 @@
         
         refreshWallpaperBtn.addEventListener('click', () => {
             if (showWallpaperCheckbox.checked) {
-                loadWallpaper();
+                loadWallpaper(true);
             }
         });
         
