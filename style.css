@@ -5,6 +5,7 @@
             --secondary: #EC4899;
             --text-dark: #1F2937;
             --text-light: #6B7280;
+            --gray: #6B7280;
             --white: #FFFFFF;
             --gray-100: #F3F4F6;
             --gray-200: #E5E7EB;
@@ -889,8 +890,8 @@
         .settings-panel {
             position: fixed;
             top: 0;
-            right: -350px;
-            width: 320px;
+            right: -480px;
+            width: 480px;
             height: 100vh;
             background: rgba(255, 255, 255, 0.95);
             -webkit-backdrop-filter: blur(10px);
@@ -1527,9 +1528,85 @@
             margin: 0;
         }
         
-        /* 计算器样式 */
-        .calculator-container {
+        /* 页脚样式 */
+        .footer {
+            width: 100%;
+            max-width: 1200px;
+            margin: 50px auto 20px;
             padding: 20px;
+            text-align: center;
+            color: var(--gray);
+            border-radius: 12px 12px 0 0;
+        }
+
+        /* 简洁模式下的页脚样式 */
+        body.minimal-mode .footer {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            margin: 0;
+            z-index: 99;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: var(--gray) !important;
+        }
+        
+        .footer-content p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            color: var(--gray) !important;
+        }
+        
+        .footer-content a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            display: inline-block !important;
+            white-space: nowrap !important;
+        }
+        
+        .footer-content a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--primary-light);
+            transition: width 0.3s ease;
+        }
+        
+        .footer-content a:hover {
+            color: var(--primary-light);
+            opacity: 1;
+        }
+        
+        .footer-content a:hover::after {
+            width: 100%;
+        }
+        
+        /* 深色模式下的页脚样式 */
+        body.dark-mode .footer {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .footer-content a {
+            color: var(--primary-light);
+        }
+        
+        body.dark-mode .footer-content a:hover {
+            color: var(--primary);
+        }
+        
+        body.dark-mode .footer-content a::after {
+            background: var(--primary);
         }
         
         .calculator-display {
@@ -2258,6 +2335,16 @@
             margin-top: 10px;
         }
         
+        .current-track {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
         .music-control-btn {
             background: var(--primary);
             color: white;
@@ -2393,6 +2480,70 @@
             padding: 10px 20px;
             cursor: pointer;
             font-size: 1rem;
+        }
+        
+        .save-only-settings {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .save-only-settings:hover {
+            background: var(--primary-dark);
+        }
+        
+        /* 深色模式下的保存按钮样式 */
+        body.dark-mode .save-only-settings {
+            background: var(--primary-light);
+        }
+        
+        body.dark-mode .save-only-settings:hover {
+            background: var(--primary);
+        }
+        
+        /* 设置提示中的链接样式 */
+        .setting-hint a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .setting-hint a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--primary-light);
+            transition: width 0.3s ease;
+        }
+        
+        .setting-hint a:hover {
+            color: var(--primary-light);
+        }
+        
+        .setting-hint a:hover::after {
+            width: 100%;
+        }
+        
+        /* 深色模式下的设置提示链接样式 */
+        body.dark-mode .setting-hint a {
+            color: var(--primary-light);
+        }
+        
+        body.dark-mode .setting-hint a:hover {
+            color: var(--primary);
+        }
+        
+        body.dark-mode .setting-hint a::after {
+            background: var(--primary);
         }
         
         /* 小组件窗口默认隐藏 */

@@ -5,7 +5,9 @@
   "main": "index.html",
   "scripts": {
     "start": "node -e \"require('open')('index.html')\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server-start": "node Run-Server.js",
+    "test": "node test-html.js",
+    "lint": "node validate.js"
   },
   "dependencies": {
     "open": "^8.4.2"
@@ -13,8 +15,11 @@
   "keywords": [
     "search",
     "engine",
-    "widgets",
-    "productivity"
+    "widgets"
   ],
-  "author": "RuanMingze"
+  "author": "RuanMingze",
+  "devDependencies": {
+    "eslint": "^9.39.2",
+    "playwright": "^1.40.0"
+  }
 }

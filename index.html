@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4F46E5">
+    <meta name="description" content="ChickRubGo - 现代化的智能搜索引擎界面，集成丰富的小组件功能">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>ChickRubGo - 智能搜索引擎</title>
     <link rel="icon" type="image/png" href="./favicon.png">
+    <link rel="apple-touch-icon" href="./favicon.png">
+    <link rel="manifest" href="./manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <link rel="stylesheet" href="./style.css">
@@ -65,12 +71,19 @@
             </div>
             <div class="setting-item">
                 <label for="bg-music">背景音乐：</label>
-                <input type="file" id="bg-music" accept="audio/*,video/mp4" class="setting-input">
+                <input type="file" id="bg-music" accept="audio/*,video/mp4" multiple class="setting-input">
                 <small class="setting-hint" id="bg-music-info">未选择音乐文件</small>
                 <div class="music-controls" id="music-controls">
+                    <button class="music-control-btn" id="music-prev" title="上一首">
+                        <i class="fa-solid fa-step-backward"></i>
+                    </button>
                     <button class="music-control-btn" id="music-play-pause" title="播放/暂停">
                         <i class="fa-solid fa-play"></i>
                     </button>
+                    <button class="music-control-btn" id="music-next" title="下一首">
+                        <i class="fa-solid fa-step-forward"></i>
+                    </button>
+                    <div class="current-track" id="current-track">未播放</div>
                     <input type="range" id="music-volume" min="0" max="1" step="0.1" value="0.3" class="music-volume-slider" title="调整音量">
                     <small class="music-volume-label" id="music-volume-label">30%</small>
                 </div>
@@ -81,6 +94,7 @@
         </button>
         <div class="settings-buttons">
             <button class="close-settings" id="close-settings">保存并关闭</button>
+            <button class="save-only-settings" id="save-only-settings">保存但不刷新</button>
             <button class="cancel-settings" id="cancel-settings">放弃更改</button>
         </div>
     </div>
@@ -100,6 +114,10 @@
                 <div class="widget-item" data-widget="wooden-fish">
                     <i class="fa-solid fa-cookie"></i>
                     <span>木鱼</span>
+                </div>
+                <div class="widget-item" data-widget="time-calendar">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>时光日历</span>
                 </div>
             </div>
             <button class="close-widgets" id="close-widgets">关闭</button>
@@ -441,6 +459,57 @@
         </div>
     </div>
     
+    <!-- 时钟日历小组件窗口 -->
+    <div class="widget-window" id="time-calendar-window">
+        <div class="widget-window-header">
+            <h4>时光日历</h4>
+            <button class="close-window" data-window="time-calendar-window" title="关闭窗口">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="widget-window-content">
+            <div class="time-calendar-container">
+                <div class="clock-display">
+                    <div class="clock-face">
+                        <div class="clock-center"></div>
+                        <div class="clock-hand hour-hand" id="hour-hand"></div>
+                        <div class="clock-hand minute-hand" id="minute-hand"></div>
+                        <div class="clock-hand second-hand" id="second-hand"></div>
+                        <div class="clock-markers">
+                            <div class="marker marker-12">12</div>
+                            <div class="marker marker-3">3</div>
+                            <div class="marker marker-6">6</div>
+                            <div class="marker marker-9">9</div>
+                        </div>
+                    </div>
+                    <div class="digital-time" id="digital-time">00:00:00</div>
+                    <div class="date-info" id="date-info">2026年1月24日 星期日</div>
+                </div>
+                <div class="calendar-display">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" id="prev-month" title="上个月">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <div class="calendar-title" id="calendar-title">2026年1月</div>
+                        <button class="calendar-nav" id="next-month" title="下个月">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div class="weekday">日</div>
+                        <div class="weekday">一</div>
+                        <div class="weekday">二</div>
+                        <div class="weekday">三</div>
+                        <div class="weekday">四</div>
+                        <div class="weekday">五</div>
+                        <div class="weekday">六</div>
+                    </div>
+                    <div class="calendar-days" id="calendar-days"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="time-section" data-aos="fade-up" data-aos-duration="1000">
         <div class="time-display" id="time-display">00:00:00</div>
         <div class="date-display" id="date-display">2026年1月24日 星期日</div>
@@ -618,5 +687,32 @@
             </div>
         </div>
     </div>
+    
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>Ruanm, Inc  保留所有权利</p>
+            <span>联系邮箱：<a href="mailto:Xmt20160124@Outlook.com" class="email-link">Xmt20160124@Outlook.com</a></span>
+        </div>
+    </footer>
+    
+    <!-- 注册 Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                if (window.location.protocol === 'file:') {
+                    console.log('PWA 功能在 file:// 协议下不可用，请使用 HTTP 服务器');
+                    return;
+                }
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker 注册成功:', registration);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker 注册失败:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

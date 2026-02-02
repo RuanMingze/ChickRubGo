@@ -280,6 +280,7 @@
         const refreshWallpaperBtn = document.getElementById('refresh-wallpaper-btn');
         const settingsPanel = document.getElementById('settings-panel');
         const closeSettings = document.getElementById('close-settings');
+        const saveOnlySettings = document.getElementById('save-only-settings');
         const cancelSettings = document.getElementById('cancel-settings');
         const resetSettingsBtn = document.getElementById('reset-settings');
         const showWallpaperCheckbox = document.getElementById('show-wallpaper');
@@ -296,7 +297,12 @@
         const musicPlayPause = document.getElementById('music-play-pause');
         const musicVolume = document.getElementById('music-volume');
         const musicVolumeLabel = document.getElementById('music-volume-label');
+        const musicPrev = document.getElementById('music-prev');
+        const musicNext = document.getElementById('music-next');
+        const currentTrack = document.getElementById('current-track');
         let audioPlayer = null;
+        let playQueue = [];
+        let currentTrackIndex = -1;
         const timeSection = document.querySelector('.time-section');
         const searchCard = document.querySelector('.search-card');
         const quickSearch = document.querySelector('.quick-search');
@@ -498,6 +504,13 @@
             }, 100);
         });
         
+        saveOnlySettings.addEventListener('click', () => {
+            saveSettings();
+            settingsPanel.classList.remove('active');
+            // 不刷新页面，只保存设置
+            ShowAlert('成功', '设置已保存');
+        });
+        
         cancelSettings.addEventListener('click', () => {
             // 直接关闭设置面板，不保存也不刷新
             settingsPanel.classList.remove('active');
@@ -508,17 +521,35 @@
         // 音乐文件选择事件
         if (bgMusicInput) {
             bgMusicInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    // 检查文件类型
-                    if (file.type.includes('video/mp4')) {
-                        // MP4文件，需要使用FFmpeg转换
-                        handleMP4File(file);
-                    } else if (file.type.includes('audio/')) {
-                        // 音频文件，直接处理
-                        handleAudioFile(file);
-                    } else {
-                        ShowAlert('错误', '不支持的文件类型，请选择音频文件或MP4视频文件');
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                    // 清空现有播放队列
+                    playQueue = [];
+                    currentTrackIndex = -1;
+                    
+                    // 处理每个选中的文件
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        if (file) {
+                            // 检查文件类型
+                            if (file.type.includes('video/mp4')) {
+                                // MP4文件，需要使用FFmpeg转换
+                                handleMP4File(file);
+                            } else if (file.type.includes('audio/')) {
+                                // 音频文件，直接处理
+                                handleAudioFile(file);
+                            } else {
+                                ShowAlert('错误', '不支持的文件类型，请选择音频文件或MP4视频文件');
+                            }
+                        }
+                    }
+                    
+                    // 更新音乐信息显示
+                    bgMusicInfo.textContent = `已选择 ${files.length} 个音乐文件`;
+                    
+                    // 如果队列不为空，播放第一首
+                    if (playQueue.length > 0) {
+                        playNextTrack();
                     }
                 }
             });
@@ -532,12 +563,8 @@
                     const audioData = event.target.result;
                     // 保存到 IndexedDB
                     await saveAudioToIndexedDB(audioData, file.name);
-                    // 保存文件名到 localStorage
-                    localStorage.setItem('bgMusicName', file.name);
-                    bgMusicInfo.textContent = `已选择: ${file.name}`;
-                    
-                    // 初始化并播放背景音乐
-                    initBackgroundMusic(audioData);
+                    // 添加到播放队列
+                    playQueue.push({ data: audioData, name: file.name });
                 } catch (error) {
                     console.error('保存音乐文件失败:', error);
                     ShowAlert('错误', '保存音乐文件失败: ' + error.message);
@@ -568,14 +595,8 @@
                 const outputFileName = file.name.replace(/\.mp4$/i, '.mp3');
                 await saveAudioToIndexedDB(fileData, outputFileName);
                 
-                // 保存文件名到localStorage
-                localStorage.setItem('bgMusicName', outputFileName);
-                
-                bgMusicInfo.textContent = `已选择: ${outputFileName} (MP4文件)`;
-                
-                
-                // 初始化并播放背景音乐
-                initBackgroundMusic(fileData);
+                // 添加到播放队列
+                playQueue.push({ data: fileData, name: outputFileName });
                 
                 // 关闭提示
                 const alertElement = document.querySelector('.alert');
@@ -614,7 +635,27 @@
                     }
                     // 更新音乐控制UI
                     updateMusicControls();
+                } else if (playQueue.length > 0) {
+                    // 如果没有音频播放器但有播放队列，播放当前曲目或第一首
+                    if (currentTrackIndex === -1) {
+                        currentTrackIndex = 0;
+                    }
+                    playCurrentTrack();
                 }
+            });
+        }
+        
+        // 上一首按钮事件监听器
+        if (musicPrev) {
+            musicPrev.addEventListener('click', () => {
+                playPreviousTrack();
+            });
+        }
+        
+        // 下一首按钮事件监听器
+        if (musicNext) {
+            musicNext.addEventListener('click', () => {
+                playNextTrack();
             });
         }
 
@@ -1844,38 +1885,102 @@
         
         // 更新音乐控制UI
         function updateMusicControls() {
-            if (audioPlayer) {
+            if (audioPlayer || playQueue.length > 0) {
                 musicControls.style.display = 'flex';
-                
-                // 更新播放/暂停按钮
-                if (audioPlayer.paused) {
+                if (audioPlayer) {
+                    // 更新播放/暂停按钮
+                    if (audioPlayer.paused) {
+                        musicPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+                        musicPlayPause.title = '播放';
+                    } else {
+                        musicPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                        musicPlayPause.title = '暂停';
+                    }
+                    // 更新音量滑块
+                    musicVolume.value = audioPlayer.volume;
+                    musicVolumeLabel.textContent = `${Math.round(audioPlayer.volume * 100)}%`;
+                } else {
+                    // 有播放队列但没有音频播放器
                     musicPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
                     musicPlayPause.title = '播放';
-                } else {
-                    musicPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-                    musicPlayPause.title = '暂停';
+                    musicVolume.value = 0.3;
+                    musicVolumeLabel.textContent = '30%';
                 }
-                
-                // 更新音量滑块
-                musicVolume.value = audioPlayer.volume;
-                musicVolumeLabel.textContent = `${Math.round(audioPlayer.volume * 100)}%`;
             } else {
                 musicControls.style.display = 'none';
             }
         }
 
+        // 播放当前曲目
+        function playCurrentTrack() {
+            if (playQueue.length > 0 && currentTrackIndex >= 0 && currentTrackIndex < playQueue.length) {
+                const track = playQueue[currentTrackIndex];
+                initBackgroundMusic(track.data, track.name);
+                updateCurrentTrackDisplay();
+                
+                // 播放音乐
+                if (audioPlayer) {
+                    audioPlayer.play().catch(error => {
+                        if (error.name === 'NotAllowedError') {
+                            ShowConfirm('背景音乐', '需要您的授权才能播放音乐，是否授权？', (confirmed) => {
+                                if (confirmed) {
+                                    localStorage.setItem('musicPermission', 'true');
+                                    audioPlayer.play().catch(err => {
+                                        ShowAlert('错误', '播放音乐失败，请稍后重试');
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        }
+        
+        // 播放下一首曲目
+        function playNextTrack() {
+            if (playQueue.length > 0) {
+                currentTrackIndex = (currentTrackIndex + 1) % playQueue.length;
+                playCurrentTrack();
+            }
+        }
+        
+        // 播放上一首曲目
+        function playPreviousTrack() {
+            if (playQueue.length > 0) {
+                currentTrackIndex = (currentTrackIndex - 1 + playQueue.length) % playQueue.length;
+                playCurrentTrack();
+            }
+        }
+        
+        // 更新当前曲目显示
+        function updateCurrentTrackDisplay() {
+            if (currentTrack && playQueue.length > 0 && currentTrackIndex >= 0 && currentTrackIndex < playQueue.length) {
+                const track = playQueue[currentTrackIndex];
+                currentTrack.textContent = `当前播放: ${track.name}`;
+            } else if (currentTrack) {
+                currentTrack.textContent = '未播放';
+            }
+        }
+        
         // 初始化背景音乐功能
-        function initBackgroundMusic(audioData) {
+        function initBackgroundMusic(audioData, trackName) {
             if (audioData) {
                 if (audioPlayer) {
                     audioPlayer.pause();
                     audioPlayer = null;
                 }
                 audioPlayer = new Audio(audioData);
-                audioPlayer.loop = true;
-                audioPlayer.volume = 0.3;
+                audioPlayer.loop = false; // 关闭单曲循环，使用队列循环
+                audioPlayer.volume = parseFloat(musicVolume.value) || 0.3;
+                
+                // 添加音频结束事件监听器，播放下一首
+                audioPlayer.addEventListener('ended', () => {
+                    playNextTrack();
+                });
+                
                 // 不自动播放，只更新音乐控制UI
                 updateMusicControls();
+                updateCurrentTrackDisplay();
             }
         }
         
