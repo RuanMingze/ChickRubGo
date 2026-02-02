@@ -1,3 +1,139 @@
+        // IndexedDB 数据库配置
+        const DB_NAME = 'ChickRubGoDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'audioStore';
+        let db = null;
+
+        // 初始化 IndexedDB
+        async function initIndexedDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = () => {
+                    console.error('IndexedDB 打开失败:', request.error);
+                    reject(request.error);
+                };
+                
+                request.onsuccess = () => {
+                    db = request.result;
+                    console.log('IndexedDB 初始化成功');
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        const objectStore = database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        objectStore.createIndex('name', 'name', { unique: false });
+                        console.log('IndexedDB 对象存储创建成功');
+                    }
+                };
+            });
+        }
+
+        // 保存音频到 IndexedDB
+        async function saveAudioToIndexedDB(audioData, fileName) {
+            if (!db) {
+                await initIndexedDB();
+            }
+            
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const objectStore = transaction.objectStore(STORE_NAME);
+                
+                const audioRecord = {
+                    id: 'bgMusic',
+                    name: fileName,
+                    data: audioData,
+                    timestamp: Date.now()
+                };
+                
+                const request = objectStore.put(audioRecord);
+                
+                request.onsuccess = () => {
+                    console.log('音频保存到 IndexedDB 成功:', fileName);
+                    resolve();
+                };
+                
+                request.onerror = () => {
+                    console.error('音频保存到 IndexedDB 失败:', request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
+        // 从 IndexedDB 加载音频，如果找不到则尝试从本地存储读取
+        async function loadAudioFromIndexedDB() {
+            if (!db) {
+                await initIndexedDB();
+            }
+            
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const objectStore = transaction.objectStore(STORE_NAME);
+                const request = objectStore.get('bgMusic');
+                
+                request.onsuccess = () => {
+                    if (request.result) {
+                        console.log('从 IndexedDB 加载音频成功:', request.result.name);
+                        resolve({ data: request.result.data, name: request.result.name });
+                    } else {
+                        console.log('IndexedDB 中没有保存的音频，尝试从本地存储读取');
+                        // 从本地存储读取
+                        const savedBgMusic = localStorage.getItem('bgMusic');
+                        const savedBgMusicName = localStorage.getItem('bgMusicName');
+                        if (savedBgMusic && savedBgMusicName) {
+                            console.log('从本地存储加载音频成功:', savedBgMusicName);
+                            // 将本地存储的音频迁移到 IndexedDB
+                            saveAudioToIndexedDB(savedBgMusic, savedBgMusicName).catch(err => {
+                                console.error('迁移音频到 IndexedDB 失败:', err);
+                            });
+                            resolve({ data: savedBgMusic, name: savedBgMusicName });
+                        } else {
+                            console.log('本地存储中也没有保存的音频');
+                            resolve(null);
+                        }
+                    }
+                };
+                
+                request.onerror = () => {
+                    console.error('从 IndexedDB 加载音频失败:', request.error);
+                    // 尝试从本地存储读取
+                    const savedBgMusic = localStorage.getItem('bgMusic');
+                    const savedBgMusicName = localStorage.getItem('bgMusicName');
+                    if (savedBgMusic && savedBgMusicName) {
+                        console.log('从本地存储加载音频成功:', savedBgMusicName);
+                        resolve({ data: savedBgMusic, name: savedBgMusicName });
+                    } else {
+                        reject(request.error);
+                    }
+                };
+            });
+        }
+
+        // 删除 IndexedDB 中的音频
+        async function deleteAudioFromIndexedDB() {
+            if (!db) {
+                await initIndexedDB();
+            }
+            
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const objectStore = transaction.objectStore(STORE_NAME);
+                const request = objectStore.delete('bgMusic');
+                
+                request.onsuccess = () => {
+                    console.log('从 IndexedDB 删除音频成功');
+                    resolve();
+                };
+                
+                request.onerror = () => {
+                    console.error('从 IndexedDB 删除音频失败:', request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
         async function loadWallpaper(skipCache = false) {
             const loading = document.getElementById('loading');
             loading.style.display = 'flex';
@@ -65,6 +201,34 @@
 
         window.addEventListener('load', () => loadWallpaper());
         window.addEventListener('load', updateTime);
+        window.addEventListener('load', () => {
+            // 加载显示动画设置
+            const showAnimations = localStorage.getItem('showAnimations') !== 'false';
+            document.getElementById('show-animations').checked = showAnimations;
+            
+            // 根据设置初始化AOS动画库
+            if (showAnimations) {
+                AOS.init({
+                    duration: 800,
+                    easing: 'ease-in-out',
+                    once: true
+                });
+            } else {
+                // 当关闭动画时，确保所有元素可见且不显示动画
+                const animatedElements = document.querySelectorAll('[data-aos]');
+                animatedElements.forEach(element => {
+                    // 移除data-aos属性，防止AOS处理
+                    element.removeAttribute('data-aos');
+                    element.removeAttribute('data-aos-duration');
+                    element.removeAttribute('data-aos-delay');
+                    // 确保元素可见
+                    element.style.opacity = '1';
+                    element.style.visibility = 'visible';
+                    element.style.transform = 'none';
+                    element.style.transition = 'none';
+                });
+            }
+        });
         setInterval(updateTime, 1000);
 
         function handleSearch() {
@@ -126,6 +290,13 @@
         const customSearchUrlInput = document.getElementById('custom-search-url');
         const customSearchContainer = document.getElementById('custom-search-container');
         const darkModeCheckbox = document.getElementById('dark-mode');
+        const bgMusicInput = document.getElementById('bg-music');
+        const bgMusicInfo = document.getElementById('bg-music-info');
+        const musicControls = document.getElementById('music-controls');
+        const musicPlayPause = document.getElementById('music-play-pause');
+        const musicVolume = document.getElementById('music-volume');
+        const musicVolumeLabel = document.getElementById('music-volume-label');
+        let audioPlayer = null;
         const timeSection = document.querySelector('.time-section');
         const searchCard = document.querySelector('.search-card');
         const quickSearch = document.querySelector('.quick-search');
@@ -147,6 +318,8 @@
             const savedNotepadContent = localStorage.getItem('notepadContent');
             const savedMeritCount = localStorage.getItem('meritCount');
             const savedDarkMode = localStorage.getItem('darkMode');
+            const savedShowAnimations = localStorage.getItem('showAnimations');
+            const savedBgMusicName = localStorage.getItem('bgMusicName');
             
             if (savedShowWallpaper !== null) {
                 showWallpaperCheckbox.checked = savedShowWallpaper === 'true';
@@ -158,6 +331,10 @@
                 // 默认深色模式
                 darkModeCheckbox.checked = true;
                 localStorage.setItem('darkMode', 'true');
+            }
+            
+            if (savedShowAnimations !== null) {
+                document.getElementById('show-animations').checked = savedShowAnimations === 'true';
             }
             
             if (savedWeatherApiKey) {
@@ -182,19 +359,68 @@
                 meritCount.textContent = savedMeritCount;
             }
             
+            // 加载背景音乐设置
+            if (savedBgMusicName) {
+                bgMusicInfo.textContent = `已选择: ${savedBgMusicName}`;
+            } else {
+                bgMusicInfo.textContent = "未选择音乐文件";
+            }
+            
+            // 从 IndexedDB 加载背景音乐并初始化播放器
+            loadAudioFromIndexedDB().then(audioRecord => {
+                if (audioRecord) {
+                    initBackgroundMusic(audioRecord.data);
+                }
+            }).catch(error => {
+                console.error('从 IndexedDB 加载音频失败:', error);
+            });
+            
+            // 更新音乐控制UI
+            updateMusicControls();
+            
             updateCustomSearchInput();
         }
         
+        function isLocalStorageAvailable() {
+            try {
+                const test = 'test';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
         function saveSettings() {
-            localStorage.setItem('showWallpaper', showWallpaperCheckbox.checked);
-            localStorage.setItem('darkMode', darkModeCheckbox.checked);
-            localStorage.setItem('weatherApiKey', weatherApiKeyInput.value);
-            localStorage.setItem('searchEngine', searchEngineSelect.value);
-            localStorage.setItem('customSearchUrl', customSearchUrlInput.value);
+            try {
+                if (!isLocalStorageAvailable()) {
+                    throw new Error('localStorage不可用');
+                }
+                localStorage.setItem('showWallpaper', showWallpaperCheckbox.checked);
+                localStorage.setItem('darkMode', darkModeCheckbox.checked);
+                localStorage.setItem('showAnimations', document.getElementById('show-animations').checked);
+                localStorage.setItem('weatherApiKey', weatherApiKeyInput.value);
+                localStorage.setItem('searchEngine', searchEngineSelect.value);
+                localStorage.setItem('customSearchUrl', customSearchUrlInput.value);
+                console.log('设置保存成功:', localStorage.getItem('showWallpaper'), localStorage.getItem('darkMode'));
+            } catch (error) {
+                console.error('保存设置失败:', error);
+                ShowAlert('错误', '保存设置失败: ' + error.message);
+            }
         }
 
         function saveNotepad() {
-            localStorage.setItem('notepadContent', notepadContent.value);
+            try {
+                if (!isLocalStorageAvailable()) {
+                    throw new Error('localStorage不可用');
+                }
+                localStorage.setItem('notepadContent', notepadContent.value);
+                console.log('记事本保存成功');
+            } catch (error) {
+                console.error('保存记事本失败:', error);
+                ShowAlert('错误', '保存记事本失败: ' + error.message);
+            }
         }
         
         function applySettings() {
@@ -233,6 +459,162 @@
             loadSettings();
         });
         
+        // 音乐文件选择事件
+        if (bgMusicInput) {
+            bgMusicInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    // 检查文件类型
+                    if (file.type.includes('video/mp4')) {
+                        // MP4文件，需要使用FFmpeg转换
+                        handleMP4File(file);
+                    } else if (file.type.includes('audio/')) {
+                        // 音频文件，直接处理
+                        handleAudioFile(file);
+                    } else {
+                        ShowAlert('错误', '不支持的文件类型，请选择音频文件或MP4视频文件');
+                    }
+                }
+            });
+        }
+
+        // 处理音频文件
+        function handleAudioFile(file) {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const audioData = event.target.result;
+                    // 保存到 IndexedDB
+                    await saveAudioToIndexedDB(audioData, file.name);
+                    // 保存文件名到 localStorage
+                    localStorage.setItem('bgMusicName', file.name);
+                    bgMusicInfo.textContent = `已选择: ${file.name}`;
+                    console.log('音乐文件保存成功:', file.name);
+                    // 初始化并播放背景音乐
+                    initBackgroundMusic(audioData);
+                } catch (error) {
+                    console.error('保存音乐文件失败:', error);
+                    ShowAlert('错误', '保存音乐文件失败: ' + error.message);
+                }
+            };
+            reader.onerror = (error) => {
+                console.error('读取音乐文件失败:', error);
+                ShowAlert('错误', '读取音乐文件失败: ' + error.message);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 处理MP4文件
+        async function handleMP4File(file) {
+            try {
+                ShowAlert('提示', '正在处理视频文件，请稍候...', false, 0);
+                
+                // 检查是否支持本地文件系统访问
+                if (window.location.protocol === 'file:') {
+                    throw new Error('从本地文件系统运行时不支持视频处理，请使用本地服务器运行');
+                }
+                
+                // 检查FFmpeg是否可用
+                let ffmpeg;
+                if (window.FFmpegWASM && window.FFmpegWASM.FFmpeg) {
+                    // 新版本的FFmpeg WASM结构
+                    ffmpeg = new window.FFmpegWASM.FFmpeg();
+                } else {
+                    throw new Error('FFmpeg加载失败');
+                }
+                
+                // 加载FFmpeg
+                await ffmpeg.load({
+                    corePath: 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.js'
+                });
+                
+                // 读取文件内容
+                const fileReader = new FileReader();
+                const fileData = await new Promise((resolve, reject) => {
+                    fileReader.onload = () => resolve(new Uint8Array(fileReader.result));
+                    fileReader.onerror = reject;
+                    fileReader.readAsArrayBuffer(file);
+                });
+                
+                // 写入文件到虚拟文件系统
+                await ffmpeg.writeFile('input.mp4', fileData);
+                
+                // 执行转换命令
+                await ffmpeg.run('-i', 'input.mp4', '-vn', '-acodec', 'libmp3lame', '-ab', '128k', 'output.mp3');
+                
+                // 读取转换后的文件
+                const data = await ffmpeg.readFile('output.mp3');
+                
+                // 创建Blob并转换为DataURL
+                const blob = new Blob([data.buffer], { type: 'audio/mp3' });
+                const audioData = await blobToBase64(blob);
+                
+                // 保存到IndexedDB
+                const outputFileName = file.name.replace(/\.mp4$/i, '.mp3');
+                await saveAudioToIndexedDB(audioData, outputFileName);
+                
+                // 保存文件名到localStorage
+                localStorage.setItem('bgMusicName', outputFileName);
+                
+                // 清理
+                await ffmpeg.deleteFile('input.mp4');
+                await ffmpeg.deleteFile('output.mp3');
+                ffmpeg.terminate();
+                
+                bgMusicInfo.textContent = `已选择: ${outputFileName} (从MP4转换)`;
+                console.log('MP4文件转换并保存成功:', outputFileName);
+                
+                // 初始化并播放背景音乐
+                initBackgroundMusic(audioData);
+                
+                // 关闭提示
+                document.querySelector('.alert').remove();
+                ShowAlert('成功', '视频文件处理完成！', true, 2000);
+                
+            } catch (error) {
+                console.error('处理MP4文件失败:', error);
+                ShowAlert('错误', '处理视频文件失败: ' + error.message);
+            }
+        }
+
+        // 音乐控制按钮事件监听器
+        if (musicPlayPause) {
+            musicPlayPause.addEventListener('click', () => {
+                if (audioPlayer) {
+                    if (audioPlayer.paused) {
+                        audioPlayer.play().catch(error => {
+                            console.log('播放音乐失败:', error);
+                            if (error.name === 'NotAllowedError') {
+                                ShowConfirm('背景音乐', '需要您的授权才能播放音乐，是否授权？', (confirmed) => {
+                                    if (confirmed) {
+                                        localStorage.setItem('musicPermission', 'true');
+                                        audioPlayer.play().catch(err => {
+                                            console.log('再次播放失败:', err);
+                                            ShowAlert('错误', '播放音乐失败，请稍后重试');
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        audioPlayer.pause();
+                    }
+                    // 更新音乐控制UI
+                    updateMusicControls();
+                }
+            });
+        }
+
+        // 音量滑块事件监听器
+        if (musicVolume) {
+            musicVolume.addEventListener('input', () => {
+                if (audioPlayer) {
+                    audioPlayer.volume = parseFloat(musicVolume.value);
+                    musicVolumeLabel.textContent = `${Math.round(audioPlayer.volume * 100)}%`;
+                }
+            });
+        }
+        
         // 模式切换功能
         let isSimpleMode = true; // 默认简洁模式
         
@@ -249,6 +631,9 @@
                 modeIcon.className = 'fa-solid fa-leaf';
                 modeToggleBtn.title = '切换到丰富模式';
                 
+                // 添加简洁模式类到body
+                document.body.classList.add('minimal-mode');
+                
                 // 应用简洁模式样式
                 searchCard.style.background = 'transparent';
                 searchCard.style.backdropFilter = 'none';
@@ -262,6 +647,9 @@
                 // 丰富模式
                 modeIcon.className = 'fa-solid fa-layer-group';
                 modeToggleBtn.title = '切换到简洁模式';
+                
+                // 从body移除简洁模式类
+                document.body.classList.remove('minimal-mode');
                 
                 // 应用丰富模式样式
                 if (darkModeCheckbox.checked) {
@@ -349,60 +737,81 @@
             const selectedText = textarea.value.substring(start, end);
             let markdownText = '';
             
-            switch(type) {
-                case 'h1':
-                    markdownText = `# ${selectedText || '标题 1'}\n\n`;
-                    break;
-                case 'h2':
-                    markdownText = `## ${selectedText || '标题 2'}\n\n`;
-                    break;
-                case 'h3':
-                    markdownText = `### ${selectedText || '标题 3'}\n\n`;
-                    break;
-                case 'bold':
-                    markdownText = `**${selectedText || '粗体文本'}**`;
-                    break;
-                case 'italic':
-                    markdownText = `*${selectedText || '斜体文本'}*`;
-                    break;
-                case 'strikethrough':
-                    markdownText = `~~${selectedText || '删除线文本'}~~`;
-                    break;
-                case 'list-ul':
-                    markdownText = `- ${selectedText || '列表项'}\n`;
-                    break;
-                case 'list-ol':
-                    markdownText = `1. ${selectedText || '列表项'}\n`;
-                    break;
-                case 'link':
-                    const linkText = selectedText || '链接文本';
-                    const linkUrl = prompt('请输入链接URL:', 'https://');
-                    if (linkUrl) {
-                        markdownText = `[${linkText}](${linkUrl})`;
-                    }
-                    break;
-                case 'image':
-                    const imgAlt = selectedText || '图片描述';
-                    const imgUrl = prompt('请输入图片URL:', 'https://');
-                    if (imgUrl) {
-                        markdownText = `![${imgAlt}](${imgUrl})`;
-                    }
-                    break;
-                case 'code':
-                    markdownText = `\`${selectedText || '代码'}\``;
-                    break;
-                case 'quote':
-                    markdownText = `> ${selectedText || '引用文本'}\n\n`;
-                    break;
-            }
-            
-            if (markdownText) {
-                const newValue = textarea.value.substring(0, start) + markdownText + textarea.value.substring(end);
-                textarea.value = newValue;
-                textarea.focus();
-                const newPosition = start + markdownText.length;
-                textarea.setSelectionRange(newPosition, newPosition);
-                saveNotepad();
+            // 处理不需要用户输入的Markdown类型
+            if (type !== 'link' && type !== 'image') {
+                switch(type) {
+                    case 'h1':
+                        markdownText = `# ${selectedText || '标题 1'}\n\n`;
+                        break;
+                    case 'h2':
+                        markdownText = `## ${selectedText || '标题 2'}\n\n`;
+                        break;
+                    case 'h3':
+                        markdownText = `### ${selectedText || '标题 3'}\n\n`;
+                        break;
+                    case 'bold':
+                        markdownText = `**${selectedText || '粗体文本'}**`;
+                        break;
+                    case 'italic':
+                        markdownText = `*${selectedText || '斜体文本'}*`;
+                        break;
+                    case 'strikethrough':
+                        markdownText = `~~${selectedText || '删除线文本'}~~`;
+                        break;
+                    case 'list-ul':
+                        markdownText = `- ${selectedText || '列表项'}\n`;
+                        break;
+                    case 'list-ol':
+                        markdownText = `1. ${selectedText || '列表项'}\n`;
+                        break;
+                    case 'code':
+                        markdownText = `\`${selectedText || '代码'}\``;
+                        break;
+                    case 'quote':
+                        markdownText = `> ${selectedText || '引用文本'}\n\n`;
+                        break;
+                }
+                
+                if (markdownText) {
+                    const newValue = textarea.value.substring(0, start) + markdownText + textarea.value.substring(end);
+                    textarea.value = newValue;
+                    textarea.focus();
+                    const newPosition = start + markdownText.length;
+                    textarea.setSelectionRange(newPosition, newPosition);
+                    saveNotepad();
+                }
+            } else {
+                // 处理需要用户输入的Markdown类型
+                switch(type) {
+                    case 'link':
+                        const linkText = selectedText || '链接文本';
+                        ShowPrompt('链接', '请输入链接URL:', 'https://', (linkUrl) => {
+                            if (linkUrl) {
+                                const linkMarkdown = `[${linkText}](${linkUrl})`;
+                                const newValue = textarea.value.substring(0, start) + linkMarkdown + textarea.value.substring(end);
+                                textarea.value = newValue;
+                                textarea.focus();
+                                const newPosition = start + linkMarkdown.length;
+                                textarea.setSelectionRange(newPosition, newPosition);
+                                saveNotepad();
+                            }
+                        });
+                        break;
+                    case 'image':
+                        const imgAlt = selectedText || '图片描述';
+                        ShowPrompt('图片', '请输入图片URL:', 'https://', (imgUrl) => {
+                            if (imgUrl) {
+                                const imgMarkdown = `![${imgAlt}](${imgUrl})`;
+                                const newValue = textarea.value.substring(0, start) + imgMarkdown + textarea.value.substring(end);
+                                textarea.value = newValue;
+                                textarea.focus();
+                                const newPosition = start + imgMarkdown.length;
+                                textarea.setSelectionRange(newPosition, newPosition);
+                                saveNotepad();
+                            }
+                        });
+                        break;
+                }
             }
         }
         
@@ -414,6 +823,161 @@
         
         // 初始化文件操作功能
         initFileOperations();
+        
+        // 自定义弹窗函数
+        function ShowAlert(title, message, autoClose = false, closeTime = 3000) {
+            const alertElement = document.getElementById('custom-alert');
+            const alertTitle = document.getElementById('alert-title');
+            const alertMessage = document.getElementById('alert-message');
+            const alertClose = document.getElementById('alert-close');
+            
+            // 设置弹窗内容
+            alertTitle.textContent = title || '提示';
+            alertMessage.textContent = message || '';
+            
+            // 显示弹窗
+            alertElement.classList.add('active');
+            
+            // 关闭按钮点击事件
+            alertClose.onclick = function() {
+                alertElement.classList.remove('active');
+            };
+            
+            // 点击弹窗外部关闭
+            alertElement.onclick = function(e) {
+                if (e.target === alertElement) {
+                    alertElement.classList.remove('active');
+                }
+            };
+            
+            // 自动关闭
+            if (autoClose) {
+                setTimeout(function() {
+                    alertElement.classList.remove('active');
+                }, closeTime);
+            }
+        }
+        
+        // 自定义确认框函数
+        function ShowConfirm(title, message, callback) {
+            const confirmElement = document.getElementById('custom-confirm');
+            const confirmTitle = document.getElementById('confirm-title');
+            const confirmMessage = document.getElementById('confirm-message');
+            const confirmBtn = document.getElementById('confirm-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const confirmClose = document.getElementById('confirm-close');
+            
+            // 设置弹窗内容
+            confirmTitle.textContent = title || '确认';
+            confirmMessage.textContent = message || '';
+            
+            // 显示弹窗
+            confirmElement.classList.add('active');
+            
+            // 确认按钮点击事件
+            confirmBtn.onclick = function() {
+                confirmElement.classList.remove('active');
+                if (typeof callback === 'function') {
+                    callback(true);
+                }
+            };
+            
+            // 取消按钮点击事件
+            cancelBtn.onclick = function() {
+                confirmElement.classList.remove('active');
+                if (typeof callback === 'function') {
+                    callback(false);
+                }
+            };
+            
+            // 关闭按钮点击事件
+            confirmClose.onclick = function() {
+                confirmElement.classList.remove('active');
+                if (typeof callback === 'function') {
+                    callback(false);
+                }
+            };
+            
+            // 点击弹窗外部关闭
+            confirmElement.onclick = function(e) {
+                if (e.target === confirmElement) {
+                    confirmElement.classList.remove('active');
+                    if (typeof callback === 'function') {
+                        callback(false);
+                    }
+                }
+            };
+        }
+        
+        // 自定义文本输入框函数
+        function ShowPrompt(title, message, defaultValue = '', callback) {
+            const promptElement = document.getElementById('custom-prompt');
+            const promptTitle = document.getElementById('prompt-title');
+            const promptMessage = document.getElementById('prompt-message');
+            const promptInput = document.getElementById('prompt-input');
+            const promptConfirmBtn = document.getElementById('prompt-confirm-btn');
+            const promptCancelBtn = document.getElementById('prompt-cancel-btn');
+            const promptClose = document.getElementById('prompt-close');
+            
+            // 设置弹窗内容
+            promptTitle.textContent = title || '输入';
+            promptMessage.textContent = message || '';
+            promptInput.value = defaultValue || '';
+            
+            // 显示弹窗
+            promptElement.classList.add('active');
+            
+            // 自动聚焦输入框
+            setTimeout(function() {
+                promptInput.focus();
+            }, 100);
+            
+            // 确认按钮点击事件
+            promptConfirmBtn.onclick = function() {
+                const value = promptInput.value;
+                promptElement.classList.remove('active');
+                if (typeof callback === 'function') {
+                    callback(value);
+                }
+            };
+            
+            // 取消按钮点击事件
+            promptCancelBtn.onclick = function() {
+                promptElement.classList.remove('active');
+                if (typeof callback === 'function') {
+                    callback(null);
+                }
+            };
+            
+            // 关闭按钮点击事件
+            promptClose.onclick = function() {
+                promptElement.classList.remove('active');
+                if (typeof callback === 'function') {
+                    callback(null);
+                }
+            };
+            
+            // 点击弹窗外部关闭
+            promptElement.onclick = function(e) {
+                if (e.target === promptElement) {
+                    promptElement.classList.remove('active');
+                    if (typeof callback === 'function') {
+                        callback(null);
+                    }
+                }
+            };
+            
+            // 回车键确认
+            promptInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const value = promptInput.value;
+                    promptElement.classList.remove('active');
+                    if (typeof callback === 'function') {
+                        callback(value);
+                    }
+                }
+            });
+        }
         
         // 初始化彩蛋功能
         initEasterEgg();
@@ -435,7 +999,13 @@
                 
                 // 检查是否输入了彩蛋代码
                 if (inputBuffer === easterEggCode.toLowerCase()) {
-                    toggleEasterEgg();
+                    // 检查是否为简洁模式
+                    if (document.body.classList.contains('minimal-mode')) {
+                        // 提示用户彩蛋模式只在丰富模式可用
+                        ShowAlert('提示', '彩蛋模式只在丰富模式可用，请先切换到丰富模式！');
+                    } else {
+                        toggleEasterEgg();
+                    }
                     inputBuffer = '';
                 }
             });
@@ -460,20 +1030,23 @@
             const exportBtn = document.getElementById('file-export');
             
             findBtn.addEventListener('click', () => {
-                const findText = prompt('请输入要查找的内容:');
-                if (findText) {
-                    findInTextarea(findText);
-                }
+                ShowPrompt('查找', '请输入要查找的内容:', '', (findText) => {
+                    if (findText) {
+                        findInTextarea(findText);
+                    }
+                });
             });
             
             replaceBtn.addEventListener('click', () => {
-                const findText = prompt('请输入要查找的内容:');
-                if (findText) {
-                    const replaceText = prompt('请输入替换内容:', '');
-                    if (replaceText !== null) {
-                        replaceInTextarea(findText, replaceText);
+                ShowPrompt('查找', '请输入要查找的内容:', '', (findText) => {
+                    if (findText) {
+                        ShowPrompt('替换', '请输入替换内容:', '', (replaceText) => {
+                            if (replaceText !== null) {
+                                replaceInTextarea(findText, replaceText);
+                            }
+                        });
                     }
-                }
+                });
             });
             
             importBtn.addEventListener('click', () => {
@@ -487,7 +1060,7 @@
                         reader.onload = (event) => {
                             notepadContent.value = event.target.result;
                             saveNotepad();
-                            alert('文件导入成功!');
+                            ShowAlert('成功', '文件导入成功!', true, 2000);
                         };
                         reader.readAsText(file);
                     }
@@ -518,7 +1091,7 @@
                 textarea.focus();
                 textarea.setSelectionRange(index, index + text.length);
             } else {
-                alert('未找到指定内容!');
+                ShowAlert('提示', '未找到指定内容!', true, 2000);
             }
         }
         
@@ -530,9 +1103,9 @@
             if (newValue !== value) {
                 textarea.value = newValue;
                 saveNotepad();
-                alert('替换完成!');
+                ShowAlert('成功', '替换完成!', true, 2000);
             } else {
-                alert('未找到指定内容!');
+                ShowAlert('提示', '未找到指定内容!', true, 2000);
             }
         }
         
@@ -767,22 +1340,37 @@
             }
         });
         
-        resetSettingsBtn.addEventListener('click', () => {
-            if (confirm('确定要恢复默认设置吗？这将清除所有本地存储的数据。')) {
-                localStorage.clear();
-                showWallpaperCheckbox.checked = true;
-                weatherApiKeyInput.value = '';
-                searchEngineSelect.value = 'https://cn.bing.com/search?q=%text%';
-                customSearchUrlInput.value = '';
-                customSearchContainer.style.display = 'none';
-                timeSection.style.display = 'block';
-                searchCard.style.background = 'rgba(255, 255, 255, 0.95)';
-                searchCard.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
-                searchCard.style.padding = '30px 40px';
-                quickSearch.style.display = 'block';
-                document.body.classList.remove('no-wallpaper');
-                loadWallpaper();
-            }
+        resetSettingsBtn.addEventListener('click', async () => {
+            ShowConfirm('确认', '确定要恢复默认设置吗？这将清除所有本地存储的数据。', async (confirmed) => {
+                if (confirmed) {
+                    localStorage.clear();
+                    // 删除 IndexedDB 中的音频数据
+                    try {
+                        await deleteAudioFromIndexedDB();
+                    } catch (error) {
+                        console.error('删除 IndexedDB 音频失败:', error);
+                    }
+                    showWallpaperCheckbox.checked = true;
+                    weatherApiKeyInput.value = '';
+                    searchEngineSelect.value = 'https://cn.bing.com/search?q=%text%';
+                    customSearchUrlInput.value = '';
+                    customSearchContainer.style.display = 'none';
+                    timeSection.style.display = 'block';
+                    searchCard.style.background = 'rgba(255, 255, 255, 0.95)';
+                    searchCard.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
+                    searchCard.style.padding = '30px 40px';
+                    quickSearch.style.display = 'block';
+                    document.body.classList.remove('no-wallpaper');
+                    // 停止并清除音频播放器
+                    if (audioPlayer) {
+                        audioPlayer.pause();
+                        audioPlayer = null;
+                    }
+                    bgMusicInfo.textContent = "未选择音乐文件";
+                    musicControls.style.display = 'none';
+                    loadWallpaper();
+                }
+            });
         });
         
         function updateCustomSearchInput() {
@@ -803,10 +1391,130 @@
             saveSettings();
         });
         
-        document.addEventListener('DOMContentLoaded', () => {
+        // 更新音乐控制UI
+        function updateMusicControls() {
+            if (audioPlayer) {
+                musicControls.style.display = 'flex';
+                
+                // 更新播放/暂停按钮
+                if (audioPlayer.paused) {
+                    musicPlayPause.innerHTML = '<i class="fa-solid fa-play"></i>';
+                    musicPlayPause.title = '播放';
+                } else {
+                    musicPlayPause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                    musicPlayPause.title = '暂停';
+                }
+                
+                // 更新音量滑块
+                musicVolume.value = audioPlayer.volume;
+                musicVolumeLabel.textContent = `${Math.round(audioPlayer.volume * 100)}%`;
+            } else {
+                musicControls.style.display = 'none';
+            }
+        }
+
+        // 初始化背景音乐功能
+        function initBackgroundMusic(audioData) {
+            if (audioData) {
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                    audioPlayer = null;
+                }
+                audioPlayer = new Audio(audioData);
+                audioPlayer.loop = true;
+                audioPlayer.volume = 0.3;
+                // 不自动播放，只更新音乐控制UI
+                updateMusicControls();
+            }
+        }
+        
+        // 显示音乐播放授权弹窗
+        async function showMusicPermissionPopup() {
+            const savedBgMusicName = localStorage.getItem('bgMusicName');
+            const hasAudioPermission = localStorage.getItem('audioPermission') === 'granted';
+            console.log('检查是否有保存的背景音乐:', savedBgMusicName ? '是' : '否');
+            console.log('检查是否已有音频授权:', hasAudioPermission ? '是' : '否');
+            console.log('audioPlayer 是否存在:', audioPlayer ? '是' : '否');
+            
+            if (savedBgMusicName) {
+                if (hasAudioPermission && audioPlayer) {
+                    // 已有授权，直接播放
+                    console.log('已有音频授权，直接播放背景音乐...');
+                    audioPlayer.play().then(() => {
+                        console.log('背景音乐播放成功');
+                        updateMusicControls();
+                    }).catch(err => {
+                        console.log('播放背景音乐失败:', err);
+                        // 授权可能已失效，重新显示授权弹窗
+                        showPermissionDialog();
+                    });
+                } else {
+                    // 没有授权或音频播放器不存在，显示授权弹窗
+                    showPermissionDialog();
+                }
+            } else {
+                console.log('没有保存的背景音乐，不显示弹窗');
+            }
+        }
+        
+        // 显示授权弹窗
+        function showPermissionDialog() {
+            ShowConfirm('背景音乐', '检测到您之前设置了背景音乐，是否开始播放？', async (confirmed) => {
+                console.log('用户选择:', confirmed ? '确认播放' : '取消播放');
+                if (confirmed) {
+                    // 保存授权状态
+                    localStorage.setItem('audioPermission', 'granted');
+                    
+                    if (audioPlayer) {
+                        console.log('开始播放背景音乐...');
+                        audioPlayer.play().then(() => {
+                            console.log('背景音乐播放成功');
+                            updateMusicControls();
+                        }).catch(err => {
+                            console.log('播放背景音乐失败:', err);
+                            console.log('错误名称:', err.name);
+                            console.log('错误消息:', err.message);
+                            ShowAlert('错误', '播放音乐失败，请稍后重试');
+                        });
+                    } else {
+                        console.log('audioPlayer 不存在，尝试从 IndexedDB 加载');
+                        try {
+                            const audioRecord = await loadAudioFromIndexedDB();
+                            if (audioRecord) {
+                                initBackgroundMusic(audioRecord.data);
+                                audioPlayer.play().then(() => {
+                                    console.log('背景音乐播放成功');
+                                    updateMusicControls();
+                                }).catch(err => {
+                                    console.log('播放背景音乐失败:', err);
+                                    ShowAlert('错误', '播放音乐失败，请稍后重试');
+                                });
+                            } else {
+                                ShowAlert('错误', '未找到保存的背景音乐');
+                            }
+                        } catch (error) {
+                            console.error('从 IndexedDB 加载音频失败:', error);
+                            ShowAlert('错误', '加载背景音乐失败');
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 初始化 IndexedDB
+            try {
+                await initIndexedDB();
+            } catch (error) {
+                console.error('IndexedDB 初始化失败:', error);
+            }
+            
             loadSettings();
             loadModeSettings();
             applySettings();
+            
+            // 显示音乐播放授权弹窗
+            showMusicPermissionPopup();
             
             const searchInput = document.getElementById('search-input');
             const updatePlaceholder = () => {

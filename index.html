@@ -6,7 +6,10 @@
     <title>ChickRubGo - 智能搜索引擎</title>
     <link rel="icon" type="image/png" href="./favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
     <link rel="stylesheet" href="./style.css">
+    <!-- 使用UMD版本的FFmpeg -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ffmpeg/0.12.15/umd/ffmpeg.min.js"></script>
 </head>
 <body>
     <div class="settings-panel" id="settings-panel">
@@ -14,17 +17,22 @@
             <h3>设置选项</h3>
             <div class="setting-item">
                 <label>
-                    <input type="checkbox" id="show-wallpaper" checked> 显示壁纸
+                    <input type="checkbox" id="show-wallpaper" checked> <span>显示壁纸</span>
                 </label>
             </div>
             <div class="setting-item">
                 <label>
-                    <input type="checkbox" id="show-time" checked> 显示时间
+                    <input type="checkbox" id="show-time" checked> <span>显示时间</span>
                 </label>
             </div>
             <div class="setting-item">
                 <label>
-                    <input type="checkbox" id="dark-mode"> 深色模式
+                    <input type="checkbox" id="dark-mode"> <span>深色模式</span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <label>
+                    <input type="checkbox" id="show-animations" checked> <span>显示淡入动画</span>
                 </label>
             </div>
             <div class="setting-item">
@@ -45,13 +53,25 @@
                 <input type="text" id="weather-api-key" placeholder="输入你的API Key" class="setting-input">
                 <small class="setting-hint">获取API Key: <a href="https://openweathermap.org/api" target="_blank" rel="noopener">OpenWeatherMap</a></small>
             </div>
-            <button class="reset-settings" id="reset-settings">
-                <i class="fa-solid fa-trash"></i> 恢复默认设置
-            </button>
-            <div class="settings-buttons">
-                <button class="close-settings" id="close-settings">保存并关闭</button>
-                <button class="cancel-settings" id="cancel-settings">放弃更改</button>
+            <div class="setting-item">
+                <label for="bg-music">背景音乐：</label>
+                <input type="file" id="bg-music" accept="audio/*,video/mp4" class="setting-input">
+                <small class="setting-hint" id="bg-music-info">未选择音乐文件</small>
+                <div class="music-controls" id="music-controls">
+                    <button class="music-control-btn" id="music-play-pause" title="播放/暂停">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <input type="range" id="music-volume" min="0" max="1" step="0.1" value="0.3" class="music-volume-slider" title="调整音量">
+                    <small class="music-volume-label" id="music-volume-label">30%</small>
+                </div>
             </div>
+        </div>
+        <button class="reset-settings" id="reset-settings">
+            <i class="fa-solid fa-trash"></i> 恢复默认设置
+        </button>
+        <div class="settings-buttons">
+            <button class="close-settings" id="close-settings">保存并关闭</button>
+            <button class="cancel-settings" id="cancel-settings">放弃更改</button>
         </div>
     </div>
 
@@ -203,13 +223,13 @@
         </div>
     </div>
     
-    <div class="time-section">
+    <div class="time-section" data-aos="fade-up" data-aos-duration="1000">
         <div class="time-display" id="time-display">00:00:00</div>
         <div class="date-display" id="date-display">2026年1月24日 星期日</div>
     </div>
     
     <div class="container">
-        <div class="operation-section">
+        <div class="operation-section" data-aos="fade-right" data-aos-duration="800" data-aos-delay="200">
             <button class="mode-toggle-btn" id="mode-toggle-btn" title="切换模式">
                 <i class="fa-solid fa-leaf"></i>
             </button>
@@ -223,12 +243,12 @@
             </button>
         </div>
         
-        <div class="brand-section">
+        <div class="brand-section" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="300">
             <h1 class="brand-logo">ChickRubGo</h1>
             <p class="brand-slogan">探索未知，一键直达</p>
         </div>
 
-        <div class="search-card">
+        <div class="search-card" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="500">
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
                 <input type="text" id="search-input" placeholder="输入你想搜索的内容，回车或点击搜索">
@@ -238,37 +258,37 @@
                 </button>
             </div>
 
-            <div class="quick-search">
+            <div class="quick-search" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="700">
                 <div class="quick-title">
                     <i class="fa-solid fa-fire-flame-curved"></i>
                     热门搜索
                 </div>
                 <div class="tag-container">
-                    <div class="search-tag">前端开发</div>
-                    <div class="search-tag">AI工具</div>
-                    <div class="search-tag">科技资讯</div>
-                    <div class="search-tag">设计资源</div>
-                    <div class="search-tag">学习教程</div>
-                    <div class="search-tag">影视推荐</div>
+                    <div class="search-tag" data-aos="fade-up" data-aos-delay="800">前端开发</div>
+                    <div class="search-tag" data-aos="fade-up" data-aos-delay="850">AI工具</div>
+                    <div class="search-tag" data-aos="fade-up" data-aos-delay="900">科技资讯</div>
+                    <div class="search-tag" data-aos="fade-up" data-aos-delay="950">设计资源</div>
+                    <div class="search-tag" data-aos="fade-up" data-aos-delay="1000">学习教程</div>
+                    <div class="search-tag" data-aos="fade-up" data-aos-delay="1050">影视推荐</div>
                 </div>
             </div>
         </div>
         
-        <div class="widgets-section">
+        <div class="widgets-section" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="1100">
             <div class="widgets-title">
                 <i class="fa-solid fa-puzzle-piece"></i>
                 小组件
             </div>
             <div class="widgets-container">
-                <div class="widget-item" data-widget="notepad">
+                <div class="widget-item" data-widget="notepad" data-aos="fade-up" data-aos-delay="1200">
                     <i class="fa-solid fa-note-sticky"></i>
                     <span>记事本</span>
                 </div>
-                <div class="widget-item" data-widget="weather">
+                <div class="widget-item" data-widget="weather" data-aos="fade-up" data-aos-delay="1250">
                     <i class="fa-solid fa-cloud-sun"></i>
                     <span>天气</span>
                 </div>
-                <div class="widget-item" data-widget="wooden-fish">
+                <div class="widget-item" data-widget="wooden-fish" data-aos="fade-up" data-aos-delay="1300">
                     <i class="fa-solid fa-cookie"></i>
                     <span>木鱼</span>
                 </div>
@@ -281,6 +301,55 @@
         正在加载精美壁纸...
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script src="./renderer.js"></script>
+    
+    <!-- 自定义弹窗结构 -->
+    <div id="custom-alert" class="custom-alert">
+        <div class="custom-alert-content">
+            <div class="custom-alert-header">
+                <h3 id="alert-title"></h3>
+                <button class="custom-alert-close" id="alert-close">&times;</button>
+            </div>
+            <div class="custom-alert-body">
+                <p id="alert-message"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 自定义确认框结构 -->
+    <div id="custom-confirm" class="custom-alert">
+        <div class="custom-alert-content">
+            <div class="custom-alert-header">
+                <h3 id="confirm-title"></h3>
+                <button class="custom-alert-close" id="confirm-close">&times;</button>
+            </div>
+            <div class="custom-alert-body">
+                <p id="confirm-message"></p>
+            </div>
+            <div class="custom-alert-footer">
+                <button class="custom-confirm-btn" id="confirm-btn">确认</button>
+                <button class="custom-cancel-btn" id="cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 自定义文本输入框结构 -->
+    <div id="custom-prompt" class="custom-alert">
+        <div class="custom-alert-content">
+            <div class="custom-alert-header">
+                <h3 id="prompt-title"></h3>
+                <button class="custom-alert-close" id="prompt-close">&times;</button>
+            </div>
+            <div class="custom-alert-body">
+                <p id="prompt-message"></p>
+                <input type="text" id="prompt-input" class="prompt-input" placeholder="请输入内容">
+            </div>
+            <div class="custom-alert-footer">
+                <button class="custom-confirm-btn" id="prompt-confirm-btn">确认</button>
+                <button class="custom-cancel-btn" id="prompt-cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
