@@ -1,0 +1,20 @@
+{
+  "name": "chickrubgo",
+  "version": "1.0.0",
+  "description": "ChickRubGo - 智能搜索引擎",
+  "main": "index.html",
+  "scripts": {
+    "start": "node -e \"require('open')('index.html')\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "open": "^8.4.2"
+  },
+  "keywords": [
+    "search",
+    "engine",
+    "widgets",
+    "productivity"
+  ],
+  "author": "RuanMingze"
+}
