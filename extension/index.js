@@ -52,12 +52,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
+     * 显示错误容器
+     */
+    function showErrorContainer() {
+        clearTimeout(loadTimeout);
+        console.log(`[最终处理] 所有地址加载失败，显示错误容器`);
+        
+        // 隐藏 iframe
+        iframe.style.display = 'none';
+        
+        // 显示错误容器
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            errorContainer.style.display = 'flex';
+        }
+        
+        // 添加刷新按钮点击事件
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                // 重新加载页面
+                window.location.reload();
+            });
+        }
+        
+        // 添加进入 Bing 按钮点击事件
+        const bingBtn = document.getElementById('bing-btn');
+        if (bingBtn) {
+            bingBtn.addEventListener('click', function() {
+                // 跳转到 Bing
+                window.location.href = CONFIG.finalUrl;
+            });
+        }
+    }
+
+    /**
      * 重定向到最终地址
      */
     function redirectToFinalUrl() {
-        clearTimeout(loadTimeout);
-        console.log(`[最终跳转] 所有地址加载失败，跳转到 ${CONFIG.finalUrl}`);
-        window.location.href = CONFIG.finalUrl;
+        showErrorContainer();
     }
 
     // 监听iframe加载成功事件
