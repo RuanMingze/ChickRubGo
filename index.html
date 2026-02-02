@@ -232,6 +232,214 @@
             </div>
         </div>
     </div>
+
+    <!-- 闹钟窗口 -->
+    <div class="widget-window" id="alarm-window">
+        <div class="widget-window-header">
+            <h4>闹钟</h4>
+            <button class="close-window" data-window="alarm-window" title="关闭窗口">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="widget-window-content">
+            <div class="alarm-content">
+                <div class="alarm-tab-container">
+                    <button class="alarm-tab active" data-tab="alarm">闹钟</button>
+                    <button class="alarm-tab" data-tab="pomodoro">番茄钟</button>
+                </div>
+                
+                <!-- 闹钟标签内容 -->
+                <div class="alarm-tab-content" id="alarm-tab-content">
+                    <div class="alarm-setup">
+                        <div class="time-picker">
+                            <input type="time" id="alarm-time" class="time-input" placeholder="选择时间">
+                        </div>
+                        <div class="alarm-days">
+                            <label class="day-label">
+                                <input type="checkbox" class="day-checkbox" value="0">日
+                            </label>
+                            <label class="day-label">
+                                <input type="checkbox" class="day-checkbox" value="1">一
+                            </label>
+                            <label class="day-label">
+                                <input type="checkbox" class="day-checkbox" value="2">二
+                            </label>
+                            <label class="day-label">
+                                <input type="checkbox" class="day-checkbox" value="3">三
+                            </label>
+                            <label class="day-label">
+                                <input type="checkbox" class="day-checkbox" value="4">四
+                            </label>
+                            <label class="day-label">
+                                <input type="checkbox" class="day-checkbox" value="5">五
+                            </label>
+                            <label class="day-label">
+                                <input type="checkbox" class="day-checkbox" value="6">六
+                            </label>
+                        </div>
+                        <div class="alarm-options">
+                            <input type="text" id="alarm-label" placeholder="闹钟标签" class="alarm-label-input">
+                            <select id="alarm-sound" class="alarm-sound-select" aria-label="选择闹钟铃声">
+                                <option value="default">默认铃声</option>
+                                <option value="bell">铃声</option>
+                                <option value="beep">蜂鸣</option>
+                            </select>
+                        </div>
+                        <button class="add-alarm-btn" id="add-alarm-btn">添加闹钟</button>
+                    </div>
+                    <div class="alarms-list" id="alarms-list">
+                        <!-- 闹钟列表将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+                
+                <!-- 番茄钟标签内容 -->
+                <div class="alarm-tab-content" id="pomodoro-tab-content">
+                    <div class="pomodoro-timer">
+                        <div class="pomodoro-display" id="pomodoro-display">25:00</div>
+                        <div class="pomodoro-controls">
+                            <button class="pomodoro-btn" id="pomodoro-start">开始</button>
+                            <button class="pomodoro-btn" id="pomodoro-pause">暂停</button>
+                            <button class="pomodoro-btn" id="pomodoro-reset">重置</button>
+                        </div>
+                    </div>
+                    <div class="pomodoro-settings">
+                        <h5>设置</h5>
+                        <div class="pomodoro-setting">
+                            <label>工作时间 (分钟):</label>
+                            <input type="number" id="work-time" min="1" max="60" value="25" class="pomodoro-setting-input" aria-label="设置工作时间">
+                        </div>
+                        <div class="pomodoro-setting">
+                            <label>短休息 (分钟):</label>
+                            <input type="number" id="short-break" min="1" max="30" value="5" class="pomodoro-setting-input" aria-label="设置短休息时间">
+                        </div>
+                        <div class="pomodoro-setting">
+                            <label>长休息 (分钟):</label>
+                            <input type="number" id="long-break" min="1" max="60" value="15" class="pomodoro-setting-input" aria-label="设置长休息时间">
+                        </div>
+                        <div class="pomodoro-setting">
+                            <label>工作轮次:</label>
+                            <input type="number" id="work-cycles" min="1" max="10" value="4" class="pomodoro-setting-input" aria-label="设置工作轮次">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 计算器窗口 -->
+    <div class="widget-window" id="calculator-window">
+        <div class="widget-window-header">
+            <h4>计算器</h4>
+            <button class="close-window" data-window="calculator-window" title="关闭窗口">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="widget-window-content">
+            <div class="calculator-container">
+                <div class="calculator-display">
+                    <div id="calculator-result" class="calculator-result">0</div>
+                    <div id="calculator-expression" class="calculator-expression"></div>
+                </div>
+                <div class="calculator-buttons">
+                    <div class="calculator-row">
+                        <button class="calculator-btn calculator-btn-clear" data-value="C">C</button>
+                        <button class="calculator-btn calculator-btn-backspace" data-value="backspace">&larr;</button>
+                        <button class="calculator-btn calculator-btn-percent" data-value="%">%</button>
+                        <button class="calculator-btn calculator-btn-operator" data-value="/">÷</button>
+                    </div>
+                    <div class="calculator-row">
+                        <button class="calculator-btn calculator-btn-number" data-value="7">7</button>
+                        <button class="calculator-btn calculator-btn-number" data-value="8">8</button>
+                        <button class="calculator-btn calculator-btn-number" data-value="9">9</button>
+                        <button class="calculator-btn calculator-btn-operator" data-value="*">×</button>
+                    </div>
+                    <div class="calculator-row">
+                        <button class="calculator-btn calculator-btn-number" data-value="4">4</button>
+                        <button class="calculator-btn calculator-btn-number" data-value="5">5</button>
+                        <button class="calculator-btn calculator-btn-number" data-value="6">6</button>
+                        <button class="calculator-btn calculator-btn-operator" data-value="-">-</button>
+                    </div>
+                    <div class="calculator-row">
+                        <button class="calculator-btn calculator-btn-number" data-value="1">1</button>
+                        <button class="calculator-btn calculator-btn-number" data-value="2">2</button>
+                        <button class="calculator-btn calculator-btn-number" data-value="3">3</button>
+                        <button class="calculator-btn calculator-btn-operator" data-value="+">+</button>
+                    </div>
+                    <div class="calculator-row">
+                        <button class="calculator-btn calculator-btn-zero" data-value="0">0</button>
+                        <button class="calculator-btn calculator-btn-decimal" data-value=".">.</button>
+                        <button class="calculator-btn calculator-btn-equals" data-value="=">=</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 每日一言窗口 -->
+    <div class="widget-window" id="daily-quote-window">
+        <div class="widget-window-header">
+            <h4>每日一言</h4>
+            <button class="close-window" data-window="daily-quote-window" title="关闭窗口">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="widget-window-content">
+            <div class="daily-quote-container">
+                <div class="daily-quote-content" id="daily-quote-content">
+                    <div class="daily-quote-loading">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        <p>正在加载每日一言...</p>
+                    </div>
+                </div>
+                <div class="daily-quote-actions">
+                    <button class="refresh-quote-btn" id="refresh-quote-btn">
+                        <i class="fa-solid fa-sync-alt"></i>
+                        换一个
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 今天吃什么窗口 -->
+    <div class="widget-window" id="food-decider-window">
+        <div class="widget-window-header">
+            <h4>今天吃什么</h4>
+            <button class="close-window" data-window="food-decider-window" title="关闭窗口">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="widget-window-content">
+            <div class="food-decider-container">
+                <div class="food-display" id="food-display">
+                    <div class="food-placeholder">
+                        <i class="fa-solid fa-question-circle"></i>
+                        <p>点击开始按钮随机选择食物</p>
+                    </div>
+                    <div class="food-result" id="food-result">
+                        <div class="food-icon">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <div class="food-name" id="food-name"></div>
+                    </div>
+                </div>
+                <div class="food-controls" id="food-controls">
+                    <button class="food-btn start-btn" id="start-food-btn">
+                        <i class="fa-solid fa-play"></i>
+                        开始
+                    </button>
+                    <button class="food-btn stop-btn" id="stop-food-btn" disabled>
+                        <i class="fa-solid fa-stop"></i>
+                        停止
+                    </button>
+                </div>
+                <div class="food-list" id="food-list">
+                    <h5>食物列表</h5>
+                    <div class="food-items" id="food-items"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="time-section" data-aos="fade-up" data-aos-duration="1000">
         <div class="time-display" id="time-display">00:00:00</div>
@@ -288,19 +496,51 @@
             <div class="widgets-title">
                 <i class="fa-solid fa-puzzle-piece"></i>
                 小组件
+                <div class="widgets-title-actions">
+                    <button class="edit-widgets-btn" id="edit-widgets-btn" title="编辑小组件">
+                        <i class="fa-solid fa-edit"></i>
+                        编辑
+                    </button>
+                </div>
             </div>
-            <div class="widgets-container">
+            <div class="widgets-container" id="widgets-container">
                 <div class="widget-item" data-widget="notepad" data-aos="fade-up" data-aos-delay="1200">
                     <i class="fa-solid fa-note-sticky"></i>
                     <span>记事本</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
                 </div>
                 <div class="widget-item" data-widget="weather" data-aos="fade-up" data-aos-delay="1250">
                     <i class="fa-solid fa-cloud-sun"></i>
                     <span>天气</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
                 </div>
                 <div class="widget-item" data-widget="wooden-fish" data-aos="fade-up" data-aos-delay="1300">
                     <i class="fa-solid fa-cookie"></i>
                     <span>木鱼</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                <div class="widget-item" data-widget="alarm" data-aos="fade-up" data-aos-delay="1350">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>闹钟</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                
+                <div class="widget-item" data-widget="calculator" data-aos="fade-up" data-aos-delay="1400">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>计算器</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                
+                <div class="widget-item" data-widget="daily-quote" data-aos="fade-up" data-aos-delay="1450">
+                    <i class="fa-solid fa-quote-right"></i>
+                    <span>每日一言</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                
+                <div class="widget-item" data-widget="food-decider" data-aos="fade-up" data-aos-delay="1500">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span>今天吃什么</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
                 </div>
             </div>
         </div>
@@ -340,6 +580,23 @@
             <div class="custom-alert-footer">
                 <button class="custom-confirm-btn" id="confirm-btn">确认</button>
                 <button class="custom-cancel-btn" id="cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 确认播放框结构 -->
+    <div id="custom-confirm-for-confirm-play" class="custom-alert-confirm-play">
+        <div class="custom-alert-confirm-play-content">
+            <div class="custom-alert-confirm-play-header">
+                <h3 id="confirm-play-title"></h3>
+                <button class="custom-alert-confirm-play-close" id="confirm-play-close">&times;</button>
+            </div>
+            <div class="custom-alert-confirm-play-body">
+                <p id="confirm-play-message"></p>
+            </div>
+            <div class="custom-alert-confirm-play-footer">
+                <button class="custom-alert-confirm-play-btn" id="confirm-play-btn">确认</button>
+                <button class="custom-alert-confirm-play-btn custom-alert-confirm-play-cancel" id="confirm-play-cancel-btn">取消</button>
             </div>
         </div>
     </div>

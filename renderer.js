@@ -162,6 +162,7 @@
                 loading.style.display = 'none';
             } catch (err) {
                 console.error('壁纸加载异常:', err);
+                ShowAlert('错误', '糟糕！壁纸被流星撞飞了！刷新一下找找它～', true, 3000);
                 if (savedWallpaperBase64) {
                     document.body.style.backgroundImage = `url(${savedWallpaperBase64})`;
                 } else {
@@ -303,11 +304,34 @@
         const notepadWindow = document.getElementById('notepad-window');
         const weatherWindow = document.getElementById('weather-window');
         const woodenFishWindow = document.getElementById('wooden-fish-window');
+        const alarmWindow = document.getElementById('alarm-window');
         const notepadContent = document.getElementById('notepad-content');
         const weatherContent = document.getElementById('weather-content');
         const woodenFish = document.getElementById('wooden-fish');
         const woodenFishImage = document.getElementById('wooden-fish-image');
         const meritCount = document.getElementById('merit-count');
+        
+        // 闹钟相关元素
+        const alarmTabContainer = document.querySelector('.alarm-tab-container');
+        const alarmTabs = document.querySelectorAll('.alarm-tab');
+        const alarmTabContent = document.getElementById('alarm-tab-content');
+        const pomodoroTabContent = document.getElementById('pomodoro-tab-content');
+        const alarmTimeInput = document.getElementById('alarm-time');
+        const dayCheckboxes = document.querySelectorAll('.day-checkbox');
+        const alarmLabelInput = document.getElementById('alarm-label');
+        const alarmSoundSelect = document.getElementById('alarm-sound');
+        const addAlarmBtn = document.getElementById('add-alarm-btn');
+        const alarmsList = document.getElementById('alarms-list');
+        
+        // 番茄钟相关元素
+        const pomodoroDisplay = document.getElementById('pomodoro-display');
+        const pomodoroStartBtn = document.getElementById('pomodoro-start');
+        const pomodoroPauseBtn = document.getElementById('pomodoro-pause');
+        const pomodoroResetBtn = document.getElementById('pomodoro-reset');
+        const workTimeInput = document.getElementById('work-time');
+        const shortBreakInput = document.getElementById('short-break');
+        const longBreakInput = document.getElementById('long-break');
+        const workCyclesInput = document.getElementById('work-cycles');
         
         function loadSettings() {
             const savedShowWallpaper = localStorage.getItem('showWallpaper');
@@ -687,6 +711,317 @@
             });
         });
         
+        // 编辑模式功能
+        const editWidgetsBtn = document.getElementById('edit-widgets-btn');
+        const widgetsSection = document.querySelector('.widgets-section');
+        const widgetsContainer = document.getElementById('widgets-container');
+        
+        if (editWidgetsBtn && widgetsSection && widgetsContainer) {
+            let isEditMode = false;
+            let draggedItem = null;
+            
+            // 初始化小组件状态
+            loadWidgetStates();
+            
+            // 编辑按钮点击事件
+            editWidgetsBtn.addEventListener('click', () => {
+                toggleEditMode();
+            });
+            
+            // 切换编辑模式
+            function toggleEditMode() {
+                isEditMode = !isEditMode;
+                
+                if (isEditMode) {
+                    widgetsSection.classList.add('edit-mode');
+                    editWidgetsBtn.innerHTML = '<i class="fa-solid fa-check"></i> 完成';
+                    editWidgetsBtn.style.backgroundColor = '#27ae60';
+                    
+                    // 添加拖拽排序功能
+                    initDragAndDrop();
+                    
+                    // 添加小组件列表按钮
+                    showWidgetList();
+                } else {
+                    widgetsSection.classList.remove('edit-mode');
+                    editWidgetsBtn.innerHTML = '<i class="fa-solid fa-edit"></i> 编辑';
+                    editWidgetsBtn.style.backgroundColor = 'var(--primary)';
+                    
+                    // 移除拖拽排序功能
+                    removeDragAndDrop();
+                    
+                    // 移除小组件列表
+                    hideWidgetList();
+                }
+            }
+            
+            // 初始化拖拽排序
+            function initDragAndDrop() {
+                const widgetItems = document.querySelectorAll('.widget-item');
+                widgetItems.forEach(item => {
+                    item.setAttribute('draggable', 'true');
+                    item.addEventListener('dragstart', handleDragStart);
+                    item.addEventListener('dragover', handleDragOver);
+                    item.addEventListener('drop', handleDrop);
+                    item.addEventListener('dragend', handleDragEnd);
+                });
+            }
+            
+            // 移除拖拽排序
+            function removeDragAndDrop() {
+                const widgetItems = document.querySelectorAll('.widget-item');
+                widgetItems.forEach(item => {
+                    item.removeAttribute('draggable');
+                    item.removeEventListener('dragstart', handleDragStart);
+                    item.removeEventListener('dragover', handleDragOver);
+                    item.removeEventListener('drop', handleDrop);
+                    item.removeEventListener('dragend', handleDragEnd);
+                });
+            }
+            
+            // 拖拽开始
+            function handleDragStart(e) {
+                draggedItem = this;
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            }
+            
+            // 拖拽经过
+            function handleDragOver(e) {
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            }
+            
+            // 放置
+            function handleDrop(e) {
+                if (e.stopPropagation) {
+                    e.stopPropagation();
+                }
+                
+                if (draggedItem !== this) {
+                    const container = widgetsContainer;
+                    const children = Array.from(container.children);
+                    const draggedIndex = children.indexOf(draggedItem);
+                    const dropIndex = children.indexOf(this);
+                    
+                    if (draggedIndex < dropIndex) {
+                        container.insertBefore(draggedItem, this.nextSibling);
+                    } else {
+                        container.insertBefore(draggedItem, this);
+                    }
+                    
+                    // 保存小组件状态
+                    saveWidgetStates();
+                }
+                
+                return false;
+            }
+            
+            // 拖拽结束
+            function handleDragEnd() {
+                const widgetItems = document.querySelectorAll('.widget-item');
+                widgetItems.forEach(item => {
+                    item.classList.remove('dragging');
+                });
+                draggedItem = null;
+            }
+            
+            // 显示小组件列表
+            function showWidgetList() {
+                // 检查是否已存在小组件列表
+                if (!document.getElementById('widget-list-container')) {
+                    const widgetListContainer = document.createElement('div');
+                    widgetListContainer.id = 'widget-list-container';
+                    widgetListContainer.className = 'widget-list-container';
+                    
+                    widgetListContainer.innerHTML = `
+                        <div class="widget-list-header">
+                            <h4>添加小组件</h4>
+                            <button class="close-widget-list-btn" id="close-widget-list-btn">×</button>
+                        </div>
+                        <div class="widget-list-content" id="widget-list-content">
+                            <!-- 小组件列表将通过JavaScript动态生成 -->
+                        </div>
+                    `;
+                    
+                    // 将小组件列表添加到widgetsSection的末尾
+                    widgetsSection.appendChild(widgetListContainer);
+                    
+                    // 生成小组件列表
+                    generateWidgetList();
+                    
+                    // 关闭按钮点击事件
+                    const closeWidgetListBtn = document.getElementById('close-widget-list-btn');
+                    if (closeWidgetListBtn) {
+                        closeWidgetListBtn.addEventListener('click', hideWidgetList);
+                    }
+                }
+            }
+            
+            // 隐藏小组件列表
+            function hideWidgetList() {
+                const widgetListContainer = document.getElementById('widget-list-container');
+                if (widgetListContainer) {
+                    widgetListContainer.remove();
+                }
+            }
+            
+            // 生成小组件列表
+            function generateWidgetList() {
+                const widgetListContent = document.getElementById('widget-list-content');
+                if (!widgetListContent) return;
+                
+                // 所有可用的小组件
+                const allWidgets = [
+                    { type: 'notepad', icon: 'fa-note-sticky', name: '记事本' },
+                    { type: 'weather', icon: 'fa-cloud-sun', name: '天气' },
+                    { type: 'wooden-fish', icon: 'fa-cookie', name: '木鱼' },
+                    { type: 'alarm', icon: 'fa-clock', name: '闹钟' },
+                    { type: 'calculator', icon: 'fa-calculator', name: '计算器' },
+                    { type: 'daily-quote', icon: 'fa-quote-right', name: '每日一言' },
+                    { type: 'food-decider', icon: 'fa-utensils', name: '今天吃什么' }
+                ];
+                
+                // 获取当前显示的小组件
+                const visibleWidgets = new Set();
+                const widgetsContainer = document.getElementById('widgets-container');
+                if (widgetsContainer) {
+                    widgetsContainer.querySelectorAll('.widget-item').forEach(item => {
+                        if (item.style.display !== 'none') {
+                            visibleWidgets.add(item.dataset.widget);
+                        }
+                    });
+                }
+                
+                // 生成小组件列表
+                widgetListContent.innerHTML = '';
+                
+                allWidgets.forEach(widget => {
+                    if (!visibleWidgets.has(widget.type)) {
+                        const widgetItem = document.createElement('div');
+                        widgetItem.className = 'widget-list-item';
+                        widgetItem.innerHTML = `
+                            <i class="fa-solid ${widget.icon}"></i>
+                            <span>${widget.name}</span>
+                            <button class="add-widget-btn" data-widget="${widget.type}">添加</button>
+                        `;
+                        widgetListContent.appendChild(widgetItem);
+                    }
+                });
+                
+                // 添加添加按钮点击事件
+                document.querySelectorAll('.add-widget-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const widgetType = this.dataset.widget;
+                        addWidget(widgetType);
+                    });
+                });
+            }
+            
+            // 添加小组件
+            function addWidget(widgetType) {
+                // 查找已存在的小组件元素
+                const widgetsContainer = document.getElementById('widgets-container');
+                if (widgetsContainer) {
+                    const existingWidget = widgetsContainer.querySelector(`.widget-item[data-widget="${widgetType}"]`);
+                    if (existingWidget) {
+                        // 显示已存在的小组件
+                        existingWidget.style.display = 'flex';
+                        saveWidgetStates();
+                        generateWidgetList();
+                    }
+                }
+            }
+            
+            // 移除小组件
+            function removeWidget(widgetItem) {
+                if (widgetItem) {
+                    widgetItem.style.display = 'none';
+                    saveWidgetStates();
+                    generateWidgetList();
+                }
+            }
+            
+            // 为所有删除按钮添加点击事件
+            document.querySelectorAll('.remove-widget-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const widgetItem = this.closest('.widget-item');
+                    removeWidget(widgetItem);
+                });
+            });
+            
+            // 保存小组件状态到本地存储
+            function saveWidgetStates() {
+                const visibleWidgets = [];
+                const widgetTypes = new Set();
+                
+                // 只选择widgets-container中的小组件元素
+                const widgetsContainer = document.getElementById('widgets-container');
+                if (widgetsContainer) {
+                    // 使用children属性获取当前DOM顺序的元素
+                    Array.from(widgetsContainer.children).forEach(item => {
+                        if (item.classList.contains('widget-item')) {
+                            if (item.style.display !== 'none') {
+                                const widgetType = item.dataset.widget;
+                                if (!widgetTypes.has(widgetType)) {
+                                    widgetTypes.add(widgetType);
+                                    visibleWidgets.push(widgetType);
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                localStorage.setItem('visibleWidgets', JSON.stringify(visibleWidgets));
+            }
+            
+            // 从本地存储加载小组件状态
+            function loadWidgetStates() {
+                const savedWidgets = localStorage.getItem('visibleWidgets');
+                
+                // 只操作widgets-container中的小组件元素
+                const widgetsContainer = document.getElementById('widgets-container');
+                if (!widgetsContainer) {
+                    return;
+                }
+                
+                if (savedWidgets) {
+                    try {
+                        const visibleWidgets = JSON.parse(savedWidgets);
+                        
+                        // 隐藏所有小组件
+                        widgetsContainer.querySelectorAll('.widget-item').forEach(item => {
+                            item.style.display = 'none';
+                        });
+                        
+                        // 按照保存的顺序重新排列并显示小组件
+                        visibleWidgets.forEach(widgetType => {
+                            const widgetItem = widgetsContainer.querySelector(`.widget-item[data-widget="${widgetType}"]`);
+                            if (widgetItem) {
+                                // 将小组件移到容器末尾，按照保存的顺序排列
+                                widgetsContainer.appendChild(widgetItem);
+                                widgetItem.style.display = 'flex';
+                            }
+                        });
+                    } catch (error) {
+                        // 加载失败时，显示所有预设小组件
+                        widgetsContainer.querySelectorAll('.widget-item').forEach(item => {
+                            item.style.display = 'flex';
+                        });
+                    }
+                } else {
+                    // 没有保存的状态时，显示所有预设小组件
+                    widgetsContainer.querySelectorAll('.widget-item').forEach(item => {
+                        item.style.display = 'flex';
+                    });
+                }
+            }
+        }
+        
         // 关闭窗口事件
         closeWindowButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -703,6 +1038,29 @@
             window.style.top = '50%';
             window.style.transform = 'translate(-50%, -50%)';
             window.style.zIndex = '1100';
+        });
+        
+        // 闹钟标签切换
+        alarmTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabType = tab.dataset.tab;
+                
+                // 移除所有标签的active类
+                alarmTabs.forEach(t => t.classList.remove('active'));
+                // 添加当前标签的active类
+                tab.classList.add('active');
+                
+                // 隐藏所有内容
+                alarmTabContent.style.display = 'none';
+                pomodoroTabContent.style.display = 'none';
+                
+                // 显示对应内容
+                if (tabType === 'alarm') {
+                    alarmTabContent.style.display = 'block';
+                } else if (tabType === 'pomodoro') {
+                    pomodoroTabContent.style.display = 'block';
+                }
+            });
         });
         
         // 记事本保存事件
@@ -855,6 +1213,57 @@
             const confirmBtn = document.getElementById('confirm-btn');
             const cancelBtn = document.getElementById('cancel-btn');
             const confirmClose = document.getElementById('confirm-close');
+            
+            // 设置弹窗内容
+            confirmTitle.textContent = title || '确认';
+            confirmMessage.textContent = message || '';
+            
+            // 显示弹窗
+            confirmElement.classList.add('active');
+            
+            // 确认按钮点击事件
+            confirmBtn.onclick = function() {
+                confirmElement.classList.remove('active');
+                if (typeof callback === 'function') {
+                    callback(true);
+                }
+            };
+            
+            // 取消按钮点击事件
+            cancelBtn.onclick = function() {
+                confirmElement.classList.remove('active');
+                if (typeof callback === 'function') {
+                    callback(false);
+                }
+            };
+            
+            // 关闭按钮点击事件
+            confirmClose.onclick = function() {
+                confirmElement.classList.remove('active');
+                if (typeof callback === 'function') {
+                    callback(false);
+                }
+            };
+            
+            // 点击弹窗外部关闭
+            confirmElement.onclick = function(e) {
+                if (e.target === confirmElement) {
+                    confirmElement.classList.remove('active');
+                    if (typeof callback === 'function') {
+                        callback(false);
+                    }
+                }
+            };
+        }
+        
+        // 确认播放框函数 - 不影响点击、缩小并放到左下角
+        function ShowConfirmForConfirmPlay(title, message, callback) {
+            const confirmElement = document.getElementById('custom-confirm-for-confirm-play');
+            const confirmTitle = document.getElementById('confirm-play-title');
+            const confirmMessage = document.getElementById('confirm-play-message');
+            const confirmBtn = document.getElementById('confirm-play-btn');
+            const cancelBtn = document.getElementById('confirm-play-cancel-btn');
+            const confirmClose = document.getElementById('confirm-play-close');
             
             // 设置弹窗内容
             confirmTitle.textContent = title || '确认';
@@ -1051,6 +1460,10 @@
                             saveNotepad();
                             ShowAlert('成功', '文件导入成功!', true, 2000);
                         };
+                        reader.onerror = () => {
+                            console.error('文件读取失败');
+                            ShowAlert('错误', '呜呜～笔记被小松鼠叼走了！重新上传试试？', true, 3000);
+                        };
                         reader.readAsText(file);
                     }
                 };
@@ -1189,12 +1602,31 @@
             
             // 打开对应窗口
             if (widgetType === 'notepad') {
-                notepadWindow.style.display = 'flex';
+                const window = document.getElementById('notepad-window');
+                if (window) window.style.display = 'flex';
             } else if (widgetType === 'weather') {
-                weatherWindow.style.display = 'flex';
+                const window = document.getElementById('weather-window');
+                if (window) window.style.display = 'flex';
                 loadWeather();
             } else if (widgetType === 'wooden-fish') {
-                woodenFishWindow.style.display = 'flex';
+                const window = document.getElementById('wooden-fish-window');
+                if (window) window.style.display = 'flex';
+            } else if (widgetType === 'alarm') {
+                const window = document.getElementById('alarm-window');
+                if (window) window.style.display = 'flex';
+                loadAlarms();
+            } else if (widgetType === 'calculator') {
+                const window = document.getElementById('calculator-window');
+                if (window) window.style.display = 'flex';
+                initCalculator();
+            } else if (widgetType === 'daily-quote') {
+                const window = document.getElementById('daily-quote-window');
+                if (window) window.style.display = 'flex';
+                loadDailyQuote();
+            } else if (widgetType === 'food-decider') {
+                const window = document.getElementById('food-decider-window');
+                if (window) window.style.display = 'flex';
+                initFoodDecider();
             }
         }
         
@@ -1271,6 +1703,8 @@
                 
                 displayWeather(weatherData);
             } catch (error) {
+                console.error('加载天气失败:', error);
+                ShowAlert('错误', '啊偶～云朵把天气藏起来啦！换个城市试试？', true, 3000);
                 weatherContent.innerHTML = `
                     <div class="weather-error">
                         <i class="fa-solid fa-exclamation-triangle"></i>
@@ -1476,7 +1910,7 @@
         
         // 显示授权弹窗
         function showPermissionDialog() {
-            ShowConfirm('背景音乐', '检测到您之前设置了背景音乐，是否开始播放？', async (confirmed) => {
+            ShowConfirmForConfirmPlay('背景音乐', '检测到您之前设置了背景音乐，是否开始播放？', async (confirmed) => {
                 
                 if (confirmed) {
                     // 保存授权状态
@@ -1488,6 +1922,7 @@
                             
                             updateMusicControls();
                         }).catch(err => {
+                            
                             
                             
                             
@@ -1550,3 +1985,781 @@
             updatePlaceholder();
             window.addEventListener('resize', updatePlaceholder);
         });
+        
+        // 闹钟功能
+        // 加载闹钟
+        function loadAlarms() {
+            const savedAlarms = localStorage.getItem('alarms');
+            if (savedAlarms) {
+                const alarms = JSON.parse(savedAlarms);
+                renderAlarms(alarms);
+            }
+        }
+        
+        // 渲染闹钟列表
+        function renderAlarms(alarms) {
+            const alarmsList = document.getElementById('alarms-list');
+            if (!alarmsList) return;
+            
+            alarmsList.innerHTML = '';
+            
+            if (alarms.length === 0) {
+                alarmsList.innerHTML = '<p class="no-alarms">暂无闹钟</p>';
+                return;
+            }
+            
+            alarms.forEach((alarm, index) => {
+                const alarmItem = document.createElement('div');
+                alarmItem.className = 'alarm-item';
+                
+                const daysOfWeek = ['日', '一', '二', '三', '四', '五', '六'];
+                const selectedDays = alarm.days.map(day => daysOfWeek[day]).join(', ');
+                
+                alarmItem.innerHTML = `
+                    <div class="alarm-item-info">
+                        <div class="alarm-item-time">${alarm.time}</div>
+                        <div class="alarm-item-days">${selectedDays || '每天'}</div>
+                        <div class="alarm-item-label">${alarm.label || '无标签'}</div>
+                    </div>
+                    <div class="alarm-item-actions">
+                        <div class="alarm-toggle ${alarm.enabled ? 'active' : ''}" data-index="${index}"></div>
+                        <button class="delete-alarm-btn" data-index="${index}" title="删除闹钟">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                alarmsList.appendChild(alarmItem);
+            });
+            
+            // 添加闹钟切换事件
+            const alarmToggles = document.querySelectorAll('.alarm-toggle');
+            alarmToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const index = parseInt(toggle.dataset.index);
+                    toggleAlarm(index);
+                });
+            });
+            
+            // 添加删除闹钟事件
+            const deleteButtons = document.querySelectorAll('.delete-alarm-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const index = parseInt(button.dataset.index);
+                    deleteAlarm(index);
+                });
+            });
+        }
+        
+        // 添加闹钟
+        function addAlarm() {
+            const alarmTimeInput = document.getElementById('alarm-time');
+            const dayCheckboxes = document.querySelectorAll('.day-checkbox');
+            const alarmLabelInput = document.getElementById('alarm-label');
+            const alarmSoundSelect = document.getElementById('alarm-sound');
+            
+            if (!alarmTimeInput || !alarmLabelInput || !alarmSoundSelect) return;
+            
+            const time = alarmTimeInput.value;
+            if (!time) {
+                ShowAlert('提示', '请选择闹钟时间', true, 2000);
+                return;
+            }
+            
+            const days = Array.from(dayCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => parseInt(checkbox.value));
+            
+            const label = alarmLabelInput.value;
+            const sound = alarmSoundSelect.value;
+            
+            const alarm = {
+                time,
+                days,
+                label,
+                sound,
+                enabled: true,
+                id: Date.now()
+            };
+            
+            const savedAlarms = localStorage.getItem('alarms');
+            const alarms = savedAlarms ? JSON.parse(savedAlarms) : [];
+            alarms.push(alarm);
+            
+            localStorage.setItem('alarms', JSON.stringify(alarms));
+            loadAlarms();
+            
+            // 重置表单
+            alarmTimeInput.value = '';
+            dayCheckboxes.forEach(checkbox => checkbox.checked = false);
+            alarmLabelInput.value = '';
+            alarmSoundSelect.value = 'default';
+            
+            ShowAlert('成功', '闹钟添加成功', true, 2000);
+        }
+        
+        // 切换闹钟状态
+        function toggleAlarm(index) {
+            const savedAlarms = localStorage.getItem('alarms');
+            if (savedAlarms) {
+                const alarms = JSON.parse(savedAlarms);
+                alarms[index].enabled = !alarms[index].enabled;
+                localStorage.setItem('alarms', JSON.stringify(alarms));
+                loadAlarms();
+            }
+        }
+        
+        // 删除闹钟
+        function deleteAlarm(index) {
+            const savedAlarms = localStorage.getItem('alarms');
+            if (savedAlarms) {
+                const alarms = JSON.parse(savedAlarms);
+                alarms.splice(index, 1);
+                localStorage.setItem('alarms', JSON.stringify(alarms));
+                loadAlarms();
+                ShowAlert('成功', '闹钟删除成功', true, 2000);
+            }
+        }
+        
+        // 初始化番茄钟
+        let pomodoroInterval = null;
+        let pomodoroTime = 25 * 60; // 默认25分钟
+        let pomodoroState = 'work'; // work, shortBreak, longBreak
+        let pomodoroCycle = 0;
+        let isPomodoroRunning = false;
+        
+        // 更新番茄钟设置
+        function updatePomodoroSettings() {
+            const workTimeInput = document.getElementById('work-time');
+            const shortBreakInput = document.getElementById('short-break');
+            const longBreakInput = document.getElementById('long-break');
+            const workCyclesInput = document.getElementById('work-cycles');
+            
+            if (!workTimeInput || !shortBreakInput || !longBreakInput || !workCyclesInput) return;
+            
+            if (!isPomodoroRunning) {
+                resetPomodoro();
+            }
+        }
+        
+        // 重置番茄钟
+        function resetPomodoro() {
+            const workTimeInput = document.getElementById('work-time');
+            const pomodoroDisplay = document.getElementById('pomodoro-display');
+            const pomodoroStartBtn = document.getElementById('pomodoro-start');
+            
+            if (!workTimeInput || !pomodoroDisplay || !pomodoroStartBtn) return;
+            
+            clearInterval(pomodoroInterval);
+            pomodoroTime = parseInt(workTimeInput.value) * 60;
+            pomodoroState = 'work';
+            pomodoroCycle = 0;
+            isPomodoroRunning = false;
+            updatePomodoroDisplay();
+            pomodoroStartBtn.textContent = '开始';
+        }
+        
+        // 更新番茄钟显示
+        function updatePomodoroDisplay() {
+            const pomodoroDisplay = document.getElementById('pomodoro-display');
+            if (!pomodoroDisplay) return;
+            
+            const minutes = Math.floor(pomodoroTime / 60);
+            const seconds = pomodoroTime % 60;
+            pomodoroDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // 开始/暂停番茄钟
+        function togglePomodoro() {
+            const pomodoroStartBtn = document.getElementById('pomodoro-start');
+            const workTimeInput = document.getElementById('work-time');
+            const shortBreakInput = document.getElementById('short-break');
+            const longBreakInput = document.getElementById('long-break');
+            const workCyclesInput = document.getElementById('work-cycles');
+            
+            if (!pomodoroStartBtn || !workTimeInput || !shortBreakInput || !longBreakInput || !workCyclesInput) return;
+            
+            if (isPomodoroRunning) {
+                clearInterval(pomodoroInterval);
+                isPomodoroRunning = false;
+                pomodoroStartBtn.textContent = '开始';
+            } else {
+                pomodoroInterval = setInterval(() => {
+                    pomodoroTime--;
+                    updatePomodoroDisplay();
+                    
+                    if (pomodoroTime <= 0) {
+                        clearInterval(pomodoroInterval);
+                        isPomodoroRunning = false;
+                        pomodoroStartBtn.textContent = '开始';
+                        
+                        // 播放提示音
+                        playAlarmSound();
+                        
+                        // 切换状态
+                        if (pomodoroState === 'work') {
+                            pomodoroCycle++;
+                            if (pomodoroCycle % parseInt(workCyclesInput.value) === 0) {
+                                // 长休息
+                                pomodoroState = 'longBreak';
+                                pomodoroTime = parseInt(longBreakInput.value) * 60;
+                                ShowAlert('提示', '工作时间结束，开始长休息', true, 3000);
+                            } else {
+                                // 短休息
+                                pomodoroState = 'shortBreak';
+                                pomodoroTime = parseInt(shortBreakInput.value) * 60;
+                                ShowAlert('提示', '工作时间结束，开始短休息', true, 3000);
+                            }
+                        } else {
+                            // 回到工作状态
+                            pomodoroState = 'work';
+                            pomodoroTime = parseInt(workTimeInput.value) * 60;
+                            ShowAlert('提示', '休息时间结束，开始工作', true, 3000);
+                        }
+                        
+                        updatePomodoroDisplay();
+                    }
+                }, 1000);
+                
+                isPomodoroRunning = true;
+                pomodoroStartBtn.textContent = '暂停';
+            }
+        }
+        
+        // 播放闹钟声音
+        function playAlarmSound() {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2588/2588-preview.mp3');
+            audio.play().catch(err => {
+                console.error('播放声音失败:', err);
+            });
+        }
+        
+        // 检查闹钟
+        function checkAlarms() {
+            const now = new Date();
+            const currentHour = now.getHours().toString().padStart(2, '0');
+            const currentMinute = now.getMinutes().toString().padStart(2, '0');
+            const currentTime = `${currentHour}:${currentMinute}`;
+            const currentDay = now.getDay();
+            
+            const savedAlarms = localStorage.getItem('alarms');
+            if (savedAlarms) {
+                const alarms = JSON.parse(savedAlarms);
+                alarms.forEach(alarm => {
+                    if (alarm.enabled && alarm.time === currentTime) {
+                        if (alarm.days.length === 0 || alarm.days.includes(currentDay)) {
+                            // 触发闹钟
+                            playAlarmSound();
+                            ShowAlert('闹钟', alarm.label || '闹钟时间到了！', true, 5000);
+                        }
+                    }
+                });
+            }
+        }
+        
+        // 每分钟检查一次闹钟
+        setInterval(checkAlarms, 60000);
+        
+        // 初始化闹钟事件
+        document.addEventListener('DOMContentLoaded', () => {
+            // 闹钟标签切换
+            const alarmTabs = document.querySelectorAll('.alarm-tab');
+            const alarmTabContent = document.getElementById('alarm-tab-content');
+            const pomodoroTabContent = document.getElementById('pomodoro-tab-content');
+            
+            if (alarmTabs && alarmTabContent && pomodoroTabContent) {
+                // 初始化默认显示的标签内容
+                alarmTabContent.style.display = 'block';
+                pomodoroTabContent.style.display = 'none';
+                
+                // 确保第一个标签是激活状态
+                alarmTabs.forEach((tab, index) => {
+                    if (index === 0) {
+                        tab.classList.add('active');
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+                
+                alarmTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const tabType = tab.dataset.tab;
+                        
+                        // 移除所有标签的active类
+                        alarmTabs.forEach(t => t.classList.remove('active'));
+                        // 添加当前标签的active类
+                        tab.classList.add('active');
+                        
+                        // 隐藏所有内容
+                        alarmTabContent.style.display = 'none';
+                        pomodoroTabContent.style.display = 'none';
+                        
+                        // 显示对应内容
+                        if (tabType === 'alarm') {
+                            alarmTabContent.style.display = 'block';
+                        } else if (tabType === 'pomodoro') {
+                            pomodoroTabContent.style.display = 'block';
+                        }
+                    });
+                });
+            }
+            
+            // 添加闹钟按钮事件
+            const addAlarmBtn = document.getElementById('add-alarm-btn');
+            if (addAlarmBtn) {
+                addAlarmBtn.addEventListener('click', addAlarm);
+            }
+            
+            // 番茄钟按钮事件
+            const pomodoroStartBtn = document.getElementById('pomodoro-start');
+            const pomodoroPauseBtn = document.getElementById('pomodoro-pause');
+            const pomodoroResetBtn = document.getElementById('pomodoro-reset');
+            const workTimeInput = document.getElementById('work-time');
+            const shortBreakInput = document.getElementById('short-break');
+            const longBreakInput = document.getElementById('long-break');
+            const workCyclesInput = document.getElementById('work-cycles');
+            
+            if (pomodoroStartBtn) {
+                pomodoroStartBtn.addEventListener('click', togglePomodoro);
+            }
+            
+            if (pomodoroPauseBtn) {
+                pomodoroPauseBtn.addEventListener('click', () => {
+                    clearInterval(pomodoroInterval);
+                    isPomodoroRunning = false;
+                    if (pomodoroStartBtn) {
+                        pomodoroStartBtn.textContent = '开始';
+                    }
+                });
+            }
+            
+            if (pomodoroResetBtn) {
+                pomodoroResetBtn.addEventListener('click', resetPomodoro);
+            }
+            
+            if (workTimeInput) {
+                workTimeInput.addEventListener('change', updatePomodoroSettings);
+            }
+            
+            if (shortBreakInput) {
+                shortBreakInput.addEventListener('change', updatePomodoroSettings);
+            }
+            
+            if (longBreakInput) {
+                longBreakInput.addEventListener('change', updatePomodoroSettings);
+            }
+            
+            if (workCyclesInput) {
+                workCyclesInput.addEventListener('change', updatePomodoroSettings);
+            }
+            
+            // 初始化
+            loadAlarms();
+            resetPomodoro();
+        });
+        
+        // 计算器功能
+        let calculatorExpression = '';
+        let calculatorResult = '';
+        let calculatorInput = '';
+        let calculatorOperator = '';
+        let calculatorShouldReset = false;
+        
+        // 初始化计算器
+        function initCalculator() {
+            const calculatorContainer = document.querySelector('.calculator-container');
+            if (!calculatorContainer) return;
+            
+            // 重置计算器状态
+            resetCalculator();
+            
+            // 添加按钮事件监听器
+            const calculatorButtons = document.querySelectorAll('.calculator-btn');
+            calculatorButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const value = button.dataset.value;
+                    if (value) {
+                        handleCalculatorButton(value);
+                    }
+                });
+            });
+        }
+        
+        // 处理计算器按钮点击
+        function handleCalculatorButton(value) {
+            if (value === 'C') {
+                // 清除所有
+                resetCalculator();
+            } else if (value === 'CE') {
+                // 清除当前输入
+                calculatorInput = '';
+                updateCalculatorDisplay();
+            } else if (value === 'Backspace') {
+                // 退格
+                calculatorInput = calculatorInput.slice(0, -1);
+                updateCalculatorDisplay();
+            } else if (value === '=') {
+                // 计算结果
+                calculateResult();
+            } else if (['+', '-', '*', '/', '%'].includes(value)) {
+                // 运算符
+                handleOperator(value);
+            } else if (value === '.') {
+                // 小数点
+                handleDecimal();
+            } else {
+                // 数字
+                handleNumber(value);
+            }
+        }
+        
+        // 处理数字输入
+        function handleNumber(number) {
+            if (calculatorShouldReset) {
+                calculatorInput = number;
+                calculatorShouldReset = false;
+            } else {
+                // 避免多个前导零
+                if (calculatorInput === '0' && number === '0') {
+                    return;
+                }
+                // 避免以零开头的数字（除了纯小数）
+                if (calculatorInput === '0' && number !== '.' && number !== '0') {
+                    calculatorInput = number;
+                } else {
+                    calculatorInput += number;
+                }
+            }
+            updateCalculatorDisplay();
+        }
+        
+        // 处理小数点
+        function handleDecimal() {
+            if (!calculatorInput.includes('.')) {
+                if (calculatorShouldReset) {
+                    calculatorInput = '0.';
+                    calculatorShouldReset = false;
+                } else if (calculatorInput === '') {
+                    calculatorInput = '0.';
+                } else {
+                    calculatorInput += '.';
+                }
+                updateCalculatorDisplay();
+            }
+        }
+        
+        // 处理运算符
+        function handleOperator(operator) {
+            if (calculatorInput === '' && calculatorExpression === '') {
+                return;
+            }
+            
+            if (calculatorInput !== '') {
+                if (calculatorExpression !== '') {
+                    // 计算之前的表达式
+                    calculateResult();
+                }
+                calculatorExpression = calculatorInput;
+                calculatorOperator = operator;
+                calculatorInput = '';
+                updateCalculatorDisplay();
+            } else {
+                // 替换运算符
+                calculatorOperator = operator;
+                updateCalculatorDisplay();
+            }
+        }
+        
+        // 计算结果
+        function calculateResult() {
+            if (calculatorExpression === '' || calculatorInput === '' || calculatorOperator === '') {
+                return;
+            }
+            
+            let result = 0;
+            const num1 = parseFloat(calculatorExpression);
+            const num2 = parseFloat(calculatorInput);
+            
+            try {
+                switch (calculatorOperator) {
+                    case '+':
+                        result = num1 + num2;
+                        break;
+                    case '-':
+                        result = num1 - num2;
+                        break;
+                    case '*':
+                        result = num1 * num2;
+                        break;
+                    case '/':
+                        if (num2 === 0) {
+                            throw new Error('除数不能为零');
+                        }
+                        result = num1 / num2;
+                        break;
+                    case '%':
+                        result = num1 % num2;
+                        break;
+                }
+                
+                // 处理结果显示
+                calculatorResult = formatCalculatorResult(result);
+                calculatorInput = calculatorResult;
+                calculatorExpression = '';
+                calculatorOperator = '';
+                calculatorShouldReset = true;
+                updateCalculatorDisplay();
+            } catch (error) {
+                calculatorResult = '错误';
+                calculatorInput = '';
+                calculatorExpression = '';
+                calculatorOperator = '';
+                updateCalculatorDisplay();
+            }
+        }
+        
+        // 格式化计算器结果
+        function formatCalculatorResult(result) {
+            if (Number.isInteger(result)) {
+                return result.toString();
+            } else {
+                // 限制小数位数为10位
+                return result.toFixed(10).replace(/\.?0+$/, '');
+            }
+        }
+        
+        // 更新计算器显示
+        function updateCalculatorDisplay() {
+            const expressionElement = document.querySelector('.calculator-expression');
+            const resultElement = document.querySelector('.calculator-result');
+            
+            if (expressionElement && resultElement) {
+                let displayExpression = calculatorExpression;
+                if (calculatorOperator) {
+                    displayExpression += ' ' + calculatorOperator;
+                }
+                if (calculatorInput) {
+                    displayExpression += ' ' + calculatorInput;
+                }
+                
+                expressionElement.textContent = displayExpression;
+                resultElement.textContent = calculatorInput || calculatorResult || '0';
+            }
+        }
+        
+        // 重置计算器
+        function resetCalculator() {
+            calculatorExpression = '';
+            calculatorResult = '';
+            calculatorInput = '';
+            calculatorOperator = '';
+            calculatorShouldReset = false;
+            updateCalculatorDisplay();
+        }
+        
+        // 检查计算器窗口是否存在
+        const calculatorWindow = document.getElementById('calculator-window');
+        if (calculatorWindow) {
+            // 初始化计算器窗口样式
+            calculatorWindow.style.position = 'fixed';
+            calculatorWindow.style.left = '50%';
+            calculatorWindow.style.top = '50%';
+            calculatorWindow.style.transform = 'translate(-50%, -50%)';
+            calculatorWindow.style.zIndex = '1100';
+        }
+        
+        // 每日一言功能
+        let dailyQuoteWindow;
+        let dailyQuoteContent;
+        let refreshQuoteBtn;
+        
+        // 加载每日一言
+        async function loadDailyQuote() {
+            const dailyQuoteContent = document.getElementById('daily-quote-content');
+            if (!dailyQuoteContent) return;
+            
+            // 显示加载状态
+            dailyQuoteContent.innerHTML = `
+                <div class="daily-quote-loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    <p>正在加载每日一言...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('https://yunzhiapi.cn/API/Bingmryy.php');
+                if (!response.ok) {
+                    throw new Error('请求失败');
+                }
+                
+                const quoteText = await response.text();
+                
+                // 显示每日一言
+                dailyQuoteContent.innerHTML = `
+                    <div class="daily-quote-text">${quoteText}</div>
+                    <div class="daily-quote-author">— 每日一言</div>
+                `;
+            } catch (error) {
+                console.error('加载每日一言失败:', error);
+                ShowAlert('错误', '呼~每日一言飞到外太空去了！', true, 3000);
+                dailyQuoteContent.innerHTML = `
+                    <div class="daily-quote-error">
+                        <i class="fa-solid fa-exclamation-triangle"></i>
+                        <p>加载失败，请点击刷新重试</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 初始化每日一言窗口
+        function initDailyQuoteWindow() {
+            dailyQuoteWindow = document.getElementById('daily-quote-window');
+            dailyQuoteContent = document.getElementById('daily-quote-content');
+            refreshQuoteBtn = document.getElementById('refresh-quote-btn');
+            
+            if (dailyQuoteWindow) {
+                // 初始化窗口样式
+                dailyQuoteWindow.style.position = 'fixed';
+                dailyQuoteWindow.style.left = '50%';
+                dailyQuoteWindow.style.top = '50%';
+                dailyQuoteWindow.style.transform = 'translate(-50%, -50%)';
+                dailyQuoteWindow.style.zIndex = '1100';
+            }
+            
+            if (refreshQuoteBtn) {
+                refreshQuoteBtn.addEventListener('click', loadDailyQuote);
+            }
+        }
+        
+        // 初始化每日一言功能
+        document.addEventListener('DOMContentLoaded', initDailyQuoteWindow);
+        
+        // 今天吃什么功能
+        let foodDeciderWindow;
+        let foodDisplay;
+        let foodPlaceholder;
+        let foodResult;
+        let foodName;
+        let startFoodBtn;
+        let stopFoodBtn;
+        let foodItems;
+        let foodDeciderInterval;
+        
+        // 预设50种食品
+        const foodList = [
+            '红烧肉', '宫保鸡丁', '鱼香肉丝', '糖醋排骨', '麻婆豆腐',
+            '清蒸鱼', '水煮肉片', '青椒肉丝', '西红柿鸡蛋', '炸鸡排',
+            '披萨', '汉堡', '寿司', '意大利面', '烤肉',
+            '火锅', '麻辣烫', '串串香', '冒菜', '烧烤',
+            '油条', '豆浆', '包子', '馒头', '稀饭',
+            '三明治', '沙拉', '炒饭', '炒面', '汤面',
+            '馄饨', '饺子', '包子', '烧麦', '小笼包',
+            '蛋糕', '冰淇淋', '奶茶', '咖啡', '果汁',
+            '水果沙拉', '酸奶', '薯片', '巧克力', '饼干'
+        ];
+        
+        // 初始化今天吃什么功能
+        function initFoodDecider() {
+            foodDeciderWindow = document.getElementById('food-decider-window');
+            foodDisplay = document.getElementById('food-display');
+            foodPlaceholder = document.querySelector('.food-placeholder');
+            foodResult = document.getElementById('food-result');
+            foodName = document.getElementById('food-name');
+            startFoodBtn = document.getElementById('start-food-btn');
+            stopFoodBtn = document.getElementById('stop-food-btn');
+            foodItems = document.getElementById('food-items');
+            
+            // 显示食物列表
+            displayFoodList();
+            
+            // 绑定按钮事件
+            if (startFoodBtn) {
+                startFoodBtn.addEventListener('click', startFoodDecider);
+            }
+            
+            if (stopFoodBtn) {
+                stopFoodBtn.addEventListener('click', stopFoodDecider);
+            }
+            
+            // 初始化窗口样式
+            if (foodDeciderWindow) {
+                foodDeciderWindow.style.position = 'fixed';
+                foodDeciderWindow.style.left = '50%';
+                foodDeciderWindow.style.top = '50%';
+                foodDeciderWindow.style.transform = 'translate(-50%, -50%)';
+                foodDeciderWindow.style.zIndex = '1100';
+            }
+        }
+        
+        // 显示食物列表
+        function displayFoodList() {
+            if (!foodItems) return;
+            
+            foodItems.innerHTML = '';
+            
+            foodList.forEach(food => {
+                const foodTag = document.createElement('span');
+                foodTag.className = 'food-item-tag';
+                foodTag.textContent = food;
+                foodItems.appendChild(foodTag);
+            });
+        }
+        
+        // 开始随机选择食物
+        function startFoodDecider() {
+            if (foodDeciderInterval) {
+                clearInterval(foodDeciderInterval);
+            }
+            
+            // 显示食物结果区域，隐藏占位符
+            if (foodPlaceholder) {
+                foodPlaceholder.style.display = 'none';
+            }
+            if (foodResult) {
+                foodResult.style.display = 'flex';
+            }
+            
+            // 禁用开始按钮，启用停止按钮
+            if (startFoodBtn) {
+                startFoodBtn.disabled = true;
+            }
+            if (stopFoodBtn) {
+                stopFoodBtn.disabled = false;
+            }
+            
+            // 开始随机选择
+            foodDeciderInterval = setInterval(() => {
+                const randomFood = foodList[Math.floor(Math.random() * foodList.length)];
+                if (foodName) {
+                    foodName.textContent = randomFood;
+                }
+            }, 100);
+        }
+        
+        // 停止随机选择食物
+        function stopFoodDecider() {
+            if (foodDeciderInterval) {
+                clearInterval(foodDeciderInterval);
+                foodDeciderInterval = null;
+            }
+            
+            // 启用开始按钮，禁用停止按钮
+            if (startFoodBtn) {
+                startFoodBtn.disabled = false;
+            }
+            if (stopFoodBtn) {
+                stopFoodBtn.disabled = true;
+            }
+        }
+        
+        // 检查今天吃什么窗口是否存在
+        const foodDeciderWindowElement = document.getElementById('food-decider-window');
+        if (foodDeciderWindowElement) {
+            // 初始化今天吃什么窗口样式
+            foodDeciderWindowElement.style.position = 'fixed';
+            foodDeciderWindowElement.style.left = '50%';
+            foodDeciderWindowElement.style.top = '50%';
+            foodDeciderWindowElement.style.transform = 'translate(-50%, -50%)';
+            foodDeciderWindowElement.style.zIndex = '1100';
+        }
+        

@@ -87,6 +87,83 @@
             color: #E5E7EB;
         }
         
+        /* 深色主题 - 闹钟样式 */
+        body.dark-mode .alarm-tab {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .alarm-tab.active {
+            color: var(--primary);
+        }
+        
+        body.dark-mode .alarm-tab:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .time-input {
+            background-color: #1F2937;
+            border-color: #374151;
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .day-label {
+            background-color: #1F2937;
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .day-label:hover {
+            background-color: #374151;
+        }
+        
+        body.dark-mode .alarm-label-input,
+        body.dark-mode .alarm-sound-select {
+            background-color: #1F2937;
+            border-color: #374151;
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .alarm-item {
+            background-color: #1F2937;
+            border-color: #374151;
+        }
+        
+        body.dark-mode .alarm-item:hover {
+            background-color: #374151;
+        }
+        
+        body.dark-mode .alarm-item-time {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .alarm-item-days,
+        body.dark-mode .alarm-item-label {
+            color: #9CA3AF;
+        }
+        
+        body.dark-mode .no-alarms {
+            color: #9CA3AF;
+        }
+        
+        body.dark-mode .pomodoro-display {
+            background-color: #1F2937;
+            border-color: var(--primary);
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .pomodoro-settings h5 {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .pomodoro-setting label {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .pomodoro-setting-input {
+            background-color: #1F2937;
+            border-color: #374151;
+            color: #E5E7EB;
+        }
+        
         body.dark-mode .weather-temp {
             color: #E5E7EB;
         }
@@ -416,11 +493,252 @@
         .widgets-title {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
             font-size: 1.1rem;
             font-weight: 600;
             color: var(--text-dark);
             margin-bottom: 20px;
+        }
+        
+        .widgets-title-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .edit-widgets-btn {
+            padding: 8px 16px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        
+        .edit-widgets-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .edit-widgets-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 编辑模式样式 */
+        .widgets-section.edit-mode {
+            border: 2px dashed var(--primary);
+            border-radius: 24px;
+            padding: 38px;
+        }
+        
+        .widgets-section.edit-mode .widget-item {
+            position: relative;
+            padding: 20px 50px 20px 20px;
+            cursor: move;
+        }
+        
+        .widget-item .remove-widget-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .widgets-section.edit-mode .widget-item .remove-widget-btn {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .widget-item .remove-widget-btn:hover {
+            background-color: #ff3742;
+            transform: scale(1.1);
+        }
+        
+        /* 拖拽排序样式 */
+        .widget-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .widget-item:hover {
+            transition: var(--transition);
+        }
+        
+        /* 小组件列表容器样式 */
+        .widget-list-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .widget-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .widget-list-header h4 {
+            margin: 0;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+        
+        .close-widget-list-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        
+        .close-widget-list-btn:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: var(--text-dark);
+        }
+        
+        .widget-list-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .widget-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .widget-list-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .widget-list-item i {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-right: 12px;
+        }
+        
+        .widget-list-item span {
+            flex: 1;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+        
+        .add-widget-btn {
+            padding: 6px 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        
+        .add-widget-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        /* 深色主题 - 编辑模式样式 */
+        body.dark-mode .widget-list-container {
+            background: rgba(45, 55, 72, 0.95);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        body.dark-mode .widget-list-header {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .widget-list-header h4 {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .close-widget-list-btn {
+            color: #9CA3AF;
+        }
+        
+        body.dark-mode .close-widget-list-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .widget-list-item {
+            background: rgba(102, 126, 234, 0.15);
+        }
+        
+        body.dark-mode .widget-list-item:hover {
+            background: rgba(102, 126, 234, 0.25);
+        }
+        
+        body.dark-mode .widget-list-item span {
+            color: #E5E7EB;
+        }
+        
+        /* 深色主题样式 */
+        body.dark-mode .edit-widgets-btn {
+            background-color: var(--primary-light);
+        }
+        
+        body.dark-mode .edit-widgets-btn:hover {
+            background-color: var(--primary);
+        }
+        
+        body.dark-mode .widgets-section.edit-mode {
+            border-color: var(--primary-light);
+        }
+        
+        /* 复活节彩蛋主题样式 */
+        body.easter-egg-active .edit-widgets-btn {
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-size: 200% 200%;
+            animation: rainbowBackground 3s ease infinite;
+        }
+        
+        body.easter-egg-active .widgets-section.edit-mode {
+            border-color: rgba(255, 255, 255, 0.5);
         }
         
         .widgets-container {
@@ -908,6 +1226,939 @@
 
         .wooden-fish-count span {
             color: var(--primary);
+        }
+        
+        /* 闹钟样式 */
+        .alarm-content {
+            padding: 20px;
+        }
+        
+        .alarm-tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .alarm-tab {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .alarm-tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .alarm-tab:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+        
+        .alarm-setup {
+            margin-bottom: 20px;
+        }
+        
+        .time-picker {
+            margin-bottom: 15px;
+        }
+        
+        .time-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .alarm-days {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .day-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background-color: #f0f0f0;
+            transition: all 0.3s ease;
+        }
+        
+        .day-label:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .day-checkbox:checked + .day-label {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .alarm-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .alarm-label-input,
+        .alarm-sound-select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .add-alarm-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .add-alarm-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .alarms-list {
+            margin-top: 20px;
+        }
+        
+        .alarm-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        
+        .alarm-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .alarm-item-info {
+            flex: 1;
+        }
+        
+        .alarm-item-time {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .alarm-item-days {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .alarm-item-label {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        .alarm-item-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .alarm-toggle {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .alarm-toggle.active {
+            background-color: var(--primary);
+        }
+        
+        .alarm-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        
+        .alarm-toggle.active::after {
+            transform: translateX(26px);
+        }
+        
+        .delete-alarm-btn {
+            background: none;
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        
+        .delete-alarm-btn:hover {
+            color: #ff0000;
+        }
+        
+        /* 番茄钟样式 */
+        .pomodoro-timer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .pomodoro-display {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 50%;
+            background-color: #f9f9f9;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--primary);
+        }
+        
+        .pomodoro-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .pomodoro-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        
+        #pomodoro-start {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        #pomodoro-start:hover {
+            background-color: #45a049;
+        }
+        
+        #pomodoro-pause {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        #pomodoro-pause:hover {
+            background-color: #f57c00;
+        }
+        
+        #pomodoro-reset {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        #pomodoro-reset:hover {
+            background-color: #da190b;
+        }
+        
+        .pomodoro-settings {
+            margin-top: 20px;
+        }
+        
+        .pomodoro-settings h5 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .pomodoro-setting {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .pomodoro-setting-input {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        /* 闹钟标签内容默认样式 */
+        .alarm-tab-content {
+            display: none;
+        }
+        
+        .alarm-tab-content:first-child {
+            display: block;
+        }
+        
+        /* 无闹钟提示 */
+        .no-alarms {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        /* 计算器样式 */
+        .calculator-container {
+            padding: 20px;
+        }
+        
+        .calculator-display {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: right;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .calculator-result {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .calculator-expression {
+            font-size: 16px;
+            color: #666;
+            min-height: 20px;
+        }
+        
+        .calculator-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .calculator-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .calculator-btn {
+            flex: 1;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .calculator-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calculator-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calculator-btn-number {
+            background-color: #f9f9f9;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .calculator-btn-number:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .calculator-btn-operator {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .calculator-btn-operator:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .calculator-btn-clear {
+            background-color: #ff4757;
+            color: white;
+        }
+        
+        .calculator-btn-clear:hover {
+            background-color: #ff3742;
+        }
+        
+        .calculator-btn-backspace {
+            background-color: #ffa502;
+            color: white;
+        }
+        
+        .calculator-btn-backspace:hover {
+            background-color: #ff9800;
+        }
+        
+        .calculator-btn-percent {
+            background-color: #2ed573;
+            color: white;
+        }
+        
+        .calculator-btn-percent:hover {
+            background-color: #27ae60;
+        }
+        
+        .calculator-btn-decimal {
+            background-color: #f9f9f9;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .calculator-btn-decimal:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .calculator-btn-equals {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+        
+        .calculator-btn-equals:hover {
+            background-color: var(--primary);
+        }
+        
+        .calculator-btn-zero {
+            flex: 2;
+            background-color: #f9f9f9;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .calculator-btn-zero:hover {
+            background-color: #f0f0f0;
+        }
+        
+        /* 深色主题 - 计算器样式 */
+        body.dark-mode .calculator-display {
+            background-color: #333;
+        }
+        
+        body.dark-mode .calculator-result {
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .calculator-expression {
+            color: #aaa;
+        }
+        
+        body.dark-mode .calculator-btn-number {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+        
+        body.dark-mode .calculator-btn-number:hover {
+            background-color: #444;
+        }
+        
+        body.dark-mode .calculator-btn-decimal {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+        
+        body.dark-mode .calculator-btn-decimal:hover {
+            background-color: #444;
+        }
+        
+        body.dark-mode .calculator-btn-zero {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+        
+        body.dark-mode .calculator-btn-zero:hover {
+            background-color: #444;
+        }
+        
+        /* 复活节彩蛋主题 - 计算器样式 */
+        body.easter-egg-active .calculator-display {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.easter-egg-active .calculator-result {
+            color: white;
+        }
+        
+        body.easter-egg-active .calculator-expression {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.easter-egg-active .calculator-btn-number {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        body.easter-egg-active .calculator-btn-number:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        body.easter-egg-active .calculator-btn-decimal {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        body.easter-egg-active .calculator-btn-decimal:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        body.easter-egg-active .calculator-btn-zero {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        body.easter-egg-active .calculator-btn-zero:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 每日一言样式 */
+        .daily-quote-container {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 300px;
+        }
+        
+        .daily-quote-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        .daily-quote-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .daily-quote-text::before {
+            content: '"';
+            font-size: 48px;
+            color: var(--primary);
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-family: Georgia, serif;
+        }
+        
+        .daily-quote-text::after {
+            content: '"';
+            font-size: 48px;
+            color: var(--primary);
+            position: absolute;
+            bottom: -30px;
+            right: 10px;
+            font-family: Georgia, serif;
+        }
+        
+        .daily-quote-author {
+            font-size: 14px;
+            color: var(--text-light);
+            font-style: italic;
+        }
+        
+        .daily-quote-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-light);
+        }
+        
+        .daily-quote-loading i {
+            font-size: 32px;
+            color: var(--primary);
+        }
+        
+        .daily-quote-actions {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .refresh-quote-btn {
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-quote-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .refresh-quote-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 深色主题 - 每日一言样式 */
+        body.dark-mode .daily-quote-text {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .daily-quote-author {
+            color: #aaa;
+        }
+        
+        body.dark-mode .daily-quote-loading {
+            color: #aaa;
+        }
+        
+        /* 复活节彩蛋主题 - 每日一言样式 */
+        body.easter-egg-active .daily-quote-text {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        body.easter-egg-active .daily-quote-author {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.easter-egg-active .daily-quote-loading {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.easter-egg-active .refresh-quote-btn {
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-size: 200% 200%;
+            animation: rainbowBackground 3s ease infinite;
+        }
+        
+        /* 今天吃什么样式 */
+        .food-decider-container {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            min-height: 400px;
+        }
+        
+        .food-display {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .food-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            color: var(--text-light);
+        }
+        
+        .food-placeholder i {
+            font-size: 64px;
+            color: var(--primary);
+            opacity: 0.5;
+        }
+        
+        .food-placeholder p {
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .food-result {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .food-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 1s ease infinite alternate;
+        }
+        
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .food-icon i {
+            font-size: 48px;
+        }
+        
+        .food-name {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--text-dark);
+            animation: pulse 1s ease infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.05);
+            }
+        }
+        
+        .food-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .food-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            justify-content: center;
+        }
+        
+        .food-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .start-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .start-btn:hover:not(:disabled) {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stop-btn {
+            background-color: #ff4757;
+            color: white;
+        }
+        
+        .stop-btn:hover:not(:disabled) {
+            background-color: #ff3742;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 食物列表样式 */
+        .food-list {
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .food-list h5 {
+            margin: 0 0 15px 0;
+            color: var(--text-dark);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .food-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 120px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        /* 自定义滚动条样式 */
+        .food-items::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .food-items::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+        
+        .food-items::-webkit-scrollbar-thumb {
+            background: rgba(79, 70, 229, 0.5);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        
+        .food-items::-webkit-scrollbar-thumb:hover {
+            background: rgba(79, 70, 229, 0.8);
+        }
+        
+        /* 深色主题 - 自定义滚动条 */
+        body.dark-mode .food-items::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .food-items::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+        }
+        
+        body.dark-mode .food-items::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.8);
+        }
+        
+        .food-item-tag {
+            padding: 6px 12px;
+            background-color: #f0f0f0;
+            color: var(--text-dark);
+            border-radius: 15px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .food-item-tag:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* 深色主题 - 今天吃什么样式 */
+        body.dark-mode .food-display {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        body.dark-mode .food-placeholder {
+            color: #aaa;
+        }
+        
+        body.dark-mode .food-name {
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .food-list {
+            background-color: rgba(51, 51, 51, 0.8);
+        }
+        
+        body.dark-mode .food-list h5 {
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .food-item-tag {
+            background-color: #444;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .food-item-tag:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* 复活节彩蛋主题 - 今天吃什么样式 */
+        body.easter-egg-active .food-display {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.easter-egg-active .food-placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        body.easter-egg-active .food-name {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.easter-egg-active .food-list {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.easter-egg-active .food-list h5 {
+            color: white;
+        }
+        
+        body.easter-egg-active .food-item-tag {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        body.easter-egg-active .food-item-tag:hover {
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border-color: transparent;
         }
         
         .settings-content h3 {
@@ -1836,6 +3087,244 @@
             .prompt-input {
                 padding: 10px 14px;
                 font-size: 0.95rem;
+            }
+        }
+        
+        /* 确认播放框样式 - 不影响点击、缩小并放到左下角 */
+        .custom-alert-confirm-play {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent !important;
+            pointer-events: none;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            box-shadow: none !important;
+            transition: none !important;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .custom-alert-confirm-play.active {
+            opacity: 1;
+            visibility: visible;
+            transition: none !important;
+        }
+        
+        .custom-alert-confirm-play::before {
+            display: none !important;
+        }
+        
+        .custom-alert-confirm-play-content {
+            width: 300px;
+            max-width: 80%;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            pointer-events: auto;
+            margin: 20px;
+            overflow: hidden;
+            animation: none !important;
+            transition: none !important;
+        }
+        
+        .custom-alert-confirm-play-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .custom-alert-confirm-play-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .custom-alert-confirm-play-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .custom-alert-confirm-play-close:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .custom-alert-confirm-play-body {
+            padding: 15px 20px;
+        }
+        
+        .custom-alert-confirm-play-body p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .custom-alert-confirm-play-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 20px 15px;
+        }
+        
+        .custom-alert-confirm-play-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .custom-alert-confirm-play-btn:not(.custom-alert-confirm-play-cancel) {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .custom-alert-confirm-play-btn:not(.custom-alert-confirm-play-cancel):hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .custom-alert-confirm-play-cancel {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #dee2e6;
+        }
+        
+        .custom-alert-confirm-play-cancel:hover {
+            background-color: #e9ecef;
+            transform: translateY(-1px);
+        }
+        
+        /* 深色主题 */
+        body.dark-mode .custom-alert-confirm-play-content {
+            background-color: rgba(31, 41, 55, 0.95);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.dark-mode .custom-alert-confirm-play-header {
+            background: #1F2937;
+            border-bottom: 1px solid #374151;
+        }
+        
+        body.dark-mode .custom-alert-confirm-play-header h3 {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .custom-alert-confirm-play-close {
+            color: #9CA3AF;
+        }
+        
+        body.dark-mode .custom-alert-confirm-play-close:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        body.dark-mode .custom-alert-confirm-play-body p {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .custom-alert-confirm-play-cancel {
+            background-color: #1F2937;
+            color: #E5E7EB;
+            border: 1px solid #374151;
+        }
+        
+        body.dark-mode .custom-alert-confirm-play-cancel:hover {
+            background-color: #374151;
+        }
+        
+        /* 复活节彩蛋主题 */
+        body.easter-egg-active .custom-alert-confirm-play-content {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(255, 183, 77, 0.95));
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+        
+        body.easter-egg-active .custom-alert-confirm-play-header {
+            background: rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        body.easter-egg-active .custom-alert-confirm-play-header h3 {
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.easter-egg-active .custom-alert-confirm-play-close {
+            color: white;
+        }
+        
+        body.easter-egg-active .custom-alert-confirm-play-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        body.easter-egg-active .custom-alert-confirm-play-body p {
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.easter-egg-active .custom-alert-confirm-play-cancel {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        body.easter-egg-active .custom-alert-confirm-play-cancel:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+        
+        /* 移动设备适配 */
+        @media (max-width: 768px) {
+            .custom-alert-confirm-play-content {
+                width: 90%;
+                max-width: 300px;
+                margin: 15px;
+            }
+            
+            .custom-alert-confirm-play-header {
+                padding: 12px 16px;
+            }
+            
+            .custom-alert-confirm-play-body {
+                padding: 12px 16px;
+            }
+            
+            .custom-alert-confirm-play-footer {
+                padding: 0 16px 12px;
+            }
+            
+            .custom-alert-confirm-play-header h3 {
+                font-size: 1rem;
+            }
+            
+            .custom-alert-confirm-play-body p {
+                font-size: 0.9rem;
+            }
+            
+            .custom-alert-confirm-play-btn {
+                padding: 6px 12px;
+                font-size: 0.85rem;
             }
         }
         
