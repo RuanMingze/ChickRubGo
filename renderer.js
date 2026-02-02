@@ -16,7 +16,6 @@
                 
                 request.onsuccess = () => {
                     db = request.result;
-                    console.log('IndexedDB 初始化成功');
                     resolve(db);
                 };
                 
@@ -25,7 +24,6 @@
                     if (!database.objectStoreNames.contains(STORE_NAME)) {
                         const objectStore = database.createObjectStore(STORE_NAME, { keyPath: 'id' });
                         objectStore.createIndex('name', 'name', { unique: false });
-                        console.log('IndexedDB 对象存储创建成功');
                     }
                 };
             });
@@ -51,7 +49,6 @@
                 const request = objectStore.put(audioRecord);
                 
                 request.onsuccess = () => {
-                    console.log('音频保存到 IndexedDB 成功:', fileName);
                     resolve();
                 };
                 
@@ -75,22 +72,22 @@
                 
                 request.onsuccess = () => {
                     if (request.result) {
-                        console.log('从 IndexedDB 加载音频成功:', request.result.name);
+                        
                         resolve({ data: request.result.data, name: request.result.name });
                     } else {
-                        console.log('IndexedDB 中没有保存的音频，尝试从本地存储读取');
+                        
                         // 从本地存储读取
                         const savedBgMusic = localStorage.getItem('bgMusic');
                         const savedBgMusicName = localStorage.getItem('bgMusicName');
                         if (savedBgMusic && savedBgMusicName) {
-                            console.log('从本地存储加载音频成功:', savedBgMusicName);
+                            
                             // 将本地存储的音频迁移到 IndexedDB
                             saveAudioToIndexedDB(savedBgMusic, savedBgMusicName).catch(err => {
                                 console.error('迁移音频到 IndexedDB 失败:', err);
                             });
                             resolve({ data: savedBgMusic, name: savedBgMusicName });
                         } else {
-                            console.log('本地存储中也没有保存的音频');
+                            
                             resolve(null);
                         }
                     }
@@ -102,7 +99,7 @@
                     const savedBgMusic = localStorage.getItem('bgMusic');
                     const savedBgMusicName = localStorage.getItem('bgMusicName');
                     if (savedBgMusic && savedBgMusicName) {
-                        console.log('从本地存储加载音频成功:', savedBgMusicName);
+                        
                         resolve({ data: savedBgMusic, name: savedBgMusicName });
                     } else {
                         reject(request.error);
@@ -123,7 +120,7 @@
                 const request = objectStore.delete('bgMusic');
                 
                 request.onsuccess = () => {
-                    console.log('从 IndexedDB 删除音频成功');
+                    
                     resolve();
                 };
                 
@@ -286,6 +283,8 @@
         const resetSettingsBtn = document.getElementById('reset-settings');
         const showWallpaperCheckbox = document.getElementById('show-wallpaper');
         const weatherApiKeyInput = document.getElementById('weather-api-key');
+        const autoLocationCheckbox = document.getElementById('auto-location');
+        const weatherCityInput = document.getElementById('weather-city');
         const searchEngineSelect = document.getElementById('search-engine');
         const customSearchUrlInput = document.getElementById('custom-search-url');
         const customSearchContainer = document.getElementById('custom-search-container');
@@ -339,6 +338,21 @@
             
             if (savedWeatherApiKey) {
                 weatherApiKeyInput.value = savedWeatherApiKey;
+            }
+            
+            // 加载自动定位设置
+            const savedAutoLocation = localStorage.getItem('autoLocation') === 'true';
+            if (autoLocationCheckbox) {
+                autoLocationCheckbox.checked = savedAutoLocation;
+            }
+            
+            // 加载城市设置
+            const savedWeatherCity = localStorage.getItem('weatherCity');
+            if (weatherCityInput && savedWeatherCity) {
+                weatherCityInput.value = savedWeatherCity;
+            } else if (weatherCityInput) {
+                // 默认城市：德清
+                weatherCityInput.value = 'deqing';
             }
             
             if (savedSearchEngine) {
@@ -403,7 +417,15 @@
                 localStorage.setItem('weatherApiKey', weatherApiKeyInput.value);
                 localStorage.setItem('searchEngine', searchEngineSelect.value);
                 localStorage.setItem('customSearchUrl', customSearchUrlInput.value);
-                console.log('设置保存成功:', localStorage.getItem('showWallpaper'), localStorage.getItem('darkMode'));
+                // 保存自动定位设置
+                if (autoLocationCheckbox) {
+                    localStorage.setItem('autoLocation', autoLocationCheckbox.checked);
+                }
+                // 保存城市设置
+                if (weatherCityInput) {
+                    localStorage.setItem('weatherCity', weatherCityInput.value);
+                }
+                
             } catch (error) {
                 console.error('保存设置失败:', error);
                 ShowAlert('错误', '保存设置失败: ' + error.message);
@@ -416,7 +438,7 @@
                     throw new Error('localStorage不可用');
                 }
                 localStorage.setItem('notepadContent', notepadContent.value);
-                console.log('记事本保存成功');
+                
             } catch (error) {
                 console.error('保存记事本失败:', error);
                 ShowAlert('错误', '保存记事本失败: ' + error.message);
@@ -489,7 +511,7 @@
                     // 保存文件名到 localStorage
                     localStorage.setItem('bgMusicName', file.name);
                     bgMusicInfo.textContent = `已选择: ${file.name}`;
-                    console.log('音乐文件保存成功:', file.name);
+                    
                     // 初始化并播放背景音乐
                     initBackgroundMusic(audioData);
                 } catch (error) {
@@ -509,66 +531,33 @@
             try {
                 ShowAlert('提示', '正在处理视频文件，请稍候...', false, 0);
                 
-                // 检查是否支持本地文件系统访问
-                if (window.location.protocol === 'file:') {
-                    throw new Error('从本地文件系统运行时不支持视频处理，请使用本地服务器运行');
-                }
-                
-                // 检查FFmpeg是否可用
-                let ffmpeg;
-                if (window.FFmpegWASM && window.FFmpegWASM.FFmpeg) {
-                    // 新版本的FFmpeg WASM结构
-                    ffmpeg = new window.FFmpegWASM.FFmpeg();
-                } else {
-                    throw new Error('FFmpeg加载失败');
-                }
-                
-                // 加载FFmpeg
-                await ffmpeg.load({
-                    corePath: 'https://unpkg.com/@ffmpeg/core@0.12.4/dist/umd/ffmpeg-core.js'
-                });
-                
-                // 读取文件内容
+                // 使用简化的方法处理MP4文件
+                // 由于CORS限制，我们直接读取文件并尝试播放音频部分
                 const fileReader = new FileReader();
                 const fileData = await new Promise((resolve, reject) => {
-                    fileReader.onload = () => resolve(new Uint8Array(fileReader.result));
+                    fileReader.onload = () => resolve(fileReader.result);
                     fileReader.onerror = reject;
-                    fileReader.readAsArrayBuffer(file);
+                    fileReader.readAsDataURL(file);
                 });
-                
-                // 写入文件到虚拟文件系统
-                await ffmpeg.writeFile('input.mp4', fileData);
-                
-                // 执行转换命令
-                await ffmpeg.run('-i', 'input.mp4', '-vn', '-acodec', 'libmp3lame', '-ab', '128k', 'output.mp3');
-                
-                // 读取转换后的文件
-                const data = await ffmpeg.readFile('output.mp3');
-                
-                // 创建Blob并转换为DataURL
-                const blob = new Blob([data.buffer], { type: 'audio/mp3' });
-                const audioData = await blobToBase64(blob);
                 
                 // 保存到IndexedDB
                 const outputFileName = file.name.replace(/\.mp4$/i, '.mp3');
-                await saveAudioToIndexedDB(audioData, outputFileName);
+                await saveAudioToIndexedDB(fileData, outputFileName);
                 
                 // 保存文件名到localStorage
                 localStorage.setItem('bgMusicName', outputFileName);
                 
-                // 清理
-                await ffmpeg.deleteFile('input.mp4');
-                await ffmpeg.deleteFile('output.mp3');
-                ffmpeg.terminate();
+                bgMusicInfo.textContent = `已选择: ${outputFileName} (MP4文件)`;
                 
-                bgMusicInfo.textContent = `已选择: ${outputFileName} (从MP4转换)`;
-                console.log('MP4文件转换并保存成功:', outputFileName);
                 
                 // 初始化并播放背景音乐
-                initBackgroundMusic(audioData);
+                initBackgroundMusic(fileData);
                 
                 // 关闭提示
-                document.querySelector('.alert').remove();
+                const alertElement = document.querySelector('.alert');
+                if (alertElement) {
+                    alertElement.remove();
+                }
                 ShowAlert('成功', '视频文件处理完成！', true, 2000);
                 
             } catch (error) {
@@ -583,13 +572,13 @@
                 if (audioPlayer) {
                     if (audioPlayer.paused) {
                         audioPlayer.play().catch(error => {
-                            console.log('播放音乐失败:', error);
+                            
                             if (error.name === 'NotAllowedError') {
                                 ShowConfirm('背景音乐', '需要您的授权才能播放音乐，是否授权？', (confirmed) => {
                                     if (confirmed) {
                                         localStorage.setItem('musicPermission', 'true');
                                         audioPlayer.play().catch(err => {
-                                            console.log('再次播放失败:', err);
+                                            
                                             ShowAlert('错误', '播放音乐失败，请稍后重试');
                                         });
                                     }
@@ -1181,7 +1170,7 @@
             // 播放敲击木鱼声
             const audio = new Audio('Assets/Knocking-the-woodenfish.wav');
             audio.play().catch(error => {
-                console.log('播放声音失败:', error);
+                
             });
             
             setTimeout(() => {
@@ -1231,28 +1220,56 @@
             `;
             
             try {
-                // 获取用户位置
-                if (!navigator.geolocation) {
-                    throw new Error('浏览器不支持地理定位');
+                let weatherData;
+                const isAutoLocation = autoLocationCheckbox && autoLocationCheckbox.checked;
+                const city = weatherCityInput ? weatherCityInput.value.trim() || 'deqing' : 'deqing';
+                
+                if (isAutoLocation && navigator.geolocation) {
+                    // 尝试自动获取定位
+                    try {
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject);
+                        });
+                        
+                        const { latitude, longitude } = position.coords;
+                        
+                        // 调用 OpenWeatherMap API (通过坐标)
+                        const response = await fetch(
+                            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric&lang=zh_cn`
+                        );
+                        
+                        if (!response.ok) {
+                            throw new Error('API 请求失败');
+                        }
+                        
+                        weatherData = await response.json();
+                    } catch (geoError) {
+                        
+                        // 自动定位失败，使用手动城市
+                        const response = await fetch(
+                            `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=zh_cn`
+                        );
+                        
+                        if (!response.ok) {
+                            throw new Error('API 请求失败');
+                        }
+                        
+                        weatherData = await response.json();
+                    }
+                } else {
+                    // 不使用自动定位，使用手动城市
+                    const response = await fetch(
+                        `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=zh_cn`
+                    );
+                    
+                    if (!response.ok) {
+                        throw new Error('API 请求失败');
+                    }
+                    
+                    weatherData = await response.json();
                 }
                 
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject);
-                });
-                
-                const { latitude, longitude } = position.coords;
-                
-                // 调用 OpenWeatherMap API
-                const response = await fetch(
-                    `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric&lang=zh_cn`
-                );
-                
-                if (!response.ok) {
-                    throw new Error('API 请求失败');
-                }
-                
-                const data = await response.json();
-                displayWeather(data);
+                displayWeather(weatherData);
             } catch (error) {
                 weatherContent.innerHTML = `
                     <div class="weather-error">
@@ -1432,19 +1449,19 @@
         async function showMusicPermissionPopup() {
             const savedBgMusicName = localStorage.getItem('bgMusicName');
             const hasAudioPermission = localStorage.getItem('audioPermission') === 'granted';
-            console.log('检查是否有保存的背景音乐:', savedBgMusicName ? '是' : '否');
-            console.log('检查是否已有音频授权:', hasAudioPermission ? '是' : '否');
-            console.log('audioPlayer 是否存在:', audioPlayer ? '是' : '否');
+            
+            
+            
             
             if (savedBgMusicName) {
                 if (hasAudioPermission && audioPlayer) {
                     // 已有授权，直接播放
-                    console.log('已有音频授权，直接播放背景音乐...');
+                    
                     audioPlayer.play().then(() => {
-                        console.log('背景音乐播放成功');
+                        
                         updateMusicControls();
                     }).catch(err => {
-                        console.log('播放背景音乐失败:', err);
+                        
                         // 授权可能已失效，重新显示授权弹窗
                         showPermissionDialog();
                     });
@@ -1453,40 +1470,40 @@
                     showPermissionDialog();
                 }
             } else {
-                console.log('没有保存的背景音乐，不显示弹窗');
+                
             }
         }
         
         // 显示授权弹窗
         function showPermissionDialog() {
             ShowConfirm('背景音乐', '检测到您之前设置了背景音乐，是否开始播放？', async (confirmed) => {
-                console.log('用户选择:', confirmed ? '确认播放' : '取消播放');
+                
                 if (confirmed) {
                     // 保存授权状态
                     localStorage.setItem('audioPermission', 'granted');
                     
                     if (audioPlayer) {
-                        console.log('开始播放背景音乐...');
+                        
                         audioPlayer.play().then(() => {
-                            console.log('背景音乐播放成功');
+                            
                             updateMusicControls();
                         }).catch(err => {
-                            console.log('播放背景音乐失败:', err);
-                            console.log('错误名称:', err.name);
-                            console.log('错误消息:', err.message);
+                            
+                            
+                            
                             ShowAlert('错误', '播放音乐失败，请稍后重试');
                         });
                     } else {
-                        console.log('audioPlayer 不存在，尝试从 IndexedDB 加载');
+                        
                         try {
                             const audioRecord = await loadAudioFromIndexedDB();
                             if (audioRecord) {
                                 initBackgroundMusic(audioRecord.data);
                                 audioPlayer.play().then(() => {
-                                    console.log('背景音乐播放成功');
+                                    
                                     updateMusicControls();
                                 }).catch(err => {
-                                    console.log('播放背景音乐失败:', err);
+                                    
                                     ShowAlert('错误', '播放音乐失败，请稍后重试');
                                 });
                             } else {
@@ -1513,8 +1530,8 @@
             loadModeSettings();
             applySettings();
             
-            // 显示音乐播放授权弹窗
-            showMusicPermissionPopup();
+            // 等待音频播放器初始化完成后再显示授权弹窗
+            setTimeout(showMusicPermissionPopup, 1000);
             
             const searchInput = document.getElementById('search-input');
             const updatePlaceholder = () => {

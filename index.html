@@ -54,6 +54,16 @@
                 <small class="setting-hint">获取API Key: <a href="https://openweathermap.org/api" target="_blank" rel="noopener">OpenWeatherMap</a></small>
             </div>
             <div class="setting-item">
+                <label for="auto-location">自动获取定位：</label>
+                <input type="checkbox" id="auto-location" class="setting-checkbox">
+                <small class="setting-hint">开启后会自动获取你的位置</small>
+            </div>
+            <div class="setting-item">
+                <label for="weather-city">城市（拼音）：</label>
+                <input type="text" id="weather-city" placeholder="例如：deqing" class="setting-input">
+                <small class="setting-hint">当自动定位关闭时使用</small>
+            </div>
+            <div class="setting-item">
                 <label for="bg-music">背景音乐：</label>
                 <input type="file" id="bg-music" accept="audio/*,video/mp4" class="setting-input">
                 <small class="setting-hint" id="bg-music-info">未选择音乐文件</small>
