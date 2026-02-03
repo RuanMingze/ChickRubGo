@@ -203,9 +203,13 @@
                 // 检查客户端配置
                 console.log('客户端实例检查:', {
                     exists: !!window.supabaseClient,
-                    url: window.supabaseClient?.options?.url,
-                    auth: window.supabaseClient?.options?.auth
+                    clientObject: window.supabaseClient
                 });
+                
+                // 手动检查客户端内部配置
+                if (window.supabaseClient._instance?.url) {
+                    console.log('内部客户端 URL:', window.supabaseClient._instance.url);
+                }
                 
                 // 不再强制重新初始化客户端，避免多个实例
                 const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
@@ -231,6 +235,30 @@
                 console.log('当前会话:', session?.session ? '存在' : '不存在');
                 console.log('会话令牌:', session?.session?.access_token ? '***' + session.session.access_token.slice(-4) : '无');
                 
+                // 尝试使用客户端 upsert 操作（推荐方法）
+                try {
+                    console.log('尝试使用客户端 upsert 操作...');
+                    const { error } = await window.supabaseClient
+                        .from('user_settings')
+                        .upsert({
+                            username: username,
+                            settings: settings,
+                            updated_at: new Date().toISOString()
+                        }, {
+                            onConflict: 'username'
+                        });
+                    
+                    if (error) {
+                        console.error('upsert 操作失败:', error);
+                        console.error('错误详情:', JSON.stringify(error));
+                    } else {
+                        console.log('upsert 操作成功');
+                        return true;
+                    }
+                } catch (upsertError) {
+                    console.error('upsert 操作出错:', upsertError);
+                }
+                
                 // 尝试直接使用 POST 请求保存数据（绕过可能的客户端问题）
                 try {
                     console.log('尝试使用直接 POST 请求保存数据...');
@@ -239,8 +267,9 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'apikey': 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
-                            'Authorization': `Bearer ${session?.session?.access_token || 'anonymous'}`,
-                            'Accept': 'application/json'
+                            'Authorization': `Bearer ${session?.session?.access_token || ''}`,
+                            'Accept': 'application/json',
+                            'Prefer': 'return=minimal'
                         },
                         body: JSON.stringify({
                             username: username,
@@ -251,69 +280,47 @@
                     
                     console.log('直接 POST 请求状态:', response.status);
                     console.log('直接 POST 请求状态文本:', response.statusText);
+                    console.log('直接 POST 请求 URL:', response.url);
                     
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
                         console.error('直接 POST 请求失败:', errorData);
-                        // 即使直接请求失败，也继续尝试使用客户端方法
+                        // 尝试获取更多错误信息
+                        try {
+                            const errorText = await response.text();
+                            console.error('直接 POST 请求错误文本:', errorText);
+                        } catch (e) {
+                            console.error('无法获取错误文本:', e);
+                        }
                     } else {
-                        const successData = await response.json();
+                        const successData = await response.json().catch(() => ({}));
                         console.log('直接 POST 请求成功:', successData);
                         return true;
                     }
                 } catch (fetchError) {
                     console.error('直接 POST 请求出错:', fetchError);
+                    console.error('获取错误详情:', fetchError.message);
                 }
                 
-                // 尝试使用客户端方法
+                // 尝试使用更简单的 insert 操作
                 try {
-                    console.log('准备发送 upsert 请求...');
-                    // 首先尝试 select 操作，检查数据是否存在
-                    const { data: existingData } = await window.supabaseClient
+                    console.log('尝试使用简单 insert 操作...');
+                    const { error: insertError } = await window.supabaseClient
                         .from('user_settings')
-                        .select('username')
-                        .eq('username', username)
-                        .limit(1);
+                        .insert({
+                            username: username,
+                            settings: settings,
+                            updated_at: new Date().toISOString()
+                        });
                     
-                    console.log('现有数据检查:', existingData?.length ? '存在' : '不存在');
-                    
-                    if (existingData?.length) {
-                        // 数据存在，使用 update 操作
-                        console.log('数据存在，尝试使用 update 操作...');
-                        const { error: updateError } = await window.supabaseClient
-                            .from('user_settings')
-                            .update({
-                                settings: settings,
-                                updated_at: new Date().toISOString()
-                            })
-                            .eq('username', username);
-                        
-                        if (updateError) {
-                            console.error('使用 update 保存设置失败:', updateError);
-                        } else {
-                            console.log('使用 update 保存设置成功');
-                            return true;
-                        }
+                    if (insertError) {
+                        console.error('简单 insert 操作失败:', insertError);
                     } else {
-                        // 数据不存在，使用 insert 操作
-                        console.log('数据不存在，尝试使用 insert 操作...');
-                        const { error: insertError } = await window.supabaseClient
-                            .from('user_settings')
-                            .insert({
-                                username: username,
-                                settings: settings,
-                                updated_at: new Date().toISOString()
-                            });
-                        
-                        if (insertError) {
-                            console.error('使用 insert 保存设置失败:', insertError);
-                        } else {
-                            console.log('使用 insert 保存设置成功');
-                            return true;
-                        }
+                        console.log('简单 insert 操作成功');
+                        return true;
                     }
-                } catch (clientError) {
-                    console.error('客户端操作出错:', clientError);
+                } catch (insertError) {
+                    console.error('简单 insert 操作出错:', insertError);
                 }
                 
                 // 所有尝试都失败，返回 false

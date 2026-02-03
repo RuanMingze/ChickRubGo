@@ -8,6 +8,7 @@ if (typeof window !== 'undefined') {
     console.log('window 对象存在');
     console.log('window.supabase 存在:', typeof window.supabase !== 'undefined');
     console.log('window.supabaseClient 存在:', typeof window.supabaseClient !== 'undefined');
+    console.log('Supabase SDK 版本:', window.supabase?.VERSION || '未知');
     
     if (typeof window.supabaseClient === 'undefined') {
         console.log('在 cloud-sync.js 中初始化 Supabase 客户端...');
@@ -18,6 +19,7 @@ if (typeof window !== 'undefined') {
             console.log('Supabase Key:', supabaseKey ? '***' + supabaseKey.slice(-4) : '未设置');
             
             // 正确初始化 Supabase 客户端，使用统一的存储键
+            console.log('开始创建 Supabase 客户端实例...');
             window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
                 auth: {
                     autoRefreshToken: true,
@@ -27,12 +29,20 @@ if (typeof window !== 'undefined') {
             });
             
             console.log('Supabase 客户端初始化成功:', !!window.supabaseClient);
-            // 检查客户端配置
+            // 详细检查客户端配置
             if (window.supabaseClient) {
-                console.log('客户端配置检查:', {
-                    url: window.supabaseClient?.options?.url,
-                    auth: window.supabaseClient?.options?.auth
-                });
+                console.log('客户端实例:', window.supabaseClient);
+                console.log('客户端 _instance:', window.supabaseClient._instance);
+                
+                if (window.supabaseClient._instance) {
+                    console.log('内部客户端 URL:', window.supabaseClient._instance.url);
+                    console.log('内部客户端 Key:', window.supabaseClient._instance.key ? '***' + window.supabaseClient._instance.key.slice(-4) : '未设置');
+                }
+                
+                // 检查认证配置
+                if (window.supabaseClient.auth) {
+                    console.log('认证客户端存在:', !!window.supabaseClient.auth);
+                }
             }
         } else {
             console.error('Supabase SDK 未加载');
@@ -40,12 +50,20 @@ if (typeof window !== 'undefined') {
     } else {
         console.log('Supabase 客户端已在其他地方初始化，直接使用现有实例');
         console.log('客户端实例存在:', !!window.supabaseClient);
-        // 不再强制重新初始化客户端，避免多个实例
+        // 详细检查现有客户端配置
         if (window.supabaseClient) {
-            console.log('现有客户端配置检查:', {
-                url: window.supabaseClient?.options?.url,
-                auth: window.supabaseClient?.options?.auth
-            });
+            console.log('现有客户端实例:', window.supabaseClient);
+            console.log('现有客户端 _instance:', window.supabaseClient._instance);
+            
+            if (window.supabaseClient._instance) {
+                console.log('现有内部客户端 URL:', window.supabaseClient._instance.url);
+                console.log('现有内部客户端 Key:', window.supabaseClient._instance.key ? '***' + window.supabaseClient._instance.key.slice(-4) : '未设置');
+            }
+            
+            // 检查认证配置
+            if (window.supabaseClient.auth) {
+                console.log('现有认证客户端存在:', !!window.supabaseClient.auth);
+            }
         }
     }
 } else {

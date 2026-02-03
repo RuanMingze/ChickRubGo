@@ -859,6 +859,7 @@
         console.log('初始化 Supabase 客户端...');
         console.log('Supabase URL:', supabaseUrl);
         console.log('Supabase Key:', supabaseKey ? '***' + supabaseKey.slice(-4) : '未设置');
+        console.log('Supabase SDK 版本:', window.supabase?.VERSION || '未知');
         
         if (!window.supabase) {
             console.error('Supabase SDK 未加载');
@@ -866,6 +867,7 @@
             // 确保只初始化一次客户端
             if (!window.supabaseClient) {
                 // 正确初始化 Supabase 客户端
+                console.log('开始创建 Supabase 客户端实例...');
                 window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
                     auth: {
                         autoRefreshToken: true,
@@ -874,13 +876,31 @@
                     }
                 });
                 console.log('Supabase 客户端初始化成功:', !!window.supabaseClient);
-                console.log('客户端配置:', {
-                    url: window.supabaseClient?.options?.url,
-                    auth: window.supabaseClient?.options?.auth
-                });
+                
+                // 详细检查客户端配置
+                console.log('客户端实例:', window.supabaseClient);
+                console.log('客户端 _instance:', window.supabaseClient._instance);
+                
+                if (window.supabaseClient._instance) {
+                    console.log('内部客户端 URL:', window.supabaseClient._instance.url);
+                    console.log('内部客户端 Key:', window.supabaseClient._instance.key ? '***' + window.supabaseClient._instance.key.slice(-4) : '未设置');
+                }
+                
+                // 检查认证配置
+                if (window.supabaseClient.auth) {
+                    console.log('认证客户端存在:', !!window.supabaseClient.auth);
+                }
+                
             } else {
                 console.log('Supabase 客户端已存在，直接使用现有实例');
+                console.log('现有客户端实例:', window.supabaseClient);
+                if (window.supabaseClient._instance) {
+                    console.log('现有内部客户端 URL:', window.supabaseClient._instance.url);
+                }
             }
+            // 全局变量，方便其他脚本使用
+            window.supabaseUrl = supabaseUrl;
+            window.supabaseKey = supabaseKey;
             const supabaseClient = window.supabaseClient;
         }
     </script>
