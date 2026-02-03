@@ -215,12 +215,11 @@
                 const { error } = await window.supabaseClient
                     .from('user_settings')
                     .upsert({
-                        user_id: user.id,
                         username: user.user_metadata.full_name || user.user_metadata.name || user.email,
                         settings: settings,
                         updated_at: new Date().toISOString()
                     }, {
-                        onConflict: 'user_id'
+                        onConflict: 'username'
                     });
                 
                 if (error) {
@@ -235,6 +234,25 @@
             }
         }
         
+        // 获取所有本地设置
+        function getAllLocalSettings() {
+            return {
+                showWallpaper: localStorage.getItem('showWallpaper') === 'true',
+                weatherApiKey: localStorage.getItem('weatherApiKey'),
+                searchEngine: localStorage.getItem('searchEngine'),
+                customSearchUrl: localStorage.getItem('customSearchUrl'),
+                searchTarget: localStorage.getItem('searchTarget'),
+                notepadContent: localStorage.getItem('notepadContent'),
+                meritCount: localStorage.getItem('meritCount'),
+                darkMode: localStorage.getItem('darkMode') === 'true',
+                showAnimations: localStorage.getItem('showAnimations') !== 'false',
+                bgMusicName: localStorage.getItem('bgMusicName'),
+                autoLocation: localStorage.getItem('autoLocation') === 'true',
+                weatherCity: localStorage.getItem('weatherCity'),
+                isSimpleMode: localStorage.getItem('isSimpleMode') === 'true'
+            };
+        }
+
         // 从 Supabase 服务器加载设置
         async function loadSettingsFromSupabase() {
             try {
@@ -251,21 +269,28 @@
                 }
                 
                 // 从 Supabase 加载设置
+                const username = user.user_metadata.full_name || user.user_metadata.name || user.email;
                 const { data, error } = await window.supabaseClient
                     .from('user_settings')
                     .select('settings')
-                    .eq('user_id', user.id)
+                    .eq('username', username)
                     .single();
                 
                 if (error) {
-                    console.error('从 Supabase 加载设置失败:', error);
-                    return null;
+                    console.error('从 Supabase 加载设置失败，尝试迁移本地数据:', error);
+                    // 获取本地设置并迁移到服务器
+                    const localSettings = getAllLocalSettings();
+                    await saveSettingsToSupabase(localSettings);
+                    return localSettings;
                 }
                 
                 return data?.settings || null;
             } catch (error) {
-                console.error('从 Supabase 加载设置出错:', error);
-                return null;
+                console.error('从 Supabase 加载设置出错，尝试迁移本地数据:', error);
+                // 获取本地设置并迁移到服务器
+                const localSettings = getAllLocalSettings();
+                await saveSettingsToSupabase(localSettings);
+                return localSettings;
             }
         }
 

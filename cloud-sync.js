@@ -177,14 +177,20 @@ async function loadSettingsFromSupabase() {
       .single();
     
     if (error) {
-      console.error('从 Supabase 加载设置失败:', error);
-      return null;
+      console.error('从 Supabase 加载设置失败，尝试迁移本地数据:', error);
+      // 获取本地设置并迁移到服务器
+      const localSettings = getAllLocalSettings();
+      await saveSettingsToSupabase(localSettings);
+      return localSettings;
     }
     
     return data?.settings || null;
   } catch (error) {
-    console.error('从 Supabase 加载设置出错:', error);
-    return null;
+    console.error('从 Supabase 加载设置出错，尝试迁移本地数据:', error);
+    // 获取本地设置并迁移到服务器
+    const localSettings = getAllLocalSettings();
+    await saveSettingsToSupabase(localSettings);
+    return localSettings;
   }
 }
 
