@@ -244,7 +244,6 @@
                         .upsert({
                             username: username,
                             settings: settings,
-                            user_id: user.id, // 添加 user_id 字段，可能是行级安全策略需要
                             updated_at: new Date().toISOString()
                         }, {
                             onConflict: 'username'
@@ -275,7 +274,6 @@
                         },
                         body: JSON.stringify({
                             username: username,
-                            user_id: user.id, // 添加 user_id 字段，可能是行级安全策略需要
                             settings: settings,
                             updated_at: new Date().toISOString()
                         })
@@ -320,7 +318,6 @@
                         .from('user_settings')
                         .insert({
                             username: username,
-                            user_id: user.id, // 添加 user_id 字段，可能是行级安全策略需要
                             settings: settings,
                             updated_at: new Date().toISOString()
                         });
@@ -342,7 +339,6 @@
                         .from('user_settings')
                         .update({
                             settings: settings,
-                            user_id: user.id, // 添加 user_id 字段，可能是行级安全策略需要
                             updated_at: new Date().toISOString()
                         })
                         .eq('username', username);
@@ -355,6 +351,94 @@
                     }
                 } catch (updateError) {
                     console.error('update 操作出错:', updateError);
+                }
+                
+                // 尝试使用 select 操作（检查数据是否存在）
+                try {
+                    console.log('尝试使用 select 操作...');
+                    const { data: existingData, error: selectError } = await window.supabaseClient
+                        .from('user_settings')
+                        .select('username')
+                        .eq('username', username)
+                        .limit(1);
+                    
+                    if (selectError) {
+                        console.error('select 操作失败:', selectError);
+                    } else if (existingData && existingData.length > 0) {
+                        console.log('数据已存在，尝试使用 upsert 操作...');
+                        // 再次尝试 upsert 操作
+                        try {
+                            console.log('再次尝试使用 upsert 操作...');
+                            const { error: upsertError } = await window.supabaseClient
+                                .from('user_settings')
+                                .upsert({
+                                    username: username,
+                                    settings: settings,
+                                    updated_at: new Date().toISOString()
+                                }, {
+                                    onConflict: 'username'
+                                });
+                            
+                            if (upsertError) {
+                                console.error('upsert 操作失败:', upsertError);
+                            } else {
+                                console.log('upsert 操作成功');
+                                return true;
+                            }
+                        } catch (upsertError) {
+                            console.error('upsert 操作出错:', upsertError);
+                        }
+                    }
+                } catch (selectError) {
+                    console.error('select 操作出错:', selectError);
+                }
+                
+                // 尝试使用 delete 操作（如果其他操作都失败）
+                try {
+                    console.log('尝试使用 delete 操作...');
+                    const { error: deleteError } = await window.supabaseClient
+                        .from('user_settings')
+                        .delete()
+                        .eq('username', username);
+                    
+                    if (deleteError) {
+                        console.error('delete 操作失败:', deleteError);
+                    } else {
+                        console.log('delete 操作成功');
+                        return true;
+                    }
+                } catch (deleteError) {
+                    console.error('delete 操作出错:', deleteError);
+                }
+                
+                // 尝试使用简单的直接请求（最后尝试）
+                try {
+                    console.log('尝试使用简单的直接请求...');
+                    const simpleResponse = await fetch('https://pyywrxrmtehucmkpqkdi.supabase.co/rest/v1/user_settings?on_conflict=username', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
+                            'Authorization': `Bearer ${session.session.access_token}`,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            settings: settings,
+                            updated_at: new Date().toISOString()
+                        })
+                    });
+                    
+                    console.log('简单直接请求状态:', simpleResponse.status);
+                    if (simpleResponse.ok) {
+                        console.log('简单直接请求成功');
+                        return true;
+                    } else {
+                        const errorData = await simpleResponse.json().catch(() => ({}));
+                        console.error('简单直接请求失败:', errorData);
+                    }
+                } catch (simpleError) {
+                    console.error('简单直接请求出错:', simpleError);
                 }
                 
                 // 所有尝试都失败，返回 false
