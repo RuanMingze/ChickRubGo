@@ -195,24 +195,24 @@
         async function saveSettingsToSupabase(settings) {
             try {
                 // 检查用户是否登录
-                if (!supabaseClient) {
+                if (!window.supabaseClient) {
                     console.error('Supabase 客户端未初始化');
                     return false;
                 }
                 
-                const { data: { user } } = await supabaseClient.auth.getUser();
+                const { data: { user } } = await window.supabaseClient.auth.getUser();
                 if (!user) {
                     console.log('用户未登录，跳过服务器保存');
                     return false;
                 }
                 
                 // 保存设置到 Supabase
-                if (!supabaseClient) {
+                if (!window.supabaseClient) {
                     console.error('Supabase 客户端未初始化');
                     return false;
                 }
                 
-                const { error } = await supabaseClient
+                const { error } = await window.supabaseClient
                     .from('user_settings')
                     .upsert({
                         user_id: user.id,
@@ -239,19 +239,19 @@
         async function loadSettingsFromSupabase() {
             try {
                 // 检查用户是否登录
-                if (!supabaseClient) {
+                if (!window.supabaseClient) {
                     console.error('Supabase 客户端未初始化');
                     return null;
                 }
                 
-                const { data: { user } } = await supabaseClient.auth.getUser();
+                const { data: { user } } = await window.supabaseClient.auth.getUser();
                 if (!user) {
                     console.log('用户未登录，跳过服务器加载');
                     return null;
                 }
                 
                 // 从 Supabase 加载设置
-                const { data, error } = await supabaseClient
+                const { data, error } = await window.supabaseClient
                     .from('user_settings')
                     .select('settings')
                     .eq('user_id', user.id)
