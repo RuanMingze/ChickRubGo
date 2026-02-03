@@ -194,15 +194,23 @@
         // 保存设置到 Supabase 服务器
         async function saveSettingsToSupabase(settings) {
             try {
-                // 检查用户是否登录
+                console.log('开始保存设置到 Supabase (renderer.js)...');
                 if (!window.supabaseClient) {
                     console.error('Supabase 客户端未初始化');
                     return false;
                 }
                 
+                // 检查客户端配置
+                console.log('客户端实例检查:', {
+                    exists: !!window.supabaseClient,
+                    url: window.supabaseClient?.options?.url,
+                    auth: window.supabaseClient?.options?.auth
+                });
+                
                 const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
                 if (authError) {
                     console.error('获取用户信息失败:', authError);
+                    console.error('认证错误详情:', JSON.stringify(authError));
                     return false;
                 }
                 
@@ -211,11 +219,19 @@
                     return false;
                 }
                 
-                const username = user.user_metadata.full_name || user.user_metadata.name || user.email;
+                const username = user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'anonymous';
                 console.log('当前用户:', username);
+                console.log('用户 ID:', user.id);
+                console.log('用户邮箱:', user.email);
                 console.log('要保存的设置:', settings);
                 
+                // 手动检查认证状态
+                const { data: session } = await window.supabaseClient.auth.getSession();
+                console.log('当前会话:', session?.session ? '存在' : '不存在');
+                console.log('会话令牌:', session?.session?.access_token ? '***' + session.session.access_token.slice(-4) : '无');
+                
                 // 保存设置到 Supabase
+                console.log('准备发送 upsert 请求...');
                 const { error } = await window.supabaseClient
                     .from('user_settings')
                     .upsert({
@@ -229,6 +245,8 @@
                 if (error) {
                     console.error('保存设置到 Supabase 失败:', error);
                     console.error('错误详情:', JSON.stringify(error));
+                    console.error('错误代码:', error.code);
+                    console.error('错误消息:', error.message);
                     return false;
                 }
                 
@@ -237,6 +255,7 @@
             } catch (error) {
                 console.error('保存设置到 Supabase 出错:', error);
                 console.error('错误详情:', JSON.stringify(error));
+                console.error('错误堆栈:', error.stack);
                 return false;
             }
         }

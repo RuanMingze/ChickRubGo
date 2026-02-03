@@ -3,14 +3,44 @@
 
 // 初始化 Supabase 客户端
 // 避免重复声明变量
-if (typeof window !== 'undefined' && typeof window.supabaseClient === 'undefined') {
-    if (typeof window.supabase !== 'undefined') {
-        const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
-        const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
-        window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+console.log('开始检查 Supabase 客户端初始化状态...');
+if (typeof window !== 'undefined') {
+    console.log('window 对象存在');
+    console.log('window.supabase 存在:', typeof window.supabase !== 'undefined');
+    console.log('window.supabaseClient 存在:', typeof window.supabaseClient !== 'undefined');
+    
+    if (typeof window.supabaseClient === 'undefined') {
+        console.log('在 cloud-sync.js 中初始化 Supabase 客户端...');
+        if (typeof window.supabase !== 'undefined') {
+            const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
+            const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
+            console.log('Supabase URL:', supabaseUrl);
+            console.log('Supabase Key:', supabaseKey ? '***' + supabaseKey.slice(-4) : '未设置');
+            window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+            console.log('Supabase 客户端初始化成功:', !!window.supabaseClient);
+            // 检查客户端配置
+            if (window.supabaseClient) {
+                console.log('客户端配置检查:', {
+                    url: window.supabaseClient?.options?.url,
+                    hasKey: !!window.supabaseClient?.options?.auth?.autoRefreshToken
+                });
+            }
+        } else {
+            console.error('Supabase SDK 未加载');
+        }
     } else {
-        console.error('Supabase SDK 未加载');
+        console.log('Supabase 客户端已在其他地方初始化，直接使用现有实例');
+        console.log('客户端实例存在:', !!window.supabaseClient);
+        // 检查现有客户端配置
+        if (window.supabaseClient) {
+            console.log('现有客户端配置检查:', {
+                url: window.supabaseClient?.options?.url,
+                hasKey: !!window.supabaseClient?.options?.auth?.autoRefreshToken
+            });
+        }
     }
+} else {
+    console.error('window 对象不存在，无法初始化 Supabase 客户端');
 }
 // 直接使用 window.supabaseClient，避免重复声明错误
 // 注意：这里不再声明局部变量 supabaseClient，而是直接使用 window.supabaseClient
@@ -122,14 +152,23 @@ function getAllLocalSettings() {
  */
 async function saveSettingsToSupabase(settings) {
   try {
+    console.log('开始保存设置到 Supabase...');
     if (!window.supabaseClient) {
       console.error('Supabase 客户端未初始化');
       return false;
     }
     
+    // 检查客户端配置
+    console.log('客户端实例检查:', {
+      exists: !!window.supabaseClient,
+      url: window.supabaseClient?.options?.url,
+      auth: window.supabaseClient?.options?.auth
+    });
+    
     const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
     if (authError) {
       console.error('获取用户信息失败:', authError);
+      console.error('认证错误详情:', JSON.stringify(authError));
       return false;
     }
     
@@ -138,11 +177,19 @@ async function saveSettingsToSupabase(settings) {
       return false;
     }
     
-    const username = user.user_metadata.full_name || user.user_metadata.name || user.email;
+    const username = user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'anonymous';
     console.log('当前用户:', username);
+    console.log('用户 ID:', user.id);
+    console.log('用户邮箱:', user.email);
     console.log('要保存的设置:', settings);
     
+    // 手动检查认证状态
+    const { data: session } = await window.supabaseClient.auth.getSession();
+    console.log('当前会话:', session?.session ? '存在' : '不存在');
+    console.log('会话令牌:', session?.session?.access_token ? '***' + session.session.access_token.slice(-4) : '无');
+    
     // 使用 upsert 机制，基于 username 唯一键
+    console.log('准备发送 upsert 请求...');
     const { error } = await window.supabaseClient
       .from('user_settings')
       .upsert({
@@ -156,6 +203,8 @@ async function saveSettingsToSupabase(settings) {
     if (error) {
       console.error('保存设置到 Supabase 失败:', error);
       console.error('错误详情:', JSON.stringify(error));
+      console.error('错误代码:', error.code);
+      console.error('错误消息:', error.message);
       return false;
     }
     
@@ -164,6 +213,7 @@ async function saveSettingsToSupabase(settings) {
   } catch (error) {
     console.error('保存设置到 Supabase 出错:', error);
     console.error('错误详情:', JSON.stringify(error));
+    console.error('错误堆栈:', error.stack);
     return false;
   }
 }
@@ -174,14 +224,23 @@ async function saveSettingsToSupabase(settings) {
  */
 async function loadSettingsFromSupabase() {
   try {
+    console.log('开始从 Supabase 加载设置...');
     if (!window.supabaseClient) {
       console.error('Supabase 客户端未初始化');
       return null;
     }
     
+    // 检查客户端配置
+    console.log('客户端实例检查:', {
+      exists: !!window.supabaseClient,
+      url: window.supabaseClient?.options?.url,
+      auth: window.supabaseClient?.options?.auth
+    });
+    
     const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
     if (authError) {
       console.error('获取用户信息失败:', authError);
+      console.error('认证错误详情:', JSON.stringify(authError));
       return null;
     }
     
@@ -190,11 +249,19 @@ async function loadSettingsFromSupabase() {
       return null;
     }
     
-    const username = user.user_metadata.full_name || user.user_metadata.name || user.email;
+    const username = user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'anonymous';
     console.log('当前用户:', username);
+    console.log('用户 ID:', user.id);
+    console.log('用户邮箱:', user.email);
+    
+    // 手动检查认证状态
+    const { data: session } = await window.supabaseClient.auth.getSession();
+    console.log('当前会话:', session?.session ? '存在' : '不存在');
+    console.log('会话令牌:', session?.session?.access_token ? '***' + session.session.access_token.slice(-4) : '无');
     
     // 尝试从 Supabase 加载设置
     try {
+      console.log('准备发送 select 请求...');
       const { data, error } = await window.supabaseClient
         .from('user_settings')
         .select('settings')
@@ -203,6 +270,9 @@ async function loadSettingsFromSupabase() {
       
       if (error) {
         console.error('从 Supabase 加载设置失败:', error);
+        console.error('错误详情:', JSON.stringify(error));
+        console.error('错误代码:', error.code);
+        console.error('错误消息:', error.message);
         // 获取本地设置并迁移到服务器
         const localSettings = getAllLocalSettings();
         console.log('尝试迁移本地数据到服务器:', localSettings);
@@ -214,6 +284,7 @@ async function loadSettingsFromSupabase() {
       return data?.settings || null;
     } catch (selectError) {
       console.error('从 Supabase 加载设置出错:', selectError);
+      console.error('错误堆栈:', selectError.stack);
       // 获取本地设置并迁移到服务器
       const localSettings = getAllLocalSettings();
       console.log('尝试迁移本地数据到服务器:', localSettings);
@@ -222,6 +293,7 @@ async function loadSettingsFromSupabase() {
     }
   } catch (error) {
     console.error('从 Supabase 加载设置出错:', error);
+    console.error('错误堆栈:', error.stack);
     // 获取本地设置并返回
     const localSettings = getAllLocalSettings();
     return localSettings;
