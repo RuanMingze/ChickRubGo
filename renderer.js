@@ -243,6 +243,7 @@
                         .from('user_settings')
                         .upsert({
                             username: username,
+                            user_id: user.id, // 添加 user_id 字段，满足行级安全策略
                             settings: settings,
                             updated_at: new Date().toISOString()
                         }, {
@@ -274,6 +275,7 @@
                         },
                         body: JSON.stringify({
                             username: username,
+                            user_id: user.id, // 添加 user_id 字段，满足行级安全策略
                             settings: settings,
                             updated_at: new Date().toISOString()
                         })
@@ -318,6 +320,7 @@
                         .from('user_settings')
                         .insert({
                             username: username,
+                            user_id: user.id, // 添加 user_id 字段，满足行级安全策略
                             settings: settings,
                             updated_at: new Date().toISOString()
                         });
@@ -373,6 +376,7 @@
                                 .from('user_settings')
                                 .upsert({
                                     username: username,
+                                    user_id: user.id, // 添加 user_id 字段，满足行级安全策略
                                     settings: settings,
                                     updated_at: new Date().toISOString()
                                 }, {
