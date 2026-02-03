@@ -3403,8 +3403,7 @@
             // 播放/暂停按钮点击事件
             document.querySelectorAll('.play-white-noise-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const soundFile = this.closest('.white-noise-item').dataset.sound;
-                    const soundPath = `Assets/white-noise/${soundFile}`;
+                    const soundPath = this.closest('.white-noise-item').dataset.sound;
                     
                     // 如果点击的是当前播放的声音，则切换播放/暂停状态
                     if (currentSound === soundPath) {
