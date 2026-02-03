@@ -3,12 +3,13 @@
 
 // 初始化 Supabase 客户端
 // 避免重复声明变量
-if (typeof supabaseClient === 'undefined') {
+if (typeof window.supabaseClient === 'undefined') {
     const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
     const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
     window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 }
-const supabaseClient = window.supabaseClient;
+// 使用 var 声明以避免重复声明错误
+var supabaseClient = window.supabaseClient;
 
 // 重试配置
 const SYNC_RETRY_DELAY = 3000; // 初始重试延迟（毫秒）
