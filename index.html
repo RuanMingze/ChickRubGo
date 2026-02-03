@@ -877,18 +877,9 @@
         }
         
         // 登录按钮点击事件
-        document.getElementById('login-btn').addEventListener('click', async function() {
-            // 使用Supabase的GitHub登录
-            const { error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'github',
-                options: {
-                    redirectTo: 'https://ruanmingze.github.io/ChickRubGo/CallBack.html'
-                }
-            });
-            
-            if (error) {
-                console.error('登录错误:', error);
-            }
+        document.getElementById('login-btn').addEventListener('click', function() {
+            // 跳转到登录页面
+            window.location.href = './login.html';
         });
         
         // 页面加载时检测登录状态
