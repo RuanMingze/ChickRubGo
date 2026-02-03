@@ -864,6 +864,9 @@ function loadModeSettings() {
 	const savedMode = localStorage.getItem('isSimpleMode');
 	if (savedMode !== null) {
 		isSimpleMode = savedMode === 'true';
+	} else {
+		isSimpleMode = true;
+		localStorage.setItem('isSimpleMode', 'true');
 	}
 	updateModeUI();
 }
