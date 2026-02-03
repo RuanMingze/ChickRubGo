@@ -207,23 +207,7 @@
                     auth: window.supabaseClient?.options?.auth
                 });
                 
-                // 强制重新初始化客户端（如果配置不正确）
-                if (!window.supabaseClient?.options?.url || !window.supabaseClient?.options?.auth) {
-                    console.log('客户端配置不正确，强制重新初始化...');
-                    const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
-                    const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
-                    window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
-                        auth: {
-                            autoRefreshToken: true,
-                            persistSession: true
-                        }
-                    });
-                    console.log('重新初始化后客户端配置:', {
-                        url: window.supabaseClient?.options?.url,
-                        auth: window.supabaseClient?.options?.auth
-                    });
-                }
-                
+                // 不再强制重新初始化客户端，避免多个实例
                 const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
                 if (authError) {
                     console.error('获取用户信息失败:', authError);
@@ -255,7 +239,8 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'apikey': 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
-                            'Authorization': `Bearer ${session?.session?.access_token}`
+                            'Authorization': `Bearer ${session?.session?.access_token || 'anonymous'}`,
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify({
                             username: username,
@@ -270,6 +255,7 @@
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
                         console.error('直接 POST 请求失败:', errorData);
+                        // 即使直接请求失败，也继续尝试使用客户端方法
                     } else {
                         const successData = await response.json();
                         console.log('直接 POST 请求成功:', successData);
@@ -279,52 +265,60 @@
                     console.error('直接 POST 请求出错:', fetchError);
                 }
                 
-                // 如果直接请求失败，尝试使用客户端 upsert
-                console.log('准备发送 upsert 请求...');
-                const { error } = await window.supabaseClient
-                    .from('user_settings')
-                    .upsert({
-                        username: username,
-                        settings: settings,
-                        updated_at: new Date().toISOString()
-                    }, {
-                        onConflict: 'username'
-                    });
-                
-                if (error) {
-                    console.error('保存设置到 Supabase 失败:', error);
-                    console.error('错误详情:', JSON.stringify(error));
-                    console.error('错误代码:', error.code);
-                    console.error('错误消息:', error.message);
+                // 尝试使用客户端方法
+                try {
+                    console.log('准备发送 upsert 请求...');
+                    // 首先尝试 select 操作，检查数据是否存在
+                    const { data: existingData } = await window.supabaseClient
+                        .from('user_settings')
+                        .select('username')
+                        .eq('username', username)
+                        .limit(1);
                     
-                    // 尝试使用 insert 而不是 upsert
-                    if (error.code === '42501') {
-                        console.log('尝试使用 insert 而不是 upsert...');
-                        try {
-                            const { error: insertError } = await window.supabaseClient
-                                .from('user_settings')
-                                .insert({
-                                    username: username,
-                                    settings: settings,
-                                    updated_at: new Date().toISOString()
-                                });
-                            
-                            if (insertError) {
-                                console.error('使用 insert 保存设置失败:', insertError);
-                            } else {
-                                console.log('使用 insert 保存设置成功');
-                                return true;
-                            }
-                        } catch (insertCatchError) {
-                            console.error('使用 insert 保存设置出错:', insertCatchError);
+                    console.log('现有数据检查:', existingData?.length ? '存在' : '不存在');
+                    
+                    if (existingData?.length) {
+                        // 数据存在，使用 update 操作
+                        console.log('数据存在，尝试使用 update 操作...');
+                        const { error: updateError } = await window.supabaseClient
+                            .from('user_settings')
+                            .update({
+                                settings: settings,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('username', username);
+                        
+                        if (updateError) {
+                            console.error('使用 update 保存设置失败:', updateError);
+                        } else {
+                            console.log('使用 update 保存设置成功');
+                            return true;
+                        }
+                    } else {
+                        // 数据不存在，使用 insert 操作
+                        console.log('数据不存在，尝试使用 insert 操作...');
+                        const { error: insertError } = await window.supabaseClient
+                            .from('user_settings')
+                            .insert({
+                                username: username,
+                                settings: settings,
+                                updated_at: new Date().toISOString()
+                            });
+                        
+                        if (insertError) {
+                            console.error('使用 insert 保存设置失败:', insertError);
+                        } else {
+                            console.log('使用 insert 保存设置成功');
+                            return true;
                         }
                     }
-                    
-                    return false;
+                } catch (clientError) {
+                    console.error('客户端操作出错:', clientError);
                 }
                 
-                console.log('设置已成功同步到云端');
-                return true;
+                // 所有尝试都失败，返回 false
+                console.error('所有保存尝试都失败');
+                return false;
             } catch (error) {
                 console.error('保存设置到 Supabase 出错:', error);
                 console.error('错误详情:', JSON.stringify(error));

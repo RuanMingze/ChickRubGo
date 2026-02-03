@@ -863,19 +863,25 @@
         if (!window.supabase) {
             console.error('Supabase SDK 未加载');
         } else {
-            // 正确初始化 Supabase 客户端
-            window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
-                auth: {
-                    autoRefreshToken: true,
-                    persistSession: true
-                }
-            });
+            // 确保只初始化一次客户端
+            if (!window.supabaseClient) {
+                // 正确初始化 Supabase 客户端
+                window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+                    auth: {
+                        autoRefreshToken: true,
+                        persistSession: true,
+                        storageKey: 'sb-pyywrxrmtehucmkpqkdi-auth-token'
+                    }
+                });
+                console.log('Supabase 客户端初始化成功:', !!window.supabaseClient);
+                console.log('客户端配置:', {
+                    url: window.supabaseClient?.options?.url,
+                    auth: window.supabaseClient?.options?.auth
+                });
+            } else {
+                console.log('Supabase 客户端已存在，直接使用现有实例');
+            }
             const supabaseClient = window.supabaseClient;
-            console.log('Supabase 客户端初始化成功:', !!supabaseClient);
-            console.log('客户端配置:', {
-                url: supabaseClient?.options?.url,
-                auth: supabaseClient?.options?.auth
-            });
         }
     </script>
     <!-- 云端同步功能 -->

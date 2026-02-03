@@ -17,11 +17,12 @@ if (typeof window !== 'undefined') {
             console.log('Supabase URL:', supabaseUrl);
             console.log('Supabase Key:', supabaseKey ? '***' + supabaseKey.slice(-4) : '未设置');
             
-            // 正确初始化 Supabase 客户端
+            // 正确初始化 Supabase 客户端，使用统一的存储键
             window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
                 auth: {
                     autoRefreshToken: true,
-                    persistSession: true
+                    persistSession: true,
+                    storageKey: 'sb-pyywrxrmtehucmkpqkdi-auth-token'
                 }
             });
             
@@ -39,29 +40,12 @@ if (typeof window !== 'undefined') {
     } else {
         console.log('Supabase 客户端已在其他地方初始化，直接使用现有实例');
         console.log('客户端实例存在:', !!window.supabaseClient);
-        // 检查现有客户端配置
+        // 不再强制重新初始化客户端，避免多个实例
         if (window.supabaseClient) {
             console.log('现有客户端配置检查:', {
                 url: window.supabaseClient?.options?.url,
                 auth: window.supabaseClient?.options?.auth
             });
-            
-            // 如果客户端配置不正确，重新初始化
-            if (!window.supabaseClient?.options?.url || !window.supabaseClient?.options?.auth) {
-                console.log('客户端配置不正确，重新初始化...');
-                const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
-                const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
-                window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
-                    auth: {
-                        autoRefreshToken: true,
-                        persistSession: true
-                    }
-                });
-                console.log('重新初始化后客户端配置:', {
-                    url: window.supabaseClient?.options?.url,
-                    auth: window.supabaseClient?.options?.auth
-                });
-            }
         }
     }
 } else {
