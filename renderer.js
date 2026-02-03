@@ -246,6 +246,15 @@
                 return;
             }
 
+            // 保存搜索历史
+            let history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            history = history.filter(item => item !== keyword);
+            history.unshift(keyword);
+            if (history.length > 10) {
+                history = history.slice(0, 10);
+            }
+            localStorage.setItem('searchHistory', JSON.stringify(history));
+
             const searchEngineSelect = document.getElementById('search-engine');
             let searchUrl;
             
@@ -260,12 +269,25 @@
                 searchUrl = searchEngineSelect.value.replace('%text%', encodeURIComponent(keyword));
             }
             
-            window.open(searchUrl, '_blank');
+            // 获取搜索方式设置
+            const searchTarget = localStorage.getItem('searchTarget') || '_blank';
+            // 根据设置决定是在新标签页打开还是在当前页面重定向
+            if (searchTarget === '_blank') {
+                window.open(searchUrl, '_blank');
+            } else {
+                window.location.href = searchUrl;
+            }
             input.value = '';
+            // 隐藏建议区域
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            suggestionsContainer.style.display = 'none';
         }
 
         document.getElementById('search-btn').addEventListener('click', handleSearch);
         document.getElementById('search-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch(); });
+
+        // 初始化搜索联想功能
+        initSearchSuggestions();
 
         document.querySelectorAll('.search-tag').forEach(tag => {
             tag.addEventListener('click', () => {
@@ -344,6 +366,7 @@
             const savedWeatherApiKey = localStorage.getItem('weatherApiKey');
             const savedSearchEngine = localStorage.getItem('searchEngine');
             const savedCustomSearchUrl = localStorage.getItem('customSearchUrl');
+            const savedSearchTarget = localStorage.getItem('searchTarget');
             const savedNotepadContent = localStorage.getItem('notepadContent');
             const savedMeritCount = localStorage.getItem('meritCount');
             const savedDarkMode = localStorage.getItem('darkMode');
@@ -393,6 +416,14 @@
                 } else {
                     customSearchContainer.style.display = 'none';
                 }
+            }
+            
+            if (savedSearchTarget) {
+                document.getElementById('search-target').value = savedSearchTarget;
+            } else {
+                // 默认新标签页搜索
+                document.getElementById('search-target').value = '_blank';
+                localStorage.setItem('searchTarget', '_blank');
             }
             
             if (savedNotepadContent) {
@@ -447,6 +478,7 @@
                 localStorage.setItem('weatherApiKey', weatherApiKeyInput.value);
                 localStorage.setItem('searchEngine', searchEngineSelect.value);
                 localStorage.setItem('customSearchUrl', customSearchUrlInput.value);
+                localStorage.setItem('searchTarget', document.getElementById('search-target').value);
                 // 保存自动定位设置
                 if (autoLocationCheckbox) {
                     localStorage.setItem('autoLocation', autoLocationCheckbox.checked);
@@ -1421,7 +1453,249 @@
                 }
             });
         }
-        
+
+        // 初始化搜索联想功能
+        function initSearchSuggestions() {
+            const searchInput = document.getElementById('search-input');
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            const suggestionsList = document.getElementById('suggestions-list');
+            let debounceTimer;
+
+            // 监听输入事件
+            searchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                
+                if (query.length < 1) {
+                    // 清除防抖定时器，防止fetchSuggestions回调覆盖操作
+                    clearTimeout(debounceTimer);
+                    showSearchHistory();
+                    return;
+                }
+
+                // 防抖处理
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    fetchSuggestions(query);
+                }, 300);
+            });
+
+            // 监听焦点事件，显示搜索历史
+            searchInput.addEventListener('focus', function() {
+                const query = this.value.trim();
+                if (query.length < 1) {
+                    showSearchHistory();
+                } else {
+                    fetchSuggestions(query);
+                }
+            });
+
+            // 监听点击事件，点击外部关闭联想框
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+
+            // 监听键盘事件
+            searchInput.addEventListener('keydown', function(e) {
+                const activeItem = suggestionsList.querySelector('.suggestion-item.active');
+                
+                switch(e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        if (activeItem) {
+                            activeItem.classList.remove('active');
+                            const nextItem = activeItem.nextElementSibling;
+                            if (nextItem) {
+                                nextItem.classList.add('active');
+                                nextItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            } else {
+                                suggestionsList.firstElementChild?.classList.add('active');
+                            }
+                        } else {
+                            suggestionsList.firstElementChild?.classList.add('active');
+                        }
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        if (activeItem) {
+                            activeItem.classList.remove('active');
+                            const prevItem = activeItem.previousElementSibling;
+                            if (prevItem) {
+                                prevItem.classList.add('active');
+                                prevItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            } else {
+                                suggestionsList.lastElementChild?.classList.add('active');
+                            }
+                        } else {
+                            suggestionsList.lastElementChild?.classList.add('active');
+                        }
+                        break;
+                    case 'Enter':
+                        if (activeItem) {
+                            e.preventDefault();
+                            searchInput.value = activeItem.textContent;
+                            suggestionsContainer.style.display = 'none';
+                            handleSearch();
+                        } else {
+                            // 保存搜索历史
+                            saveSearchHistory(searchInput.value.trim());
+                        }
+                        break;
+                    case 'Escape':
+                        suggestionsContainer.style.display = 'none';
+                        break;
+                }
+            });
+
+            // 保存搜索历史
+            function saveSearchHistory(query) {
+                if (!query) return;
+                
+                let history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+                
+                // 移除重复项
+                history = history.filter(item => item !== query);
+                
+                // 添加到开头
+                history.unshift(query);
+                
+                // 限制历史记录数量
+                if (history.length > 10) {
+                    history = history.slice(0, 10);
+                }
+                
+                localStorage.setItem('searchHistory', JSON.stringify(history));
+            }
+
+            // 显示搜索历史
+            function showSearchHistory() {
+                const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+                
+                if (history.length > 0) {
+                    suggestionsList.innerHTML = '';
+                    
+                    history.forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'suggestion-item';
+                        li.style.display = 'flex';
+                        li.style.alignItems = 'center';
+                        li.style.justifyContent = 'space-between';
+                        li.innerHTML = `
+                            <div style="display: flex; align-items: center;">
+                                <i class="fa-solid fa-clock" style="margin-right: 10px; color: var(--text-light);"></i>
+                                <span>${item}</span>
+                            </div>
+                            <button class="clear-history-btn" style="background: none; border: none; color: var(--text-light); cursor: pointer; padding: 0 5px;">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        `;
+                        
+                        // 点击历史项
+                        li.querySelector('div').addEventListener('click', function() {
+                            searchInput.value = item;
+                            suggestionsContainer.style.display = 'none';
+                            handleSearch();
+                        });
+                        
+                        // 点击清除按钮
+                        li.querySelector('.clear-history-btn').addEventListener('click', function(e) {
+                            e.stopPropagation(); // 阻止冒泡到li
+                            // 清除对应的历史记录
+                            let updatedHistory = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+                            updatedHistory = updatedHistory.filter(historyItem => historyItem !== item);
+                            localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
+                            // 重新显示历史记录
+                            showSearchHistory();
+                            // 重新聚焦到输入框
+                            searchInput.focus();
+                        });
+                        
+                        suggestionsList.appendChild(li);
+                    });
+                    
+                    suggestionsContainer.style.display = 'block';
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            }
+
+            // 获取搜索建议
+            function fetchSuggestions(query) {
+                try {
+                    // 使用百度搜索建议 API，使用 JSONP 方式
+                    const callbackName = 'baiduSearchCallback_' + Date.now();
+                    
+                    // 移除已存在的回调函数
+                    if (window[callbackName]) {
+                        delete window[callbackName];
+                    }
+                    
+                    // 创建回调函数
+                    window[callbackName] = function(data) {
+                        // 处理返回的数据（百度 API 返回格式：{q: "搜索词", p: false, s: ["建议1", "建议2", ...]}
+                        const suggestions = [];
+                        if (data && data.s) {
+                            data.s.forEach(item => {
+                                suggestions.push(item);
+                            });
+                        }
+                        
+                        if (suggestions.length > 0) {
+                            displaySuggestions(suggestions);
+                        } else {
+                            suggestionsContainer.style.display = 'none';
+                        }
+                        
+                        // 移除 script 标签
+                        const script = document.getElementById('baidu-search-script');
+                        if (script) {
+                            script.remove();
+                        }
+                        
+                        // 清理回调函数
+                        if (window[callbackName]) {
+                            delete window[callbackName];
+                        }
+                    };
+                    
+                    // 创建 script 标签
+                    const script = document.createElement('script');
+                    script.id = 'baidu-search-script';
+                    script.src = `https://suggestion.baidu.com/su?wd=${encodeURIComponent(query)}&cb=${callbackName}`;
+                    script.type = 'text/javascript';
+                    
+                    // 添加到文档
+                    document.head.appendChild(script);
+                } catch (error) {
+                    console.error('获取搜索建议失败:', error);
+                    suggestionsContainer.style.display = 'none';
+                }
+            }
+
+            // 显示搜索建议
+            function displaySuggestions(suggestions) {
+                suggestionsList.innerHTML = '';
+                
+                suggestions.forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.className = 'suggestion-item';
+                    li.textContent = suggestion;
+                    
+                    // 点击建议项
+                    li.addEventListener('click', function() {
+                        searchInput.value = this.textContent;
+                        suggestionsContainer.style.display = 'none';
+                        handleSearch();
+                    });
+                    
+                    suggestionsList.appendChild(li);
+                });
+                
+                suggestionsContainer.style.display = 'block';
+            }
+        }
+
         // 初始化彩蛋功能
         initEasterEgg();
         

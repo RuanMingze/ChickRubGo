@@ -52,6 +52,13 @@
                 <small class="setting-hint">提示: 使用 %text% 作为搜索词的占位符</small>
             </div>
             <div class="setting-item">
+                <label for="search-target">搜索方式：</label>
+                <select id="search-target">
+                    <option value="_blank">新标签页搜索</option>
+                    <option value="_self">当前页面重定向</option>
+                </select>
+            </div>
+            <div class="setting-item">
                 <label for="weather-api-key">OpenWeatherMap API Key：</label>
                 <input type="text" id="weather-api-key" placeholder="输入你的API Key" class="setting-input">
                 <small class="setting-hint">获取API Key: <a href="https://openweathermap.org/api" target="_blank" rel="noopener">OpenWeatherMap</a></small>
@@ -731,6 +738,9 @@
                     <i class="fa-solid fa-search"></i>
                     搜索
                 </button>
+                <div class="suggestions-container" id="suggestions-container">
+                    <ul class="suggestions-list" id="suggestions-list"></ul>
+                </div>
             </div>
 
             <div class="quick-search" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="700">
