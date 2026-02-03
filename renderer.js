@@ -195,6 +195,11 @@
         async function saveSettingsToSupabase(settings) {
             try {
                 // 检查用户是否登录
+                if (!supabaseClient) {
+                    console.error('Supabase 客户端未初始化');
+                    return false;
+                }
+                
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) {
                     console.log('用户未登录，跳过服务器保存');
@@ -202,6 +207,11 @@
                 }
                 
                 // 保存设置到 Supabase
+                if (!supabaseClient) {
+                    console.error('Supabase 客户端未初始化');
+                    return false;
+                }
+                
                 const { error } = await supabaseClient
                     .from('user_settings')
                     .upsert({
@@ -229,6 +239,11 @@
         async function loadSettingsFromSupabase() {
             try {
                 // 检查用户是否登录
+                if (!supabaseClient) {
+                    console.error('Supabase 客户端未初始化');
+                    return null;
+                }
+                
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (!user) {
                     console.log('用户未登录，跳过服务器加载');

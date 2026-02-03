@@ -3,13 +3,17 @@
 
 // 初始化 Supabase 客户端
 // 避免重复声明变量
-if (typeof window.supabaseClient === 'undefined') {
-    const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
-    const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
-    window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+if (typeof window !== 'undefined' && typeof window.supabaseClient === 'undefined') {
+    if (typeof window.supabase !== 'undefined') {
+        const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
+        const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
+        window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+    } else {
+        console.error('Supabase SDK 未加载');
+    }
 }
 // 使用 var 声明以避免重复声明错误
-var supabaseClient = window.supabaseClient;
+var supabaseClient = typeof window !== 'undefined' ? window.supabaseClient : null;
 
 // 重试配置
 const SYNC_RETRY_DELAY = 3000; // 初始重试延迟（毫秒）
@@ -27,6 +31,10 @@ let retryTimer = null;
  */
 async function isUserLoggedIn() {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase 客户端未初始化');
+      return false;
+    }
     const { data: { user } } = await supabaseClient.auth.getUser();
     return !!user;
   } catch (error) {
@@ -41,6 +49,10 @@ async function isUserLoggedIn() {
  */
 async function getCurrentUserInfo() {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase 客户端未初始化');
+      return null;
+    }
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return null;
     
@@ -105,6 +117,11 @@ function getAllLocalSettings() {
  */
 async function saveSettingsToSupabase(settings) {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase 客户端未初始化');
+      return false;
+    }
+    
     const username = await getCurrentUsername();
     if (!username) {
       console.log('用户未登录，跳过云端同步');
@@ -136,11 +153,16 @@ async function saveSettingsToSupabase(settings) {
 }
 
 /**
- * 从 Supabase 加载设置
+ * 从 Supabase 加载用户设置
  * @returns {Promise<Object|null>} 设置对象或null
  */
 async function loadSettingsFromSupabase() {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase 客户端未初始化');
+      return null;
+    }
+    
     const username = await getCurrentUsername();
     if (!username) {
       console.log('用户未登录，跳过云端加载');
