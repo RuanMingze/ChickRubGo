@@ -242,12 +242,13 @@
                     const { error } = await window.supabaseClient
                         .from('user_settings')
                         .upsert({
+                            id: user.id,
                             username: username,
-                            user_id: user.id, // 添加 user_id 字段，满足行级安全策略
+                            apikey: 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
                             settings: settings,
                             updated_at: new Date().toISOString()
                         }, {
-                            onConflict: 'username'
+                            onConflict: 'id'
                         });
                     
                     if (error) {
@@ -274,8 +275,9 @@
                             'Prefer': 'return=minimal'
                         },
                         body: JSON.stringify({
+                            id: user.id,
                             username: username,
-                            user_id: user.id, // 添加 user_id 字段，满足行级安全策略
+                            apikey: 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
                             settings: settings,
                             updated_at: new Date().toISOString()
                         })
@@ -319,8 +321,9 @@
                     const { error: insertError } = await window.supabaseClient
                         .from('user_settings')
                         .insert({
+                            id: user.id,
                             username: username,
-                            user_id: user.id, // 添加 user_id 字段，满足行级安全策略
+                            apikey: 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
                             settings: settings,
                             updated_at: new Date().toISOString()
                         });
@@ -341,10 +344,13 @@
                     const { error: updateError } = await window.supabaseClient
                         .from('user_settings')
                         .update({
+                            id: user.id,
+                            username: username,
+                            apikey: 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
                             settings: settings,
                             updated_at: new Date().toISOString()
                         })
-                        .eq('username', username);
+                        .eq('id', user.id);
                     
                     if (updateError) {
                         console.error('update 操作失败:', updateError);
@@ -361,8 +367,8 @@
                     console.log('尝试使用 select 操作...');
                     const { data: existingData, error: selectError } = await window.supabaseClient
                         .from('user_settings')
-                        .select('username')
-                        .eq('username', username)
+                        .select('id, username')
+                        .eq('id', user.id)
                         .limit(1);
                     
                     if (selectError) {
@@ -375,12 +381,13 @@
                             const { error: upsertError } = await window.supabaseClient
                                 .from('user_settings')
                                 .upsert({
+                                    id: user.id,
                                     username: username,
-                                    user_id: user.id, // 添加 user_id 字段，满足行级安全策略
+                                    apikey: 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
                                     settings: settings,
                                     updated_at: new Date().toISOString()
                                 }, {
-                                    onConflict: 'username'
+                                    onConflict: 'id'
                                 });
                             
                             if (upsertError) {
@@ -403,7 +410,7 @@
                     const { error: deleteError } = await window.supabaseClient
                         .from('user_settings')
                         .delete()
-                        .eq('username', username);
+                        .eq('id', user.id);
                     
                     if (deleteError) {
                         console.error('delete 操作失败:', deleteError);
@@ -427,7 +434,9 @@
                             'Accept': 'application/json'
                         },
                         body: JSON.stringify({
+                            id: user.id,
                             username: username,
+                            apikey: 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
                             settings: settings,
                             updated_at: new Date().toISOString()
                         })
@@ -495,7 +504,7 @@
                 const { data, error } = await window.supabaseClient
                     .from('user_settings')
                     .select('settings')
-                    .eq('username', username)
+                    .eq('id', user.id)
                     .single();
                 
                 if (error) {
