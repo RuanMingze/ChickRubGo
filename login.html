@@ -157,10 +157,7 @@
             const { error } = await supabaseClient.auth.signInWithOAuth({
                 provider: 'github',
                 options: {
-                    redirectTo: 'https://pyywrxrmtehucmkpqkdi.supabase.co/auth/v1/callback',
-                    queryParams: {
-                        redirect_to: 'https://ruanmingze.github.io/ChickRubGo/CallBack.html'
-                    }
+                    redirectTo: 'https://ruanmingze.github.io/ChickRubGo/CallBack.html'
                 }
             });
             

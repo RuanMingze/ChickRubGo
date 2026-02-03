@@ -71,8 +71,8 @@
             }
             
             return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const objectStore = transaction.objectStore(STORE_NAME);
+                const transaction = db.transaction([AUDIO_STORE_NAME], 'readonly');
+                const objectStore = transaction.objectStore(AUDIO_STORE_NAME);
                 const request = objectStore.get('bgMusic');
                 
                 request.onsuccess = () => {

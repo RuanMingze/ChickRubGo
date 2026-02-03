@@ -162,7 +162,8 @@
         // 处理回调
         async function handleCallback() {
             try {
-                // 让Supabase处理OAuth回调
+                // 在Supabase v2中，SDK会自动处理URL中的授权码
+                // 我们只需要尝试获取会话即可
                 const { data, error } = await supabaseClient.auth.getSession();
                 
                 if (error) {
@@ -171,8 +172,23 @@
                 }
                 
                 if (!data.session) {
-                    showError('登录会话无效');
-                    return;
+                    // 尝试刷新会话
+                    const { data: refreshData, error: refreshError } = await supabaseClient.auth.refreshSession();
+                    
+                    if (refreshError || !refreshData.session) {
+                        showError('登录会话无效');
+                        return;
+                    }
+                    
+                    // 获取用户UUID并存储到localStorage
+                    const userId = refreshData.session.user.id;
+                    localStorage.setItem('userId', userId);
+                    console.log('用户UUID已存储:', userId);
+                } else {
+                    // 获取用户UUID并存储到localStorage
+                    const userId = data.session.user.id;
+                    localStorage.setItem('userId', userId);
+                    console.log('用户UUID已存储:', userId);
                 }
                 
                 // 登录成功，显示成功信息

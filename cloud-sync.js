@@ -2,9 +2,13 @@
 // 基于现有的 Supabase 客户端和本地存储能力
 
 // 初始化 Supabase 客户端
-const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
-const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+// 避免重复声明变量
+if (typeof supabaseClient === 'undefined') {
+    const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
+    const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
+    window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+}
+const supabaseClient = window.supabaseClient;
 
 // 重试配置
 const SYNC_RETRY_DELAY = 3000; // 初始重试延迟（毫秒）
@@ -31,20 +35,43 @@ async function isUserLoggedIn() {
 }
 
 /**
- * 获取当前登录用户的用户名
- * @returns {Promise<string|null>} 用户名或null
+ * 获取当前登录用户的信息
+ * @returns {Promise<Object|null>} 用户信息对象，包含id和username
  */
-async function getCurrentUsername() {
+async function getCurrentUserInfo() {
   try {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return null;
     
     // 优先使用全名，其次使用name，最后使用email
-    return user.user_metadata.full_name || user.user_metadata.name || user.email;
+    const username = user.user_metadata.full_name || user.user_metadata.name || user.email;
+    
+    return {
+      id: user.id, // Supabase 自动生成的 UUID 用户 ID
+      username: username
+    };
   } catch (error) {
-    console.error('获取用户名失败:', error);
+    console.error('获取用户信息失败:', error);
     return null;
   }
+}
+
+/**
+ * 获取当前登录用户的用户名
+ * @returns {Promise<string|null>} 用户名或null
+ */
+async function getCurrentUsername() {
+  const userInfo = await getCurrentUserInfo();
+  return userInfo?.username || null;
+}
+
+/**
+ * 获取当前登录用户的 ID
+ * @returns {Promise<string|null>} 用户ID或null
+ */
+async function getCurrentUserId() {
+  const userInfo = await getCurrentUserInfo();
+  return userInfo?.id || null;
 }
 
 /**
@@ -162,6 +189,13 @@ function applyCloudSettings(cloudSettings) {
  */
 async function syncSettingsWithRetry(settings) {
   if (syncInProgress) return;
+  
+  // 检查用户是否登录，未登录则不进行同步
+  const username = await getCurrentUsername();
+  if (!username) {
+    console.log('用户未登录，跳过云端同步');
+    return;
+  }
   
   syncInProgress = true;
   
