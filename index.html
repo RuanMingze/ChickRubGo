@@ -15,8 +15,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ffmpeg/0.12.15/umd/ffmpeg.min.js"></script>
     <!-- Supabase SDK -->
     <script src="./Supabase-SDK.js"></script>
-    <!-- 云端同步功能 -->
-    <script src="./cloud-sync.js"></script>
 </head>
 <body>
     <div class="settings-panel" id="settings-panel">
@@ -853,13 +851,18 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script src="./Supabase-SDK.js"></script>
-    <script src="./renderer.js"></script>
     <script>
         // 初始化Supabase客户端
         const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
         const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-        
+        window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = window.supabaseClient;
+    </script>
+    <!-- 云端同步功能 -->
+    <script src="./cloud-sync.js"></script>
+    <!-- 渲染器 -->
+    <script src="./renderer.js"></script>
+    <script>
         // 检测登录状态
         async function checkLoginStatus() {
             const { data: { user } } = await supabaseClient.auth.getUser();
