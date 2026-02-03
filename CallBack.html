@@ -6,7 +6,7 @@
     <title>登录回调 - ChickRubGo</title>
     <link rel="icon" type="image/png" href="./favicon.png">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./Supabase-SDK.js"></script>
     <style>
         * {
             margin: 0;
@@ -145,7 +145,7 @@
         // 初始化Supabase客户端
         const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
         const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         
         // 加载主题设置
         function loadTheme() {
