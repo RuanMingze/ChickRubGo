@@ -16,13 +16,21 @@ if (typeof window !== 'undefined') {
             const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
             console.log('Supabase URL:', supabaseUrl);
             console.log('Supabase Key:', supabaseKey ? '***' + supabaseKey.slice(-4) : '未设置');
-            window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+            
+            // 正确初始化 Supabase 客户端
+            window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+                auth: {
+                    autoRefreshToken: true,
+                    persistSession: true
+                }
+            });
+            
             console.log('Supabase 客户端初始化成功:', !!window.supabaseClient);
             // 检查客户端配置
             if (window.supabaseClient) {
                 console.log('客户端配置检查:', {
                     url: window.supabaseClient?.options?.url,
-                    hasKey: !!window.supabaseClient?.options?.auth?.autoRefreshToken
+                    auth: window.supabaseClient?.options?.auth
                 });
             }
         } else {
@@ -35,8 +43,25 @@ if (typeof window !== 'undefined') {
         if (window.supabaseClient) {
             console.log('现有客户端配置检查:', {
                 url: window.supabaseClient?.options?.url,
-                hasKey: !!window.supabaseClient?.options?.auth?.autoRefreshToken
+                auth: window.supabaseClient?.options?.auth
             });
+            
+            // 如果客户端配置不正确，重新初始化
+            if (!window.supabaseClient?.options?.url || !window.supabaseClient?.options?.auth) {
+                console.log('客户端配置不正确，重新初始化...');
+                const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
+                const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
+                window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+                    auth: {
+                        autoRefreshToken: true,
+                        persistSession: true
+                    }
+                });
+                console.log('重新初始化后客户端配置:', {
+                    url: window.supabaseClient?.options?.url,
+                    auth: window.supabaseClient?.options?.auth
+                });
+            }
         }
     }
 } else {

@@ -207,6 +207,23 @@
                     auth: window.supabaseClient?.options?.auth
                 });
                 
+                // 强制重新初始化客户端（如果配置不正确）
+                if (!window.supabaseClient?.options?.url || !window.supabaseClient?.options?.auth) {
+                    console.log('客户端配置不正确，强制重新初始化...');
+                    const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
+                    const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
+                    window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+                        auth: {
+                            autoRefreshToken: true,
+                            persistSession: true
+                        }
+                    });
+                    console.log('重新初始化后客户端配置:', {
+                        url: window.supabaseClient?.options?.url,
+                        auth: window.supabaseClient?.options?.auth
+                    });
+                }
+                
                 const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
                 if (authError) {
                     console.error('获取用户信息失败:', authError);
@@ -230,7 +247,39 @@
                 console.log('当前会话:', session?.session ? '存在' : '不存在');
                 console.log('会话令牌:', session?.session?.access_token ? '***' + session.session.access_token.slice(-4) : '无');
                 
-                // 保存设置到 Supabase
+                // 尝试直接使用 POST 请求保存数据（绕过可能的客户端问题）
+                try {
+                    console.log('尝试使用直接 POST 请求保存数据...');
+                    const response = await fetch('https://pyywrxrmtehucmkpqkdi.supabase.co/rest/v1/user_settings?on_conflict=username', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
+                            'Authorization': `Bearer ${session?.session?.access_token}`
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            settings: settings,
+                            updated_at: new Date().toISOString()
+                        })
+                    });
+                    
+                    console.log('直接 POST 请求状态:', response.status);
+                    console.log('直接 POST 请求状态文本:', response.statusText);
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error('直接 POST 请求失败:', errorData);
+                    } else {
+                        const successData = await response.json();
+                        console.log('直接 POST 请求成功:', successData);
+                        return true;
+                    }
+                } catch (fetchError) {
+                    console.error('直接 POST 请求出错:', fetchError);
+                }
+                
+                // 如果直接请求失败，尝试使用客户端 upsert
                 console.log('准备发送 upsert 请求...');
                 const { error } = await window.supabaseClient
                     .from('user_settings')
@@ -247,6 +296,30 @@
                     console.error('错误详情:', JSON.stringify(error));
                     console.error('错误代码:', error.code);
                     console.error('错误消息:', error.message);
+                    
+                    // 尝试使用 insert 而不是 upsert
+                    if (error.code === '42501') {
+                        console.log('尝试使用 insert 而不是 upsert...');
+                        try {
+                            const { error: insertError } = await window.supabaseClient
+                                .from('user_settings')
+                                .insert({
+                                    username: username,
+                                    settings: settings,
+                                    updated_at: new Date().toISOString()
+                                });
+                            
+                            if (insertError) {
+                                console.error('使用 insert 保存设置失败:', insertError);
+                            } else {
+                                console.log('使用 insert 保存设置成功');
+                                return true;
+                            }
+                        } catch (insertCatchError) {
+                            console.error('使用 insert 保存设置出错:', insertCatchError);
+                        }
+                    }
+                    
                     return false;
                 }
                 

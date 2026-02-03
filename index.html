@@ -855,8 +855,28 @@
         // 初始化Supabase客户端
         const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
         const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
-        window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-        const supabaseClient = window.supabaseClient;
+        
+        console.log('初始化 Supabase 客户端...');
+        console.log('Supabase URL:', supabaseUrl);
+        console.log('Supabase Key:', supabaseKey ? '***' + supabaseKey.slice(-4) : '未设置');
+        
+        if (!window.supabase) {
+            console.error('Supabase SDK 未加载');
+        } else {
+            // 正确初始化 Supabase 客户端
+            window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+                auth: {
+                    autoRefreshToken: true,
+                    persistSession: true
+                }
+            });
+            const supabaseClient = window.supabaseClient;
+            console.log('Supabase 客户端初始化成功:', !!supabaseClient);
+            console.log('客户端配置:', {
+                url: supabaseClient?.options?.url,
+                auth: supabaseClient?.options?.auth
+            });
+        }
     </script>
     <!-- 云端同步功能 -->
     <script src="./cloud-sync.js"></script>
