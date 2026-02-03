@@ -1,7 +1,8 @@
         // IndexedDB 数据库配置
         const DB_NAME = 'ChickRubGoDB';
-        const DB_VERSION = 1;
-        const STORE_NAME = 'audioStore';
+        const DB_VERSION = 2;
+        const AUDIO_STORE_NAME = 'audioStore';
+        const SETTINGS_STORE_NAME = 'settingsStore';
         let db = null;
 
         // 初始化 IndexedDB
@@ -21,9 +22,13 @@
                 
                 request.onupgradeneeded = (event) => {
                     const database = event.target.result;
-                    if (!database.objectStoreNames.contains(STORE_NAME)) {
-                        const objectStore = database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    if (!database.objectStoreNames.contains(AUDIO_STORE_NAME)) {
+                        const objectStore = database.createObjectStore(AUDIO_STORE_NAME, { keyPath: 'id' });
                         objectStore.createIndex('name', 'name', { unique: false });
+                    }
+                    if (!database.objectStoreNames.contains(SETTINGS_STORE_NAME)) {
+                        const settingsStore = database.createObjectStore(SETTINGS_STORE_NAME, { keyPath: 'userId' });
+                        settingsStore.createIndex('timestamp', 'timestamp', { unique: false });
                     }
                 };
             });
@@ -36,8 +41,8 @@
             }
             
             return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const objectStore = transaction.objectStore(STORE_NAME);
+                const transaction = db.transaction([AUDIO_STORE_NAME], 'readwrite');
+                const objectStore = transaction.objectStore(AUDIO_STORE_NAME);
                 
                 const audioRecord = {
                     id: 'bgMusic',
@@ -115,8 +120,8 @@
             }
             
             return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const objectStore = transaction.objectStore(STORE_NAME);
+                const transaction = db.transaction([AUDIO_STORE_NAME], 'readwrite');
+                const objectStore = transaction.objectStore(AUDIO_STORE_NAME);
                 const request = objectStore.delete('bgMusic');
                 
                 request.onsuccess = () => {
@@ -129,6 +134,124 @@
                     reject(request.error);
                 };
             });
+        }
+        
+        // 保存设置到 IndexedDB
+        async function saveSettingsToIndexedDB(settings, userId) {
+            if (!db) {
+                await initIndexedDB();
+            }
+            
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([SETTINGS_STORE_NAME], 'readwrite');
+                const objectStore = transaction.objectStore(SETTINGS_STORE_NAME);
+                
+                const settingsRecord = {
+                    userId: userId || 'anonymous',
+                    settings: settings,
+                    timestamp: Date.now()
+                };
+                
+                const request = objectStore.put(settingsRecord);
+                
+                request.onsuccess = () => {
+                    resolve();
+                };
+                
+                request.onerror = () => {
+                    console.error('设置保存到 IndexedDB 失败:', request.error);
+                    reject(request.error);
+                };
+            });
+        }
+        
+        // 从 IndexedDB 加载设置
+        async function loadSettingsFromIndexedDB(userId) {
+            if (!db) {
+                await initIndexedDB();
+            }
+            
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([SETTINGS_STORE_NAME], 'readonly');
+                const objectStore = transaction.objectStore(SETTINGS_STORE_NAME);
+                const request = objectStore.get(userId || 'anonymous');
+                
+                request.onsuccess = () => {
+                    if (request.result) {
+                        resolve(request.result.settings);
+                    } else {
+                        resolve(null);
+                    }
+                };
+                
+                request.onerror = () => {
+                    console.error('从 IndexedDB 加载设置失败:', request.error);
+                    reject(request.error);
+                };
+            });
+        }
+        
+        // 保存设置到 Supabase 服务器
+        async function saveSettingsToSupabase(settings) {
+            try {
+                // 检查用户是否登录
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) {
+                    console.log('用户未登录，跳过服务器保存');
+                    return false;
+                }
+                
+                // 保存设置到 Supabase
+                const { error } = await supabaseClient
+                    .from('user_settings')
+                    .upsert({
+                        user_id: user.id,
+                        username: user.user_metadata.full_name || user.user_metadata.name || user.email,
+                        settings: settings,
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id'
+                    });
+                
+                if (error) {
+                    console.error('保存设置到 Supabase 失败:', error);
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('保存设置到 Supabase 出错:', error);
+                return false;
+            }
+        }
+        
+        // 从 Supabase 服务器加载设置
+        async function loadSettingsFromSupabase() {
+            try {
+                // 检查用户是否登录
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) {
+                    console.log('用户未登录，跳过服务器加载');
+                    return null;
+                }
+                
+                // 从 Supabase 加载设置
+                const { data, error } = await supabaseClient
+                    .from('user_settings')
+                    .select('settings')
+                    .eq('user_id', user.id)
+                    .single();
+                
+                if (error) {
+                    console.error('从 Supabase 加载设置失败:', error);
+                    return null;
+                }
+                
+                return data?.settings || null;
+            } catch (error) {
+                console.error('从 Supabase 加载设置出错:', error);
+                return null;
+            }
         }
 
         async function loadWallpaper(skipCache = false) {
@@ -488,6 +611,11 @@
                     localStorage.setItem('weatherCity', weatherCityInput.value);
                 }
                 
+                // 调用云端同步功能
+                if (typeof CloudSync !== 'undefined' && CloudSync.syncSettingsOnChange) {
+                    CloudSync.syncSettingsOnChange();
+                }
+                
             } catch (error) {
                 console.error('保存设置失败:', error);
                 ShowAlert('错误', '保存设置失败: ' + error.message);
@@ -500,6 +628,11 @@
                     throw new Error('localStorage不可用');
                 }
                 localStorage.setItem('notepadContent', notepadContent.value);
+                
+                // 调用云端同步功能
+                if (typeof CloudSync !== 'undefined' && CloudSync.syncSettingsOnChange) {
+                    CloudSync.syncSettingsOnChange();
+                }
                 
             } catch (error) {
                 console.error('保存记事本失败:', error);
@@ -1054,6 +1187,11 @@
                 }
                 
                 localStorage.setItem('visibleWidgets', JSON.stringify(visibleWidgets));
+                
+                // 调用云端同步功能
+                if (typeof CloudSync !== 'undefined' && CloudSync.syncSettingsOnChange) {
+                    CloudSync.syncSettingsOnChange();
+                }
             }
             
             // 从本地存储加载小组件状态
@@ -1894,6 +2032,12 @@
             meritCount.textContent = newCount;
             // 保存功德值到本地存储
             localStorage.setItem('meritCount', newCount.toString());
+            
+            // 调用云端同步功能
+            if (typeof CloudSync !== 'undefined' && CloudSync.syncSettingsOnChange) {
+                CloudSync.syncSettingsOnChange();
+            }
+            
             woodenFish.style.transform = 'scale(0.8)';
             
             // 切换到敲击时的图片
