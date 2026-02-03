@@ -760,6 +760,7 @@
             cursor: pointer;
             transition: var(--transition);
             min-width: 100px;
+            position: relative;
         }
         
         .widget-item:hover {
@@ -3678,4 +3679,966 @@
                 border-radius: 28px;
                 justify-content: center;
             }
+        }
+
+        /* 时钟日历小组件样式 */
+        #time-calendar-window {
+            width: 800px;
+            height: auto !important;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+        
+        #time-calendar-window .widget-window-content {
+            overflow: hidden;
+            padding: 0;
+            height: calc(100% - 60px);
+        }
+        
+        .time-calendar-container {
+            display: flex;
+            gap: 30px;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        /* 待办事项窗口样式 */
+        #todo-list-window {
+            width: 600px;
+            height: 500px;
+            overflow: hidden;
+        }
+        
+        #todo-list-window .widget-window-content {
+            overflow: hidden;
+            padding: 0;
+            height: calc(100% - 60px);
+        }
+        
+        .todo-list-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            gap: 15px;
+        }
+        
+        /* 输入区域样式 */
+        .todo-input-section {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .todo-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .todo-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .todo-add-btn {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 20px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .todo-add-btn:hover {
+            background: #2563EB;
+        }
+        
+        /* 待办事项列表样式 */
+        .todo-list {
+            flex: 1;
+            overflow-y: auto;
+            border-radius: 8px;
+            padding: 10px;
+            background: #F8FAFC;
+        }
+        
+        .todo-empty {
+            text-align: center;
+            color: #94A3B8;
+            padding: 40px 20px;
+            font-size: 14px;
+        }
+        
+        .todo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+        
+        .todo-item:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+        
+        .todo-item.completed {
+            background: #F1F5F9;
+            opacity: 0.8;
+        }
+        
+        .todo-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        
+        .todo-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .todo-text {
+            font-size: 14px;
+            color: #1E293B;
+            line-height: 1.4;
+        }
+        
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #64748B;
+        }
+        
+        .todo-delete-btn {
+            background: none;
+            border: none;
+            color: #EF4444;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .todo-delete-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        /* 操作按钮样式 */
+        .todo-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .todo-action-btn {
+            background: #F1F5F9;
+            color: #475569;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        
+        .todo-action-btn:hover {
+            background: #E2E8F0;
+            color: #1E293B;
+        }
+        
+        /* 深色模式支持 */
+        .dark-mode .todo-input {
+            background: #1E293B;
+            border-color: #334155;
+            color: #F8FAFC;
+        }
+        
+        .dark-mode .todo-input:focus {
+            border-color: #60A5FA;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        }
+        
+        .dark-mode .todo-list {
+            background: #0F172A;
+        }
+        
+        .dark-mode .todo-item {
+            background: #1E293B;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dark-mode .todo-item:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+        
+        .dark-mode .todo-item.completed {
+            background: #1E293B;
+        }
+        
+        .dark-mode .todo-text {
+            color: #F8FAFC;
+        }
+        
+        .dark-mode .todo-item.completed .todo-text {
+            color: #94A3B8;
+        }
+        
+        .dark-mode .todo-action-btn {
+            background: #334155;
+            color: #CBD5E1;
+        }
+        
+        .dark-mode .todo-action-btn:hover {
+            background: #475569;
+            color: #F8FAFC;
+        }
+        
+        .dark-mode .todo-empty {
+            color: #64748B;
+        }
+
+        /* 画板窗口样式 */
+        #drawing-board-window {
+            width: 800px;
+            height: 600px;
+            overflow: hidden;
+        }
+        
+        #drawing-board-window .widget-window-content {
+            overflow: hidden;
+            padding: 0;
+            height: calc(100% - 60px);
+        }
+        
+        .drawing-board-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        /* 工具栏样式 */
+        .drawing-toolbar {
+            background: #F8FAFC;
+            border-bottom: 2px solid #E2E8F0;
+            padding: 15px;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .tool-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .tool-group h5 {
+            margin: 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* 工具按钮 */
+        .tool-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .tool-btn {
+            background: white;
+            border: 2px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            color: #475569;
+        }
+        
+        .tool-btn:hover {
+            border-color: #3B82F6;
+            color: #3B82F6;
+        }
+        
+        .tool-btn.active {
+            background: #3B82F6;
+            border-color: #3B82F6;
+            color: white;
+        }
+        
+        /* 颜色选择 */
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .color-input {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #E2E8F0;
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .color-input::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        
+        .color-input::-webkit-color-swatch {
+            border: none;
+        }
+        
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+        
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #E2E8F0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .color-swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 笔刷大小 */
+        .brush-size {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .size-slider {
+            width: 120px;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: #E2E8F0;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        .size-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #3B82F6;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .size-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .size-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #3B82F6;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s;
+        }
+        
+        .size-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        #brush-size-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            background: white;
+            border: 2px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            color: #475569;
+        }
+        
+        .action-btn:hover {
+            border-color: #3B82F6;
+            color: #3B82F6;
+        }
+        
+        /* 画布容器 */
+        .canvas-container {
+            flex: 1;
+            background: white;
+            border: 2px solid #E2E8F0;
+            margin: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .drawing-canvas {
+            display: block;
+            cursor: crosshair;
+        }
+        
+        /* 深色模式支持 */
+        .dark-mode .drawing-toolbar {
+            background: #0F172A;
+            border-bottom-color: #334155;
+        }
+        
+        .dark-mode .tool-group h5 {
+            color: #94A3B8;
+        }
+        
+        .dark-mode .tool-btn {
+            background: #1E293B;
+            border-color: #334155;
+            color: #CBD5E1;
+        }
+        
+        .dark-mode .tool-btn:hover {
+            border-color: #60A5FA;
+            color: #60A5FA;
+        }
+        
+        .dark-mode .tool-btn.active {
+            background: #3B82F6;
+            border-color: #3B82F6;
+            color: white;
+        }
+        
+        .dark-mode .color-input {
+            border-color: #334155;
+        }
+        
+        .dark-mode .color-swatch {
+            border-color: #334155;
+        }
+        
+        .dark-mode .size-slider {
+            background: #334155;
+        }
+        
+        .dark-mode .size-slider::-webkit-slider-thumb {
+            background: #60A5FA;
+        }
+        
+        .dark-mode .size-slider::-moz-range-thumb {
+            background: #60A5FA;
+        }
+        
+        .dark-mode #brush-size-value {
+            color: #CBD5E1;
+        }
+        
+        .dark-mode .action-btn {
+            background: #1E293B;
+            border-color: #334155;
+            color: #CBD5E1;
+        }
+        
+        .dark-mode .action-btn:hover {
+            border-color: #60A5FA;
+            color: #60A5FA;
+        }
+        
+        .dark-mode .canvas-container {
+            background: #1E293B;
+            border-color: #334155;
+        }
+        
+        .dark-mode .drawing-canvas {
+            background: #1E293B;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            #drawing-board-window {
+                width: 90vw;
+                height: 80vh;
+            }
+            
+            .drawing-toolbar {
+                gap: 15px;
+                padding: 10px;
+            }
+            
+            .tool-buttons {
+                flex-wrap: wrap;
+            }
+            
+            .color-picker {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        /* 时钟样式 */
+        .clock-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .clock-face {
+            width: 200px;
+            height: 200px;
+            border: 4px solid #3B82F6;
+            border-radius: 50%;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .clock-center {
+            width: 12px;
+            height: 12px;
+            background: #3B82F6;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .clock-hand {
+            position: absolute;
+            background: #333;
+            transform-origin: bottom center;
+            left: 50%;
+            bottom: 50%;
+            border-radius: 4px;
+        }
+
+        .hour-hand {
+            width: 8px;
+            height: 60px;
+            background: #1E293B;
+        }
+
+        .minute-hand {
+            width: 6px;
+            height: 80px;
+            background: #334155;
+        }
+
+        .second-hand {
+            width: 4px;
+            height: 90px;
+            background: #EF4444;
+        }
+
+        .clock-markers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .marker {
+            position: absolute;
+            font-size: 16px;
+            font-weight: bold;
+            color: #334155;
+        }
+
+        .marker-12 {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .marker-3 {
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+        }
+
+        .marker-6 {
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .marker-9 {
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+        }
+
+        .digital-time {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1E293B;
+        }
+
+        .date-info {
+            font-size: 14px;
+            color: #64748B;
+            text-align: center;
+        }
+
+        /* 日历样式 */
+        .calendar-display {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #E2E8F0;
+        }
+
+        .calendar-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1E293B;
+        }
+
+        .calendar-nav {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .calendar-nav:hover {
+            background: #2563EB;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #64748B;
+            padding: 8px 0;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            flex: 1;
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 14px;
+        }
+
+        .calendar-day:hover {
+            background: #E2E8F0;
+        }
+
+        .calendar-day.empty {
+            background: transparent;
+            cursor: default;
+        }
+
+        .calendar-day.today {
+            background: #3B82F6;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* 深色模式适配 */
+        .dark-mode .clock-face {
+            border-color: #60A5FA;
+            background: rgba(17, 24, 39, 0.8);
+        }
+
+        .dark-mode .clock-center {
+            background: #60A5FA;
+        }
+
+        .dark-mode .hour-hand {
+            background: #F3F4F6;
+        }
+
+        .dark-mode .minute-hand {
+            background: #E5E7EB;
+        }
+
+        .dark-mode .second-hand {
+            background: #F87171;
+        }
+
+        .dark-mode .marker {
+            color: #9CA3AF;
+        }
+
+        .dark-mode .digital-time {
+            color: #F3F4F6;
+        }
+
+        .dark-mode .date-info {
+            color: #9CA3AF;
+        }
+
+        .dark-mode .calendar-title {
+            color: #F3F4F6;
+        }
+
+        .dark-mode .calendar-header {
+            border-bottom-color: #374151;
+        }
+
+        .dark-mode .weekday {
+            color: #9CA3AF;
+        }
+
+        .dark-mode .calendar-day {
+            color: #F3F4F6;
+        }
+
+        .dark-mode .calendar-day:hover {
+            background: #374151;
+        }
+
+        .dark-mode .calendar-day.today {
+            background: #60A5FA;
+        }
+        
+        /* 白噪音样式 */
+        .white-noise-container {
+            padding: 20px;
+        }
+        
+        .white-noise-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .white-noise-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        
+        .white-noise-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .white-noise-item i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-right: 15px;
+        }
+        
+        .white-noise-item span {
+            flex: 1;
+            font-size: 1rem;
+            color: var(--text-dark);
+        }
+        
+        .play-white-noise-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 1rem;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .play-white-noise-btn i {
+            color: white;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            line-height: 1;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .play-white-noise-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+        
+        .play-white-noise-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* 确保深色模式下图标也可见 */
+        body.dark-mode .play-white-noise-btn i {
+            color: white;
+        }
+        
+        .white-noise-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .white-noise-controls label {
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .volume-slider::-webkit-slider-thumb:hover {
+            background: var(--primary-dark);
+        }
+        
+        #white-noise-volume-value {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        /* 深色模式下的白噪音样式 */
+        body.dark-mode .white-noise-item {
+            background: rgba(102, 126, 234, 0.15);
+        }
+        
+        body.dark-mode .white-noise-item:hover {
+            background: rgba(102, 126, 234, 0.25);
+        }
+        
+        body.dark-mode .white-noise-item span {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .white-noise-controls {
+            border-top: 1px solid #374151;
+        }
+        
+        body.dark-mode .white-noise-controls label {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .volume-slider {
+            background: #374151;
+        }
+        
+        body.dark-mode .volume-slider::-webkit-slider-thumb {
+            background: var(--primary);
+        }
+        
+        body.dark-mode .volume-slider::-webkit-slider-thumb:hover {
+            background: var(--primary-light);
+        }
+        
+        body.dark-mode #white-noise-volume-value {
+            color: #9CA3AF;
         }

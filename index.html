@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4F46E5">
     <meta name="description" content="ChickRubGo - 现代化的智能搜索引擎界面，集成丰富的小组件功能">
     <title>ChickRubGo - 智能搜索引擎</title>
     <link rel="icon" type="image/png" href="./favicon.png">
@@ -114,8 +113,24 @@
                     <span>木鱼</span>
                 </div>
                 <div class="widget-item" data-widget="time-calendar">
-                    <i class="fa-solid fa-clock"></i>
+                    <i class="fa-regular fa-clock"></i>
                     <span>时光日历</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                <div class="widget-item" data-widget="todo-list">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>待办事项</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                <div class="widget-item" data-widget="drawing-board">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>画板</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                <div class="widget-item" data-widget="white-noise">
+                    <i class="fa-solid fa-volume-high"></i>
+                    <span>白噪音</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
                 </div>
             </div>
             <button class="close-widgets" id="close-widgets">关闭</button>
@@ -507,6 +522,181 @@
             </div>
         </div>
     </div>
+
+    <!-- 待办事项窗口 -->
+    <div class="widget-window" id="todo-list-window">
+        <div class="widget-window-header">
+            <h4>待办事项</h4>
+            <button class="close-window" data-window="todo-list-window" title="关闭窗口">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="widget-window-content">
+            <div class="todo-list-container">
+                <!-- 添加待办事项 -->
+                <div class="todo-input-section">
+                    <input type="text" id="todo-input" placeholder="输入待办事项..." class="todo-input">
+                    <button id="add-todo-btn" class="todo-add-btn" title="添加待办事项">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                
+                <!-- 待办事项列表 -->
+                <div class="todo-list" id="todo-list"></div>
+                
+                <!-- 操作按钮 -->
+                <div class="todo-actions">
+                    <button id="clear-completed-btn" class="todo-action-btn">
+                        <i class="fa-solid fa-check-double"></i> 清除已完成
+                    </button>
+                    <button id="clear-all-btn" class="todo-action-btn">
+                        <i class="fa-solid fa-trash"></i> 清空所有
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 画板窗口 -->
+    <div class="widget-window" id="drawing-board-window">
+        <div class="widget-window-header">
+            <h4>画板</h4>
+            <button class="close-window" data-window="drawing-board-window" title="关闭窗口">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="widget-window-content">
+            <div class="drawing-board-container">
+                <!-- 工具栏 -->
+                <div class="drawing-toolbar">
+                    <!-- 绘制工具 -->
+                    <div class="tool-group">
+                        <h5>工具</h5>
+                        <div class="tool-buttons">
+                            <button class="tool-btn active" data-tool="brush" title="画笔">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                            <button class="tool-btn" data-tool="eraser" title="橡皮擦">
+                                <i class="fa-solid fa-eraser"></i>
+                            </button>
+                            <button class="tool-btn" data-tool="rectangle" title="矩形">
+                                <i class="fa-solid fa-square"></i>
+                            </button>
+                            <button class="tool-btn" data-tool="circle" title="圆形">
+                                <i class="fa-solid fa-circle"></i>
+                            </button>
+                            <button class="tool-btn" data-tool="line" title="直线">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 颜色选择 -->
+                    <div class="tool-group">
+                        <h5>颜色</h5>
+                        <div class="color-picker">
+                            <input type="color" id="primary-color" class="color-input" value="#000000" title="选择颜色">
+                            <div class="color-palette">
+                                <div class="color-swatch" data-color="#000000"></div>
+                                <div class="color-swatch" data-color="#FF0000"></div>
+                                <div class="color-swatch" data-color="#00FF00"></div>
+                                <div class="color-swatch" data-color="#0000FF"></div>
+                                <div class="color-swatch" data-color="#FFFF00"></div>
+                                <div class="color-swatch" data-color="#FF00FF"></div>
+                                <div class="color-swatch" data-color="#00FFFF"></div>
+                                <div class="color-swatch" data-color="#FFFFFF"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 笔刷大小 -->
+                    <div class="tool-group">
+                        <h5>笔刷大小</h5>
+                        <div class="brush-size">
+                            <input type="range" id="brush-size" class="size-slider" min="1" max="50" value="5" title="调整笔刷大小">
+                            <span id="brush-size-value">5</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按钮 -->
+                    <div class="tool-group">
+                        <h5>操作</h5>
+                        <div class="action-buttons">
+                            <button id="clear-canvas-btn" class="action-btn" title="清空画布">
+                                <i class="fa-solid fa-trash"></i> 清空
+                            </button>
+                            <button id="save-canvas-btn" class="action-btn" title="保存画布">
+                                <i class="fa-solid fa-download"></i> 保存
+                            </button>
+                            <button id="undo-btn" class="action-btn" title="撤销">
+                                <i class="fa-solid fa-undo"></i> 撤销
+                            </button>
+                            <button id="redo-btn" class="action-btn" title="重做">
+                                <i class="fa-solid fa-redo"></i> 重做
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 画布区域 -->
+                <div class="canvas-container">
+                    <canvas id="drawing-canvas" class="drawing-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 白噪音窗口 -->
+    <div class="widget-window" id="white-noise-window">
+        <div class="widget-window-header">
+            <h4>白噪音</h4>
+            <button class="close-window" data-window="white-noise-window" title="关闭窗口">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="widget-window-content">
+            <div class="white-noise-container">
+                <!-- 白噪音列表 -->
+                <div class="white-noise-list" id="white-noise-list">
+                    <div class="white-noise-item" data-sound="AuenwaldWasser.mp3">
+                        <i class="fa-solid fa-water"></i>
+                        <span>森林流水</span>
+                        <button class="play-white-noise-btn" title="播放/暂停">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="white-noise-item" data-sound="DrflisWieseJune.mp3">
+                        <i class="fa-solid fa-tree"></i>
+                        <span>草原漫步</span>
+                        <button class="play-white-noise-btn" title="播放/暂停">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="white-noise-item" data-sound="LangenbachEisWasser.mp3">
+                        <i class="fa-solid fa-snowflake"></i>
+                        <span>冰川流水</span>
+                        <button class="play-white-noise-btn" title="播放/暂停">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                    <div class="white-noise-item" data-sound="ShekPikCountryTrailSound.mp3">
+                        <i class="fa-solid fa-mountain"></i>
+                        <span>山间小径</span>
+                        <button class="play-white-noise-btn" title="播放/暂停">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 音量控制 -->
+                <div class="white-noise-controls">
+                    <label for="white-noise-volume">音量：</label>
+                    <input type="range" id="white-noise-volume" class="volume-slider" min="0" max="1" step="0.1" value="0.5">
+                    <span id="white-noise-volume-value">50%</span>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="time-section" data-aos="fade-up" data-aos-duration="1000">
         <div class="time-display" id="time-display">00:00:00</div>
@@ -587,7 +777,7 @@
                     <button class="remove-widget-btn" title="隐藏小组件">×</button>
                 </div>
                 <div class="widget-item" data-widget="alarm" data-aos="fade-up" data-aos-delay="1350">
-                    <i class="fa-solid fa-clock"></i>
+                <i class="fa-solid fa-alarm-clock"></i>
                     <span>闹钟</span>
                     <button class="remove-widget-btn" title="隐藏小组件">×</button>
                 </div>
@@ -607,6 +797,30 @@
                 <div class="widget-item" data-widget="food-decider" data-aos="fade-up" data-aos-delay="1500">
                     <i class="fa-solid fa-utensils"></i>
                     <span>今天吃什么</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+
+                 <div class="widget-item" data-widget="time-calendar">
+                    <i class="fa-solid fa-clock"></i>
+                    <span>时光日历</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                
+                <div class="widget-item" data-widget="todo-list">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>待办事项</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                
+                <div class="widget-item" data-widget="drawing-board">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>画板</span>
+                    <button class="remove-widget-btn" title="隐藏小组件">×</button>
+                </div>
+                
+                <div class="widget-item" data-widget="white-noise">
+                    <i class="fa-solid fa-volume-high"></i>
+                    <span>白噪音</span>
                     <button class="remove-widget-btn" title="隐藏小组件">×</button>
                 </div>
             </div>
@@ -713,7 +927,4 @@
         }
     </script>
 </body>
-
 </html>
-
-

@@ -923,7 +923,11 @@
                     { type: 'alarm', icon: 'fa-clock', name: '闹钟' },
                     { type: 'calculator', icon: 'fa-calculator', name: '计算器' },
                     { type: 'daily-quote', icon: 'fa-quote-right', name: '每日一言' },
-                    { type: 'food-decider', icon: 'fa-utensils', name: '今天吃什么' }
+                    { type: 'food-decider', icon: 'fa-utensils', name: '今天吃什么' },
+                    { type: 'time-calendar', icon: 'fa-clock', name: '时光日历' },
+                    { type: 'todo-list', icon: 'fa-list-check', name: '待办事项' },
+                    { type: 'drawing-board', icon: 'fa-palette', name: '画板' },
+                    { type: 'white-noise', icon: 'fa-volume-high', name: '白噪音' }
                 ];
                 
                 // 获取当前显示的小组件
@@ -1668,6 +1672,22 @@
                 const window = document.getElementById('food-decider-window');
                 if (window) window.style.display = 'flex';
                 initFoodDecider();
+            } else if (widgetType === 'time-calendar') {
+                const window = document.getElementById('time-calendar-window');
+                if (window) window.style.display = 'flex';
+                initTimeCalendar();
+            } else if (widgetType === 'todo-list') {
+                const window = document.getElementById('todo-list-window');
+                if (window) window.style.display = 'flex';
+                initTodoList();
+            } else if (widgetType === 'drawing-board') {
+                const window = document.getElementById('drawing-board-window');
+                if (window) window.style.display = 'flex';
+                initDrawingBoard();
+            } else if (widgetType === 'white-noise') {
+                const window = document.getElementById('white-noise-window');
+                if (window) window.style.display = 'flex';
+                initWhiteNoise();
             }
         }
         
@@ -2867,4 +2887,578 @@
             foodDeciderWindowElement.style.transform = 'translate(-50%, -50%)';
             foodDeciderWindowElement.style.zIndex = '1100';
         }
+    
+        // 时钟日历小组件功能
+        let currentDate = new Date();
         
+        function initTimeCalendar() {
+            updateClock();
+            updateCalendar();
+            updateDigitalTime();
+            
+            // 每秒更新时钟
+            setInterval(updateClock, 1000);
+            setInterval(updateDigitalTime, 1000);
+            
+            // 添加日历导航事件
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            
+            if (prevMonthBtn) {
+                prevMonthBtn.addEventListener('click', () => {
+                    currentDate.setMonth(currentDate.getMonth() - 1);
+                    updateCalendar();
+                });
+            }
+            
+            if (nextMonthBtn) {
+                nextMonthBtn.addEventListener('click', () => {
+                    currentDate.setMonth(currentDate.getMonth() + 1);
+                    updateCalendar();
+                });
+            }
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours() % 12 || 12;
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            
+            const hourDeg = (hours * 30) + (minutes * 0.5);
+            const minuteDeg = minutes * 6;
+            const secondDeg = seconds * 6;
+            
+            const hourHand = document.getElementById('hour-hand');
+            const minuteHand = document.getElementById('minute-hand');
+            const secondHand = document.getElementById('second-hand');
+            
+            if (hourHand) {
+                hourHand.style.transform = `rotate(${hourDeg}deg)`;
+            }
+            if (minuteHand) {
+                minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
+            }
+            if (secondHand) {
+                secondHand.style.transform = `rotate(${secondDeg}deg)`;
+            }
+        }
+        
+        function updateDigitalTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-CN', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            const dateString = now.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+            
+            const digitalTime = document.getElementById('digital-time');
+            const dateInfo = document.getElementById('date-info');
+            
+            if (digitalTime) {
+                digitalTime.textContent = timeString;
+            }
+            if (dateInfo) {
+                dateInfo.textContent = dateString;
+            }
+        }
+        
+        function updateCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const calendarTitle = document.getElementById('calendar-title');
+            const calendarDays = document.getElementById('calendar-days');
+            
+            if (calendarTitle) {
+                calendarTitle.textContent = `${year}年${month + 1}月`;
+            }
+            
+            if (calendarDays) {
+                calendarDays.innerHTML = '';
+                
+                // 获取当月第一天是星期几
+                const firstDay = new Date(year, month, 1).getDay();
+                // 获取当月的天数
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                // 添加上个月的占位
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'calendar-day empty';
+                    calendarDays.appendChild(emptyDay);
+                }
+                
+                // 添加当月的天数
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const day = document.createElement('div');
+                    day.className = 'calendar-day';
+                    day.textContent = i;
+                    
+                    // 标记今天
+                    const today = new Date();
+                    if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                        day.classList.add('today');
+                    }
+                    
+                    calendarDays.appendChild(day);
+                }
+            }
+        }
+
+        // 初始化待办事项列表
+        function initTodoList() {
+            // 从localStorage加载待办事项
+            const todos = JSON.parse(localStorage.getItem('chickrubgo-todos')) || [];
+            
+            // 渲染待办事项列表
+            renderTodoList(todos);
+            
+            // 添加待办事项
+            const addTodoBtn = document.getElementById('add-todo-btn');
+            const todoInput = document.getElementById('todo-input');
+            
+            if (addTodoBtn) {
+                addTodoBtn.addEventListener('click', addTodo);
+            }
+            
+            if (todoInput) {
+                todoInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addTodo();
+                    }
+                });
+            }
+            
+            // 清除已完成
+            const clearCompletedBtn = document.getElementById('clear-completed-btn');
+            if (clearCompletedBtn) {
+                clearCompletedBtn.addEventListener('click', function() {
+                    const updatedTodos = todos.filter(todo => !todo.completed);
+                    localStorage.setItem('chickrubgo-todos', JSON.stringify(updatedTodos));
+                    renderTodoList(updatedTodos);
+                });
+            }
+            
+            // 清空所有
+            const clearAllBtn = document.getElementById('clear-all-btn');
+            if (clearAllBtn) {
+                clearAllBtn.addEventListener('click', function() {
+                    ShowConfirm('确认操作', '确定要清空所有待办事项吗？', function(confirmed) {
+                        if (confirmed) {
+                            localStorage.removeItem('chickrubgo-todos');
+                            renderTodoList([]);
+                        }
+                    });
+                });
+            }
+            
+            // 添加待办事项函数
+            function addTodo() {
+                if (todoInput && todoInput.value.trim() !== '') {
+                    const newTodo = {
+                        id: Date.now(),
+                        text: todoInput.value.trim(),
+                        completed: false,
+                        timestamp: Date.now()
+                    };
+                    
+                    todos.push(newTodo);
+                    localStorage.setItem('chickrubgo-todos', JSON.stringify(todos));
+                    renderTodoList(todos);
+                    todoInput.value = '';
+                }
+            }
+        }
+
+        // 渲染待办事项列表
+        function renderTodoList(todos) {
+            const todoList = document.getElementById('todo-list');
+            if (!todoList) return;
+            
+            todoList.innerHTML = '';
+            
+            if (todos.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.className = 'todo-empty';
+                emptyMessage.textContent = '暂无待办事项，添加一个吧！';
+                todoList.appendChild(emptyMessage);
+                return;
+            }
+            
+            todos.forEach(todo => {
+                const todoItem = document.createElement('div');
+                todoItem.className = 'todo-item';
+                if (todo.completed) {
+                    todoItem.classList.add('completed');
+                }
+                
+                todoItem.innerHTML = `
+                    <div class="todo-content">
+                        <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} data-id="${todo.id}">
+                        <span class="todo-text">${todo.text}</span>
+                    </div>
+                    <button class="todo-delete-btn" data-id="${todo.id}">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                
+                todoList.appendChild(todoItem);
+            });
+            
+            // 为复选框添加事件
+            document.querySelectorAll('.todo-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const todoId = parseInt(this.dataset.id);
+                    const todos = JSON.parse(localStorage.getItem('chickrubgo-todos')) || [];
+                    const updatedTodos = todos.map(todo => {
+                        if (todo.id === todoId) {
+                            return { ...todo, completed: this.checked };
+                        }
+                        return todo;
+                    });
+                    localStorage.setItem('chickrubgo-todos', JSON.stringify(updatedTodos));
+                    renderTodoList(updatedTodos);
+                });
+            });
+            
+            // 为删除按钮添加事件
+            document.querySelectorAll('.todo-delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const todoId = parseInt(this.dataset.id);
+                    const todos = JSON.parse(localStorage.getItem('chickrubgo-todos')) || [];
+                    const updatedTodos = todos.filter(todo => todo.id !== todoId);
+                    localStorage.setItem('chickrubgo-todos', JSON.stringify(updatedTodos));
+                    renderTodoList(updatedTodos);
+                });
+            });
+        }
+
+        // 初始化画板
+        function initDrawingBoard() {
+            const canvas = document.getElementById('drawing-canvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // 绘制状态
+            const drawingState = {
+                isDrawing: false,
+                lastX: 0,
+                lastY: 0,
+                tool: 'brush',
+                color: '#000000',
+                brushSize: 5,
+                savedData: localStorage.getItem('chickrubgo-drawing') || null,
+                history: [],
+                historyIndex: -1
+            };
+            
+            // 设置画布尺寸
+            function resizeCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                
+                // 重新绘制保存的内容
+                if (drawingState.savedData) {
+                    const img = new Image();
+                    img.onload = function() {
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = drawingState.savedData;
+                }
+            }
+            
+            // 调整画布尺寸
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // 保存当前画布状态到历史记录
+            function saveToHistory() {
+                // 移除历史记录中当前索引之后的所有记录
+                drawingState.history = drawingState.history.slice(0, drawingState.historyIndex + 1);
+                // 添加当前状态到历史记录
+                drawingState.history.push(canvas.toDataURL());
+                // 限制历史记录长度
+                if (drawingState.history.length > 20) {
+                    drawingState.history.shift();
+                } else {
+                    drawingState.historyIndex++;
+                }
+            }
+            
+            // 撤销
+            function undo() {
+                if (drawingState.historyIndex > 0) {
+                    drawingState.historyIndex--;
+                    const img = new Image();
+                    img.onload = function() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = drawingState.history[drawingState.historyIndex];
+                }
+            }
+            
+            // 重做
+            function redo() {
+                if (drawingState.historyIndex < drawingState.history.length - 1) {
+                    drawingState.historyIndex++;
+                    const img = new Image();
+                    img.onload = function() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = drawingState.history[drawingState.historyIndex];
+                }
+            }
+            
+            // 开始绘制
+            function startDrawing(e) {
+                drawingState.isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                drawingState.lastX = e.clientX - rect.left;
+                drawingState.lastY = e.clientY - rect.top;
+                
+                // 开始路径
+                ctx.beginPath();
+                ctx.moveTo(drawingState.lastX, drawingState.lastY);
+                
+                // 保存当前状态到历史记录
+                saveToHistory();
+            }
+            
+            // 绘制中
+            function draw(e) {
+                if (!drawingState.isDrawing) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const currentX = e.clientX - rect.left;
+                const currentY = e.clientY - rect.top;
+                
+                ctx.strokeStyle = drawingState.color;
+                ctx.lineWidth = drawingState.brushSize;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                ctx.lineTo(currentX, currentY);
+                ctx.stroke();
+                
+                drawingState.lastX = currentX;
+                drawingState.lastY = currentY;
+            }
+            
+            // 结束绘制
+            function stopDrawing() {
+                if (drawingState.isDrawing) {
+                    drawingState.isDrawing = false;
+                    ctx.closePath();
+                    
+                    // 保存到localStorage
+                    drawingState.savedData = canvas.toDataURL();
+                    localStorage.setItem('chickrubgo-drawing', drawingState.savedData);
+                }
+            }
+            
+            // 事件监听
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // 触摸支持
+            canvas.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+            
+            canvas.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+            
+            canvas.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                const mouseEvent = new MouseEvent('mouseup', {});
+                canvas.dispatchEvent(mouseEvent);
+            });
+            
+            // 工具选择
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    drawingState.tool = this.dataset.tool;
+                });
+            });
+            
+            // 颜色选择
+            const primaryColor = document.getElementById('primary-color');
+            if (primaryColor) {
+                primaryColor.addEventListener('change', function() {
+                    drawingState.color = this.value;
+                });
+            }
+            
+            // 颜色面板
+            document.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.style.backgroundColor = swatch.dataset.color;
+                swatch.addEventListener('click', function() {
+                    drawingState.color = this.dataset.color;
+                    if (primaryColor) {
+                        primaryColor.value = this.dataset.color;
+                    }
+                });
+            });
+            
+            // 笔刷大小
+            const brushSize = document.getElementById('brush-size');
+            const brushSizeValue = document.getElementById('brush-size-value');
+            if (brushSize && brushSizeValue) {
+                brushSize.addEventListener('input', function() {
+                    drawingState.brushSize = parseInt(this.value);
+                    brushSizeValue.textContent = this.value;
+                });
+            }
+            
+            // 清空画布
+            const clearCanvasBtn = document.getElementById('clear-canvas-btn');
+            if (clearCanvasBtn) {
+                clearCanvasBtn.addEventListener('click', function() {
+                    ShowConfirm('确认操作', '确定要清空画布吗？', function(confirmed) {
+                        if (confirmed) {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            drawingState.savedData = null;
+                            localStorage.removeItem('chickrubgo-drawing');
+                            drawingState.history = [];
+                            drawingState.historyIndex = -1;
+                        }
+                    });
+                });
+            }
+            
+            // 保存画布
+            const saveCanvasBtn = document.getElementById('save-canvas-btn');
+            if (saveCanvasBtn) {
+                saveCanvasBtn.addEventListener('click', function() {
+                    const link = document.createElement('a');
+                    link.download = `drawing-${new Date().toISOString().slice(0, 10)}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            }
+            
+            // 撤销
+            const undoBtn = document.getElementById('undo-btn');
+            if (undoBtn) {
+                undoBtn.addEventListener('click', undo);
+            }
+            
+            // 重做
+            const redoBtn = document.getElementById('redo-btn');
+            if (redoBtn) {
+                redoBtn.addEventListener('click', redo);
+            }
+        }
+        
+        // 初始化白噪音
+        function initWhiteNoise() {
+            // 音频对象
+            let audio = null;
+            let currentSound = null;
+            
+            // 音量控制
+            const volumeSlider = document.getElementById('white-noise-volume');
+            const volumeValue = document.getElementById('white-noise-volume-value');
+            
+            if (volumeSlider && volumeValue) {
+                volumeSlider.addEventListener('input', function() {
+                    const volume = parseFloat(this.value);
+                    volumeValue.textContent = `${Math.round(volume * 100)}%`;
+                    if (audio) {
+                        audio.volume = volume;
+                    }
+                });
+            }
+            
+            // 播放/暂停按钮点击事件
+            document.querySelectorAll('.play-white-noise-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const soundFile = this.closest('.white-noise-item').dataset.sound;
+                    const soundPath = `Assets/white-noise/${soundFile}`;
+                    
+                    // 如果点击的是当前播放的声音，则切换播放/暂停状态
+                    if (currentSound === soundPath) {
+                        if (audio && !audio.paused) {
+                            audio.pause();
+                            this.innerHTML = '<i class="fa-solid fa-play"></i>';
+                        } else if (audio && audio.paused) {
+                            audio.play().catch(error => {
+                                if (error.name === 'NotAllowedError') {
+                                    ShowConfirm('白噪音', '需要您的授权才能播放白噪音，是否授权？', (confirmed) => {
+                                        if (confirmed) {
+                                            localStorage.setItem('whiteNoisePermission', 'true');
+                                            audio.play().catch(err => {
+                                                ShowAlert('错误', '播放白噪音失败，请稍后重试');
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                            this.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                        }
+                    } else {
+                        // 停止当前播放的声音
+                        if (audio) {
+                            audio.pause();
+                            audio = null;
+                            // 重置所有按钮状态
+                            document.querySelectorAll('.play-white-noise-btn').forEach(b => {
+                                b.innerHTML = '<i class="fa-solid fa-play"></i>';
+                            });
+                        }
+                        
+                        // 创建新的音频对象并播放
+                        audio = new Audio(soundPath);
+                        audio.loop = true;
+                        audio.volume = volumeSlider ? parseFloat(volumeSlider.value) : 0.5;
+                        currentSound = soundPath;
+                        
+                        audio.play().catch(error => {
+                            if (error.name === 'NotAllowedError') {
+                                ShowConfirm('白噪音', '需要您的授权才能播放白噪音，是否授权？', (confirmed) => {
+                                    if (confirmed) {
+                                        localStorage.setItem('whiteNoisePermission', 'true');
+                                        audio.play().catch(err => {
+                                            ShowAlert('错误', '播放白噪音失败，请稍后重试');
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                        
+                        // 更新按钮状态
+                        this.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                    }
+                });
+            });
+        }
