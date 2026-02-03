@@ -206,11 +206,6 @@
                     clientObject: window.supabaseClient
                 });
                 
-                // 手动检查客户端内部配置
-                if (window.supabaseClient._instance?.url) {
-                    console.log('内部客户端 URL:', window.supabaseClient._instance.url);
-                }
-                
                 // 不再强制重新初始化客户端，避免多个实例
                 const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
                 if (authError) {
@@ -235,6 +230,12 @@
                 console.log('当前会话:', session?.session ? '存在' : '不存在');
                 console.log('会话令牌:', session?.session?.access_token ? '***' + session.session.access_token.slice(-4) : '无');
                 
+                // 检查认证令牌是否存在
+                if (!session?.session?.access_token) {
+                    console.error('会话令牌不存在，无法保存数据');
+                    return false;
+                }
+                
                 // 尝试使用客户端 upsert 操作（推荐方法）
                 try {
                     console.log('尝试使用客户端 upsert 操作...');
@@ -243,6 +244,7 @@
                         .upsert({
                             username: username,
                             settings: settings,
+                            user_id: user.id, // 添加 user_id 字段，可能是行级安全策略需要
                             updated_at: new Date().toISOString()
                         }, {
                             onConflict: 'username'
@@ -267,12 +269,13 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'apikey': 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj',
-                            'Authorization': `Bearer ${session?.session?.access_token || ''}`,
+                            'Authorization': `Bearer ${session.session.access_token}`,
                             'Accept': 'application/json',
                             'Prefer': 'return=minimal'
                         },
                         body: JSON.stringify({
                             username: username,
+                            user_id: user.id, // 添加 user_id 字段，可能是行级安全策略需要
                             settings: settings,
                             updated_at: new Date().toISOString()
                         })
@@ -283,18 +286,26 @@
                     console.log('直接 POST 请求 URL:', response.url);
                     
                     if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({}));
-                        console.error('直接 POST 请求失败:', errorData);
-                        // 尝试获取更多错误信息
+                        // 只读取一次响应体
                         try {
-                            const errorText = await response.text();
-                            console.error('直接 POST 请求错误文本:', errorText);
+                            const errorData = await response.json();
+                            console.error('直接 POST 请求失败:', errorData);
                         } catch (e) {
-                            console.error('无法获取错误文本:', e);
+                            console.error('无法解析错误 JSON:', e);
+                            try {
+                                const errorText = await response.text();
+                                console.error('直接 POST 请求错误文本:', errorText);
+                            } catch (textError) {
+                                console.error('无法获取错误文本:', textError);
+                            }
                         }
                     } else {
-                        const successData = await response.json().catch(() => ({}));
-                        console.log('直接 POST 请求成功:', successData);
+                        try {
+                            const successData = await response.json();
+                            console.log('直接 POST 请求成功:', successData);
+                        } catch (e) {
+                            console.log('直接 POST 请求成功（无响应数据）');
+                        }
                         return true;
                     }
                 } catch (fetchError) {
@@ -309,6 +320,7 @@
                         .from('user_settings')
                         .insert({
                             username: username,
+                            user_id: user.id, // 添加 user_id 字段，可能是行级安全策略需要
                             settings: settings,
                             updated_at: new Date().toISOString()
                         });
@@ -321,6 +333,28 @@
                     }
                 } catch (insertError) {
                     console.error('简单 insert 操作出错:', insertError);
+                }
+                
+                // 尝试使用 update 操作（如果数据已存在）
+                try {
+                    console.log('尝试使用 update 操作...');
+                    const { error: updateError } = await window.supabaseClient
+                        .from('user_settings')
+                        .update({
+                            settings: settings,
+                            user_id: user.id, // 添加 user_id 字段，可能是行级安全策略需要
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('username', username);
+                    
+                    if (updateError) {
+                        console.error('update 操作失败:', updateError);
+                    } else {
+                        console.log('update 操作成功');
+                        return true;
+                    }
+                } catch (updateError) {
+                    console.error('update 操作出错:', updateError);
                 }
                 
                 // 所有尝试都失败，返回 false
