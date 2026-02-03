@@ -81,6 +81,42 @@
             color: #4338ca;
             text-decoration: underline;
         }
+        
+        /* 深色模式样式 */
+        body.dark-mode {
+            background-color: #121212;
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .login-container {
+            background-color: rgba(31, 41, 55, 0.92);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.dark-mode .logo {
+            color: #6366F1;
+        }
+        
+        body.dark-mode .slogan {
+            color: #9CA3AF;
+        }
+        
+        body.dark-mode .login-btn {
+            background-color: #374151;
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .login-btn:hover {
+            background-color: #4B5563;
+        }
+        
+        body.dark-mode .back-btn {
+            color: #6366F1;
+        }
+        
+        body.dark-mode .back-btn:hover {
+            color: #818CF8;
+        }
     </style>
 </head>
 <body>
@@ -97,10 +133,22 @@
     </div>
     
     <script>
+        // 加载主题设置
+        function loadTheme() {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            const darkMode = savedDarkMode !== null ? savedDarkMode === 'true' : true; // 默认深色模式
+            
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        
         // GitHub OAuth 登录配置
         const clientId = 'Ov23lieOTMuWJHUXBaMf';
         const redirectUri = encodeURIComponent('https://ruanmingze.github.io/ChickRubGo/CallBack.html');
-        const scope = encodeURIComponent('user');
+        const scope = encodeURIComponent('user:email read:user'); // 请求用户信息和邮箱权限
         
         // 生成随机状态值
         function generateState() {
@@ -115,6 +163,9 @@
             const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
             window.location.href = githubAuthUrl;
         });
+        
+        // 页面加载时应用主题
+        window.addEventListener('load', loadTheme);
     </script>
 </body>
 </html>

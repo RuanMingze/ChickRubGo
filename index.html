@@ -848,12 +848,51 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./renderer.js"></script>
     <script>
+        // 初始化Supabase客户端
+        const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
+        const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // 检测登录状态
+        async function checkLoginStatus() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const loginBtn = document.getElementById('login-btn');
+            
+            if (user) {
+                // 显示用户信息
+                loginBtn.innerHTML = `<i class="fa-solid fa-user-check"></i> ${user.user_metadata.full_name || user.user_metadata.name || user.email}`;
+                loginBtn.disabled = true;
+                loginBtn.style.cursor = 'default';
+                loginBtn.style.opacity = '0.8';
+            } else {
+                // 显示登录按钮
+                loginBtn.innerHTML = '<i class="fa-solid fa-user"></i> 登录';
+                loginBtn.disabled = false;
+                loginBtn.style.cursor = 'pointer';
+                loginBtn.style.opacity = '1';
+            }
+        }
+        
         // 登录按钮点击事件
-        document.getElementById('login-btn').addEventListener('click', function() {
-            window.location.href = './login.html';
+        document.getElementById('login-btn').addEventListener('click', async function() {
+            // 使用Supabase的GitHub登录
+            const { error } = await supabaseClient.auth.signInWithOAuth({
+                provider: 'github',
+                options: {
+                    redirectTo: 'https://ruanmingze.github.io/ChickRubGo/CallBack.html'
+                }
+            });
+            
+            if (error) {
+                console.error('登录错误:', error);
+            }
         });
+        
+        // 页面加载时检测登录状态
+        window.addEventListener('load', checkLoginStatus);
     </script>
     
     <!-- 自定义弹窗结构 -->

@@ -6,6 +6,7 @@
     <title>登录回调 - ChickRubGo</title>
     <link rel="icon" type="image/png" href="./favicon.png">
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -89,6 +90,34 @@
         .btn:hover {
             background-color: #4338ca;
         }
+        
+        /* 深色模式样式 */
+        body.dark-mode {
+            background-color: #121212;
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .callback-container {
+            background-color: rgba(31, 41, 55, 0.92);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.dark-mode .logo {
+            color: #6366F1;
+        }
+        
+        body.dark-mode .message {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .btn {
+            background-color: #4F46E5;
+            color: #FFFFFF;
+        }
+        
+        body.dark-mode .btn:hover {
+            background-color: #4338ca;
+        }
     </style>
 </head>
 <body>
@@ -113,63 +142,49 @@
     </div>
     
     <script>
-        // 解析URL参数
-        function getUrlParams() {
-            const params = {};
-            const search = window.location.search.substring(1);
-            const pairs = search.split('&');
+        // 初始化Supabase客户端
+        const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
+        const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // 加载主题设置
+        function loadTheme() {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            const darkMode = savedDarkMode !== null ? savedDarkMode === 'true' : true; // 默认深色模式
             
-            for (const pair of pairs) {
-                const [key, value] = pair.split('=');
-                if (key && value) {
-                    params[key] = decodeURIComponent(value);
-                }
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
             }
-            
-            return params;
         }
         
         // 处理回调
-        function handleCallback() {
-            const params = getUrlParams();
-            const code = params.code;
-            const state = params.state;
-            const error = params.error;
-            
-            // 验证state
-            const storedState = localStorage.getItem('githubOAuthState');
-            
-            if (error) {
-                showError(`登录被取消或失败: ${error}`);
-                return;
-            }
-            
-            if (!code) {
-                showError('无效的登录请求');
-                return;
-            }
-            
-            if (!state || state !== storedState) {
-                showError('状态验证失败，可能存在安全风险');
-                return;
-            }
-            
-            // 清除存储的state
-            localStorage.removeItem('githubOAuthState');
-            
-            // 模拟登录成功
-            // 在实际应用中，这里应该向服务器发送code获取token
-            setTimeout(() => {
-                showSuccess();
+        async function handleCallback() {
+            try {
+                // 让Supabase处理OAuth回调
+                const { data, error } = await supabaseClient.auth.getSession();
                 
-                // 存储登录状态
-                localStorage.setItem('isLoggedIn', 'true');
+                if (error) {
+                    showError(`登录失败: ${error.message}`);
+                    return;
+                }
+                
+                if (!data.session) {
+                    showError('登录会话无效');
+                    return;
+                }
+                
+                // 登录成功，显示成功信息
+                showSuccess();
                 
                 // 跳转到首页
                 setTimeout(() => {
                     window.location.href = './index.html';
                 }, 1500);
-            }, 1000);
+            } catch (error) {
+                showError(`处理登录时出错: ${error.message}`);
+            }
         }
         
         function showSuccess() {
@@ -185,8 +200,11 @@
             document.getElementById('error-message').textContent = message;
         }
         
-        // 页面加载时处理回调
-        window.onload = handleCallback;
+        // 页面加载时应用主题并处理回调
+        window.addEventListener('load', function() {
+            loadTheme();
+            handleCallback();
+        });
     </script>
 </body>
 </html>
