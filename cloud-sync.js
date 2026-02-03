@@ -54,11 +54,15 @@ async function getCurrentUserInfo() {
       console.error('Supabase 客户端未初始化');
       return null;
     }
-    const { data: { user } } = await window.supabaseClient.auth.getUser();
+    const { data: { user }, error } = await window.supabaseClient.auth.getUser();
+    if (error) {
+      console.error('获取用户信息失败:', error);
+      return null;
+    }
     if (!user) return null;
     
     // 优先使用全名，其次使用name，最后使用email
-    const username = user.user_metadata.full_name || user.user_metadata.name || user.email;
+    const username = user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'anonymous';
     
     return {
       id: user.id, // Supabase 自动生成的 UUID 用户 ID
@@ -123,11 +127,20 @@ async function saveSettingsToSupabase(settings) {
       return false;
     }
     
-    const username = await getCurrentUsername();
-    if (!username) {
+    const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
+    if (authError) {
+      console.error('获取用户信息失败:', authError);
+      return false;
+    }
+    
+    if (!user) {
       console.log('用户未登录，跳过云端同步');
       return false;
     }
+    
+    const username = user.user_metadata.full_name || user.user_metadata.name || user.email;
+    console.log('当前用户:', username);
+    console.log('要保存的设置:', settings);
     
     // 使用 upsert 机制，基于 username 唯一键
     const { error } = await window.supabaseClient
@@ -142,6 +155,7 @@ async function saveSettingsToSupabase(settings) {
     
     if (error) {
       console.error('保存设置到 Supabase 失败:', error);
+      console.error('错误详情:', JSON.stringify(error));
       return false;
     }
     
@@ -149,6 +163,7 @@ async function saveSettingsToSupabase(settings) {
     return true;
   } catch (error) {
     console.error('保存设置到 Supabase 出错:', error);
+    console.error('错误详情:', JSON.stringify(error));
     return false;
   }
 }
@@ -164,32 +179,51 @@ async function loadSettingsFromSupabase() {
       return null;
     }
     
-    const username = await getCurrentUsername();
-    if (!username) {
+    const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
+    if (authError) {
+      console.error('获取用户信息失败:', authError);
+      return null;
+    }
+    
+    if (!user) {
       console.log('用户未登录，跳过云端加载');
       return null;
     }
     
-    const { data, error } = await window.supabaseClient
-      .from('user_settings')
-      .select('settings')
-      .eq('username', username)
-      .single();
+    const username = user.user_metadata.full_name || user.user_metadata.name || user.email;
+    console.log('当前用户:', username);
     
-    if (error) {
-      console.error('从 Supabase 加载设置失败，尝试迁移本地数据:', error);
+    // 尝试从 Supabase 加载设置
+    try {
+      const { data, error } = await window.supabaseClient
+        .from('user_settings')
+        .select('settings')
+        .eq('username', username)
+        .single();
+      
+      if (error) {
+        console.error('从 Supabase 加载设置失败:', error);
+        // 获取本地设置并迁移到服务器
+        const localSettings = getAllLocalSettings();
+        console.log('尝试迁移本地数据到服务器:', localSettings);
+        await saveSettingsToSupabase(localSettings);
+        return localSettings;
+      }
+      
+      console.log('从云端加载的设置:', data?.settings);
+      return data?.settings || null;
+    } catch (selectError) {
+      console.error('从 Supabase 加载设置出错:', selectError);
       // 获取本地设置并迁移到服务器
       const localSettings = getAllLocalSettings();
+      console.log('尝试迁移本地数据到服务器:', localSettings);
       await saveSettingsToSupabase(localSettings);
       return localSettings;
     }
-    
-    return data?.settings || null;
   } catch (error) {
-    console.error('从 Supabase 加载设置出错，尝试迁移本地数据:', error);
-    // 获取本地设置并迁移到服务器
+    console.error('从 Supabase 加载设置出错:', error);
+    // 获取本地设置并返回
     const localSettings = getAllLocalSettings();
-    await saveSettingsToSupabase(localSettings);
     return localSettings;
   }
 }

@@ -200,22 +200,26 @@
                     return false;
                 }
                 
-                const { data: { user } } = await window.supabaseClient.auth.getUser();
+                const { data: { user }, error: authError } = await window.supabaseClient.auth.getUser();
+                if (authError) {
+                    console.error('获取用户信息失败:', authError);
+                    return false;
+                }
+                
                 if (!user) {
                     console.log('用户未登录，跳过服务器保存');
                     return false;
                 }
                 
-                // 保存设置到 Supabase
-                if (!window.supabaseClient) {
-                    console.error('Supabase 客户端未初始化');
-                    return false;
-                }
+                const username = user.user_metadata.full_name || user.user_metadata.name || user.email;
+                console.log('当前用户:', username);
+                console.log('要保存的设置:', settings);
                 
+                // 保存设置到 Supabase
                 const { error } = await window.supabaseClient
                     .from('user_settings')
                     .upsert({
-                        username: user.user_metadata.full_name || user.user_metadata.name || user.email,
+                        username: username,
                         settings: settings,
                         updated_at: new Date().toISOString()
                     }, {
@@ -224,12 +228,15 @@
                 
                 if (error) {
                     console.error('保存设置到 Supabase 失败:', error);
+                    console.error('错误详情:', JSON.stringify(error));
                     return false;
                 }
                 
+                console.log('设置已成功同步到云端');
                 return true;
             } catch (error) {
                 console.error('保存设置到 Supabase 出错:', error);
+                console.error('错误详情:', JSON.stringify(error));
                 return false;
             }
         }
