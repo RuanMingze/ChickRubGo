@@ -12,8 +12,9 @@ if (typeof window !== 'undefined' && typeof window.supabaseClient === 'undefined
         console.error('Supabase SDK 未加载');
     }
 }
-// 使用 var 声明以避免重复声明错误
-var supabaseClient = typeof window !== 'undefined' ? window.supabaseClient : null;
+// 直接使用 window.supabaseClient，避免重复声明错误
+// 注意：这里不再声明局部变量 supabaseClient，而是直接使用 window.supabaseClient
+// 这样可以避免与 index.html 中声明的 const supabaseClient 冲突
 
 // 重试配置
 const SYNC_RETRY_DELAY = 3000; // 初始重试延迟（毫秒）
@@ -31,11 +32,11 @@ let retryTimer = null;
  */
 async function isUserLoggedIn() {
   try {
-    if (!supabaseClient) {
+    if (!window.supabaseClient) {
       console.error('Supabase 客户端未初始化');
       return false;
     }
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: { user } } = await window.supabaseClient.auth.getUser();
     return !!user;
   } catch (error) {
     console.error('检查登录状态失败:', error);
@@ -49,11 +50,11 @@ async function isUserLoggedIn() {
  */
 async function getCurrentUserInfo() {
   try {
-    if (!supabaseClient) {
+    if (!window.supabaseClient) {
       console.error('Supabase 客户端未初始化');
       return null;
     }
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: { user } } = await window.supabaseClient.auth.getUser();
     if (!user) return null;
     
     // 优先使用全名，其次使用name，最后使用email
@@ -117,7 +118,7 @@ function getAllLocalSettings() {
  */
 async function saveSettingsToSupabase(settings) {
   try {
-    if (!supabaseClient) {
+    if (!window.supabaseClient) {
       console.error('Supabase 客户端未初始化');
       return false;
     }
@@ -129,7 +130,7 @@ async function saveSettingsToSupabase(settings) {
     }
     
     // 使用 upsert 机制，基于 username 唯一键
-    const { error } = await supabaseClient
+    const { error } = await window.supabaseClient
       .from('user_settings')
       .upsert({
         username: username,
@@ -158,7 +159,7 @@ async function saveSettingsToSupabase(settings) {
  */
 async function loadSettingsFromSupabase() {
   try {
-    if (!supabaseClient) {
+    if (!window.supabaseClient) {
       console.error('Supabase 客户端未初始化');
       return null;
     }
@@ -169,7 +170,7 @@ async function loadSettingsFromSupabase() {
       return null;
     }
     
-    const { data, error } = await supabaseClient
+    const { data, error } = await window.supabaseClient
       .from('user_settings')
       .select('settings')
       .eq('username', username)
