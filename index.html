@@ -723,6 +723,11 @@
             <button class="settings-btn" id="settings-btn" title="打开设置菜单">
                 <i class="fa-solid fa-gear"></i>
             </button>
+            
+            <button class="login-btn" id="login-btn" title="登录">
+                <i class="fa-solid fa-user"></i>
+                登录
+            </button>
         </div>
         
         <div class="brand-section" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="300">
@@ -844,6 +849,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script src="./renderer.js"></script>
+    <script>
+        // 登录按钮点击事件
+        document.getElementById('login-btn').addEventListener('click', function() {
+            window.location.href = './login.html';
+        });
+    </script>
     
     <!-- 自定义弹窗结构 -->
     <div id="custom-alert" class="custom-alert">

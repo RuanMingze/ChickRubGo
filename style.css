@@ -996,6 +996,39 @@
             right: 20px;
             z-index: 100;
         }
+        
+        .login-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: var(--white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .login-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 深色模式下的登录按钮 */
+        body.dark-mode .login-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .login-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
 
         .settings-btn:hover {
             background: rgba(255, 255, 255, 0.3);
