@@ -793,13 +793,19 @@
 		    // 确保只初始化一次客户端
 		    if (!window.supabaseClient) {
 		        // 正确初始化 Supabase 客户端
-		        window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
-		            auth: {
-		                autoRefreshToken: true,
-		                persistSession: true,
-		                storageKey: 'sb-pyywrxrmtehucmkpqkdi-auth-token'
-		            }
-		        });
+        window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                storageKey: 'sb-pyywrxrmtehucmkpqkdi-auth-token'
+            },
+            global: {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            }
+        });
 			}
 		    // 全局变量，方便其他脚本使用
 		    window.supabaseUrl = supabaseUrl;
@@ -812,17 +818,42 @@
 	<script>
 		// 检测登录状态
 		async function checkLoginStatus() {
-		    const { data: { user } } = await supabaseClient.auth.getUser();
-		    const loginBtn = document.getElementById('login-btn');
-		    
-		    if (user) {
-		        // 显示用户信息
-		        loginBtn.innerHTML = `<i class="fa-solid fa-user-check"></i> ${user.user_metadata.full_name || user.user_metadata.name || user.email}`;
-		        loginBtn.disabled = true;
-		        loginBtn.style.cursor = 'default';
-		        loginBtn.style.opacity = '0.8';
-		    } else {
-		        // 显示登录按钮
+		    try {
+		        const { data: { user } } = await supabaseClient.auth.getUser();
+		        const loginBtn = document.getElementById('login-btn');
+		        
+		        if (user) {
+		            // 从profiles表获取用户名
+		            let displayName = user.email;
+		            try {
+		                const { data: profile, error } = await supabaseClient
+		                    .from('profiles')
+		                    .select('username')
+		                    .eq('id', user.id)
+		                    .single();
+		                
+		                if (!error && profile && profile.username) {
+		                    displayName = profile.username;
+		                }
+		            } catch (err) {
+		                console.warn('获取用户名失败:', err);
+		            }
+		            
+		            // 显示用户信息
+		            loginBtn.innerHTML = `<i class="fa-solid fa-user-check"></i> ${displayName}`;
+		            loginBtn.disabled = true;
+		            loginBtn.style.cursor = 'default';
+		            loginBtn.style.opacity = '0.8';
+		        } else {
+		            // 显示登录按钮
+		            loginBtn.innerHTML = '<i class="fa-solid fa-user"></i> 登录';
+		            loginBtn.disabled = false;
+		            loginBtn.style.cursor = 'pointer';
+		            loginBtn.style.opacity = '1';
+		        }
+		    } catch (err) {
+		        console.warn('检测登录状态失败:', err);
+		        const loginBtn = document.getElementById('login-btn');
 		        loginBtn.innerHTML = '<i class="fa-solid fa-user"></i> 登录';
 		        loginBtn.disabled = false;
 		        loginBtn.style.cursor = 'pointer';

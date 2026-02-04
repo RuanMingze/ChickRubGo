@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - ChickRubGo</title>
-    <link rel="icon" type="image/png" href="./favicon.png">
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    <script src="./Supabase-SDK.js"></script>
     <style>
         * {
             margin: 0;
@@ -36,22 +33,53 @@
         .logo {
             font-size: 32px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             color: #4f46e5;
         }
         
         .slogan {
             color: #6b7280;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
+            font-size: 16px;
         }
         
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #f9fafb;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            background-color: white;
+        }
+        
+        /* 登录按钮样式 */
         .login-btn {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             padding: 14px;
-            background-color: #24292e;
+            background-color: #4f46e5;
             color: white;
             border: none;
             border-radius: 8px;
@@ -59,28 +87,104 @@
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.2s;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .login-btn:hover {
+            background-color: #4338ca;
+        }
+        
+        .github-login-btn {
+            background-color: #24292e;
+        }
+        
+        .github-login-btn:hover {
             background-color: #30363d;
         }
         
-        .github-icon {
+        .icon {
             margin-right: 10px;
             font-size: 20px;
         }
         
-        .back-btn {
+        .register-link {
             color: #4f46e5;
             text-decoration: none;
             font-size: 14px;
             transition: color 0.2s;
+            display: block;
+            margin-top: 10px;
         }
         
-        .back-btn:hover {
+        .register-link:hover {
             color: #4338ca;
             text-decoration: underline;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin-bottom: 20px;
+            min-height: 18px;
+        }
+        
+        .success-message {
+            color: #10b981;
+            font-size: 14px;
+            margin-bottom: 20px;
+            min-height: 18px;
+        }
+        
+        /* 用户信息卡片（隐藏ID相关显示） */
+        .user-info-card {
+            background-color: #f9fafb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+            display: none;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            border: 2px solid #4f46e5;
+        }
+        
+        .user-info-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .user-info-label {
+            color: #6b7280;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+        
+        .user-info-value {
+            color: #374151;
+            word-break: break-all;
+        }
+        
+        .logout-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+        
+        .logout-btn:hover {
+            background-color: #dc2626;
         }
         
         /* 深色模式样式 */
@@ -102,72 +206,314 @@
             color: #9CA3AF;
         }
         
+        body.dark-mode .form-label {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .form-input {
+            background-color: #1f2937;
+            border-color: #374151;
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .form-input:focus {
+            border-color: #6366F1;
+            background-color: #1f2937;
+        }
+        
         body.dark-mode .login-btn {
-            background-color: #374151;
+            background-color: #6366F1;
             color: #E5E7EB;
         }
         
         body.dark-mode .login-btn:hover {
+            background-color: #4f46e5;
+        }
+        
+        body.dark-mode .github-login-btn {
+            background-color: #374151;
+        }
+        
+        body.dark-mode .github-login-btn:hover {
             background-color: #4B5563;
         }
         
-        body.dark-mode .back-btn {
+        body.dark-mode .register-link {
             color: #6366F1;
         }
         
-        body.dark-mode .back-btn:hover {
+        body.dark-mode .register-link:hover {
             color: #818CF8;
+        }
+        
+        body.dark-mode .user-info-card {
+            background-color: #1f2937;
+            border-color: #374151;
+        }
+        
+        body.dark-mode .user-info-label {
+            color: #9CA3AF;
+        }
+        
+        body.dark-mode .user-info-value {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .logout-btn {
+            background-color: #991b1b;
+        }
+        
+        body.dark-mode .logout-btn:hover {
+            background-color: #7f1d1d;
         }
     </style>
 </head>
 <body>
     <div class="login-container">
         <div class="logo">ChickRubGo</div>
-        <div class="slogan">使用 GitHub 账号登录</div>
+        <div class="slogan">账号登录</div>
         
-        <button class="login-btn" id="github-login-btn">
-            <i class="fa-brands fa-github github-icon"></i>
-            登录 GitHub
+        <!-- 用户信息卡片（无ID显示） -->
+        <div class="user-info-card" id="userInfoCard">
+            <img src="" alt="用户头像" class="user-avatar" id="userAvatar">
+            <div class="user-info-item">
+                <span class="user-info-label">用户名：</span>
+                <span class="user-info-value" id="userName">-</span>
+            </div>
+            <div class="user-info-item">
+                <span class="user-info-label">邮箱：</span>
+                <span class="user-info-value" id="userEmail">-</span>
+            </div>
+            <button class="logout-btn" id="logoutBtn">退出登录</button>
+        </div>
+        
+        <div class="error-message" id="error-message"></div>
+        <div class="success-message" id="success-message"></div>
+        
+        <div class="form-group">
+            <label class="form-label" for="email">邮箱</label>
+            <input type="email" class="form-input" id="email" placeholder="请输入邮箱" required>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="password">密码</label>
+            <input type="password" class="form-input" id="password" placeholder="请输入密码" required>
+        </div>
+        
+        <!-- 账号密码登录按钮 -->
+        <button class="login-btn" id="loginBtn">
+            <i class="fa-solid fa-right-to-bracket icon"></i>
+            登录账号
         </button>
         
-        <a href="./index.html" class="back-btn">返回首页</a>
+        <!-- GitHub登录按钮（文案：使用GitHub登录） -->
+        <button class="login-btn github-login-btn" id="githubLoginBtn">
+            <i class="fa-brands fa-github icon"></i>
+            使用GitHub登录
+        </button>
+        
+        <a href="./register.html" class="register-link">还没有账号？立即注册</a>
     </div>
-    
+
+    <!-- 仅引入本地SDK -->
+    <script src="./Supabase-SDK.js"></script>
     <script>
-        // 初始化Supabase客户端
+        // 初始化本地Supabase客户端
         const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
         const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-        
-        // 加载主题设置
-        function loadTheme() {
-            const savedDarkMode = localStorage.getItem('darkMode');
-            const darkMode = savedDarkMode !== null ? savedDarkMode === 'true' : true; // 默认深色模式
-            
-            if (darkMode) {
-                document.body.classList.add('dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-            }
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // DOM元素
+        const loginBtn = document.getElementById('loginBtn');
+        const githubLoginBtn = document.getElementById('githubLoginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const errorMsg = document.getElementById('error-message');
+        const successMsg = document.getElementById('success-message');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const userInfoCard = document.getElementById('userInfoCard');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+
+        // 加载深色模式
+        function loadDarkMode() {
+            const isDark = localStorage.getItem('darkMode') === 'true' || true;
+            if (isDark) document.body.classList.add('dark-mode');
         }
-        
-        // 登录按钮点击事件
-        document.getElementById('github-login-btn').addEventListener('click', async function() {
-            // 使用Supabase的GitHub登录
-            const { error } = await supabaseClient.auth.signInWithOAuth({
-                provider: 'github',
-                options: {
-                    redirectTo: 'https://ruanmingze.github.io/ChickRubGo/CallBack.html'
-                }
-            });
+
+        // 清空提示
+        function clearMessages() {
+            errorMsg.textContent = '';
+            successMsg.textContent = '';
+        }
+
+        // 获取用户信息（仅用户名/头像，无ID）
+        async function getUserProfile(userId) {
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('username, avatar_url')
+                .eq('id', userId)
+                .single();
             
             if (error) {
-                console.error('登录错误:', error);
+                console.warn('获取用户资料失败:', error);
+                return null;
             }
+            return data;
+        }
+
+        // 渲染用户信息（无ID相关）
+        async function renderUserInfo(user) {
+            if (user) {
+                // 获取profiles表中的用户资料
+                let profile = await getUserProfile(user.id);
+                
+                // 如果profiles表中没有记录，创建一个
+                if (!profile) {
+                    try {
+                        // 从邮箱生成用户名
+                        const username = user.email.split('@')[0];
+                        
+                        const { error: profileError } = await supabaseClient
+                            .from('profiles')
+                            .insert([
+                                {
+                                    id: user.id,
+                                    username,
+                                    full_name: '',
+                                    avatar_url: ''
+                                }
+                            ]);
+                        
+                        if (profileError) {
+                            console.warn('创建profiles记录失败:', profileError);
+                        } else {
+                            // 重新获取profile信息
+                            profile = await getUserProfile(user.id);
+                        }
+                    } catch (err) {
+                        console.warn('创建profiles记录时出错:', err);
+                    }
+                }
+                
+                // 填充信息（无ID）
+                userAvatar.src = profile?.avatar_url || './default-avatar.png';
+                userName.textContent = profile?.username || '未知用户名';
+                userEmail.textContent = user.email || '未绑定邮箱';
+                
+                // 显示用户卡片，隐藏登录表单
+                userInfoCard.style.display = 'block';
+                emailInput.parentElement.style.display = 'none';
+                passwordInput.parentElement.style.display = 'none';
+                loginBtn.style.display = 'none';
+                githubLoginBtn.style.display = 'none';
+                successMsg.textContent = '登录成功！';
+            } else {
+                // 隐藏用户卡片，显示登录表单
+                userInfoCard.style.display = 'none';
+                emailInput.parentElement.style.display = 'block';
+                passwordInput.parentElement.style.display = 'block';
+                loginBtn.style.display = 'flex';
+                githubLoginBtn.style.display = 'flex';
+            }
+        }
+
+        // 检查登录状态
+        async function checkLoginStatus() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                // 已登录用户直接跳转到主页面
+                window.location.href = './index.html';
+            }
+        }
+
+        // 账号密码登录逻辑
+        async function handleLogin() {
+            clearMessages();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                errorMsg.textContent = '邮箱和密码为必填项';
+                return;
+            }
+
+            try {
+                // 直接登录，无验证步骤
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) throw error;
+                
+                // 登录成功后跳转到主页面
+                window.location.href = './index.html';
+                // 清空表单
+                emailInput.value = '';
+                passwordInput.value = '';
+
+            } catch (err) {
+                console.error('登录失败:', err);
+                if (err.message.includes('Invalid login credentials')) {
+                    errorMsg.textContent = '邮箱或密码错误';
+                } else {
+                    errorMsg.textContent = '登录失败：' + err.message;
+                }
+            }
+        }
+
+        // GitHub登录逻辑
+        async function handleGithubLogin() {
+            clearMessages();
+            try {
+                const { error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: 'github',
+                    options: {
+                        redirectTo: 'https://pyywrxrmtehucmkpqkdi.supabase.co/auth/v1/callback'
+                    }
+                });
+
+                if (error) throw error;
+            } catch (err) {
+                console.error('GitHub登录失败:', err);
+                errorMsg.textContent = 'GitHub登录失败：' + err.message;
+            }
+        }
+
+        // 退出登录
+        async function handleLogout() {
+            clearMessages();
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                
+                // 退出成功后跳转到主页面
+                window.location.href = './index.html';
+            } catch (err) {
+                console.error('退出失败:', err);
+                errorMsg.textContent = '退出失败：' + err.message;
+            }
+        }
+
+        // 绑定事件
+        loginBtn.addEventListener('click', handleLogin);
+        githubLoginBtn.addEventListener('click', handleGithubLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+
+        // 回车提交
+        [emailInput, passwordInput].forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
         });
-        
-        // 页面加载时应用主题
-        window.addEventListener('load', loadTheme);
+
+        // 页面加载初始化
+        window.addEventListener('load', async () => {
+            loadDarkMode();
+            await checkLoginStatus();
+        });
     </script>
 </body>
 </html>
