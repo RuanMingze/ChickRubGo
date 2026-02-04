@@ -549,7 +549,6 @@ body.dark-mode .suggestion-item:active {
 }
 
 .search-btn:focus {
-	border-radius: 0 28px 0 0;
 	outline: none;
 }
 
