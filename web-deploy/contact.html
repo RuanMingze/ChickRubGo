@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="联系我们 - ChickRubGo 智能搜索引擎">
+	<title>联系我们 - Ruanm ChickRubGo</title>
+	<link rel="icon" type="image/png" href="./favicon.png">
+	<link rel="apple-touch-icon" href="./favicon.png">
+	<link rel="manifest" href="./manifest.json">
+	<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+	<link rel="stylesheet" href="./style.css">
+	<link rel="stylesheet" href="./mobile.css" media="screen and (max-width: 768px)">
+	<style>
+		/* 联系页面特有样式 */
+		.contact-container {
+			width: 100%;
+			max-width: 800px;
+			background: rgba(255, 255, 255, 0.92);
+			-webkit-backdrop-filter: blur(12px);
+			backdrop-filter: blur(12px);
+			border-radius: 24px;
+			padding: 40px;
+			box-shadow: var(--shadow-lg);
+			transition: var(--transition);
+			margin: 40px auto;
+		}
+
+		body.dark-mode .contact-container {
+			background: rgba(31, 41, 55, 0.92);
+			box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+		}
+
+		.contact-header {
+			text-align: center;
+			margin-bottom: 40px;
+		}
+
+		.contact-header h1 {
+			font-size: 2.5rem;
+			font-weight: 700;
+			margin-bottom: 10px;
+			background: linear-gradient(90deg, var(--primary), var(--secondary));
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			text-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+		}
+
+		body.dark-mode .contact-header h1 {
+			text-shadow: 0 2px 10px rgba(79, 70, 229, 0.5);
+		}
+
+		.contact-header p {
+			font-size: 1.1rem;
+			color: var(--text-light);
+			margin-bottom: 0;
+		}
+
+		body.dark-mode .contact-header p {
+			color: #9CA3AF;
+		}
+
+		.contact-content {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 40px;
+			margin-bottom: 40px;
+		}
+
+		@media (max-width: 768px) {
+			.contact-content {
+				grid-template-columns: 1fr;
+				gap: 30px;
+			}
+		}
+
+		.contact-info {
+			display: flex;
+			flex-direction: column;
+			gap: 25px;
+		}
+
+		.contact-item {
+			display: flex;
+			align-items: flex-start;
+			gap: 15px;
+			padding: 20px;
+			background: rgba(102, 126, 234, 0.1);
+			border-radius: 12px;
+			transition: var(--transition);
+		}
+
+		body.dark-mode .contact-item {
+			background: rgba(102, 126, 234, 0.15);
+		}
+
+		.contact-item:hover {
+			background: rgba(102, 126, 234, 0.2);
+			transform: translateY(-3px);
+			box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+		}
+
+		.contact-item i {
+			font-size: 1.5rem;
+			color: var(--primary);
+			margin-top: 2px;
+			flex-shrink: 0;
+		}
+
+		.contact-item-content h3 {
+			font-size: 1.1rem;
+			font-weight: 600;
+			color: var(--text-dark);
+			margin-bottom: 5px;
+		}
+
+		body.dark-mode .contact-item-content h3 {
+			color: #E5E7EB;
+		}
+
+		.contact-item-content p {
+			font-size: 0.95rem;
+			color: var(--text-light);
+			margin-bottom: 0;
+		}
+
+		body.dark-mode .contact-item-content p {
+			color: #9CA3AF;
+		}
+
+		.contact-item-content a {
+			color: var(--primary);
+			text-decoration: none;
+			transition: var(--transition);
+			position: relative;
+			display: inline-block;
+		}
+
+		body.dark-mode .contact-item-content a {
+			color: var(--primary-light);
+		}
+
+		.contact-item-content a::after {
+			content: '';
+			position: absolute;
+			bottom: -2px;
+			left: 0;
+			width: 0;
+			height: 1px;
+			background: var(--primary-light);
+			transition: width 0.3s ease;
+		}
+
+		.contact-item-content a:hover {
+			color: var(--primary-light);
+		}
+
+		body.dark-mode .contact-item-content a:hover {
+			color: var(--primary);
+		}
+
+		.contact-item-content a:hover::after {
+			width: 100%;
+		}
+
+		.contact-form {
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+		}
+
+		.form-group {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		.form-group label {
+			font-size: 0.95rem;
+			font-weight: 500;
+			color: var(--text-dark);
+		}
+
+		body.dark-mode .form-group label {
+			color: #E5E7EB;
+		}
+
+		.form-group input,
+		.form-group textarea {
+			padding: 12px 16px;
+			border: 2px solid var(--gray-200);
+			border-radius: 8px;
+			font-size: 1rem;
+			color: var(--text-dark);
+			background: var(--white);
+			outline: none;
+			transition: var(--transition);
+			font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+		}
+
+		body.dark-mode .form-group input,
+		body.dark-mode .form-group textarea {
+			background: #1F2937;
+			border-color: #374151;
+			color: #E5E7EB;
+		}
+
+		.form-group input:focus,
+		.form-group textarea:focus {
+			border-color: var(--primary-light);
+			box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+		}
+
+		body.dark-mode .form-group input:focus,
+		body.dark-mode .form-group textarea:focus {
+			box-shadow: none;
+		}
+
+		.form-group input::placeholder,
+		.form-group textarea::placeholder {
+			color: var(--text-light);
+		}
+
+		body.dark-mode .form-group input::placeholder,
+		body.dark-mode .form-group textarea::placeholder {
+			color: #9CA3AF;
+		}
+
+		.form-group textarea {
+			height: 150px;
+			resize: vertical;
+			min-height: 100px;
+			max-height: 300px;
+		}
+
+		.submit-btn {
+			padding: 14px 28px;
+			background: var(--primary);
+			color: var(--white);
+			border: none;
+			border-radius: 8px;
+			font-size: 1.1rem;
+			font-weight: 500;
+			cursor: pointer;
+			transition: var(--transition);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			margin-top: 10px;
+		}
+
+		.submit-btn:hover {
+			background: var(--primary-dark);
+			transform: translateY(-2px);
+			box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+		}
+
+		.submit-btn:active {
+			transform: translateY(0);
+			box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+		}
+
+
+
+		.back-home {
+			text-align: center;
+			margin-top: 30px;
+		}
+
+		.back-home-btn {
+			padding: 12px 24px;
+			background: rgba(255, 255, 255, 0.2);
+			color: var(--white);
+			border: none;
+			border-radius: 25px;
+			cursor: pointer;
+			font-size: 1rem;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			transition: var(--transition);
+			-webkit-backdrop-filter: blur(10px);
+			backdrop-filter: blur(10px);
+			margin: 0 auto;
+		}
+
+		body.dark-mode .back-home-btn {
+			background: rgba(255, 255, 255, 0.1);
+			color: #E5E7EB;
+		}
+
+		.back-home-btn:hover {
+			background: rgba(255, 255, 255, 0.3);
+			transform: translateY(-2px);
+			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+		}
+
+		body.dark-mode .back-home-btn:hover {
+			background: rgba(255, 255, 255, 0.2);
+		}
+	</style>
+</head>
+<body>
+	<div class="operation-section">
+		<button class="mode-toggle-btn" id="mode-toggle-btn" title="切换模式">
+			<i class="fa-solid fa-leaf"></i>
+		</button>
+		<button class="settings-btn" id="settings-btn" title="打开设置菜单">
+			<i class="fa-solid fa-gear"></i>
+		</button>
+		<button class="login-btn" id="login-btn" title="登录">
+			<i class="fa-solid fa-user"></i> 登录 </button>
+	</div>
+
+	<div class="container">
+		<div class="contact-container" data-aos="fade-up" data-aos-duration="1000">
+			<div class="contact-header">
+				<h1>联系我们</h1>
+				<p>如果您有任何问题或建议，欢迎随时与我们联系</p>
+			</div>
+
+			<div class="contact-content">
+				<div class="contact-info" data-aos="fade-right" data-aos-duration="800" data-aos-delay="300">
+					<div class="contact-item">
+						<i class="fa-solid fa-envelope"></i>
+						<div class="contact-item-content">
+							<h3>电子邮箱</h3>
+							<p>您可以通过以下邮箱联系我们：</p>
+							<p><a href="mailto:Xmt20160124@Outlook.com" class="email-link">Xmt20160124@Outlook.com</a></p>
+						</div>
+					</div>
+
+					<div class="contact-item">
+						<i class="fa-solid fa-message"></i>
+						<div class="contact-item-content">
+							<h3>在线反馈</h3>
+							<p>请在右侧表单中填写您的反馈信息，我们会尽快回复您</p>
+						</div>
+					</div>
+
+					<div class="contact-item">
+						<i class="fa-solid fa-map-marker-alt"></i>
+						<div class="contact-item-content">
+							<h3>联系地址</h3>
+							<p>中国</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="contact-form" data-aos="fade-left" data-aos-duration="800" data-aos-delay="400">
+					<div class="form-group">
+						<label for="name">姓名</label>
+						<input type="text" id="name" name="name" placeholder="请输入您的姓名" required>
+					</div>
+
+					<div class="form-group">
+						<label for="email">邮箱</label>
+						<input type="email" id="email" name="email" placeholder="请输入您的邮箱" required>
+					</div>
+
+					<div class="form-group">
+						<label for="subject">主题</label>
+						<input type="text" id="subject" name="subject" placeholder="请输入邮件主题" required>
+					</div>
+
+					<div class="form-group">
+						<label for="message">留言内容</label>
+						<textarea id="message" name="message" placeholder="请输入您的留言内容" required></textarea>
+					</div>
+
+					<button type="button" class="submit-btn" id="submit-btn">
+						<i class="fa-solid fa-paper-plane"></i>
+						发送留言
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="back-home" data-aos="fade-up" data-aos-duration="800" data-aos-delay="500">
+			<button class="back-home-btn" id="back-home-btn">
+				<i class="fa-solid fa-home"></i>
+				返回首页
+			</button>
+		</div>
+	</div>
+
+	<footer class="footer">
+		<div class="footer-content">
+			<p>© 2026 ChickRubGo by Ruanm, Inc. 探索未知，一键直达</p>
+			<span>联系邮箱：<a href="mailto:Xmt20160124@Outlook.com" class="email-link">Xmt20160124@Outlook.com</a> | <a href="./sitemap.xml" class="sitemap-link">网站地图</a></span>
+		</div>
+	</footer>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+	<script>
+		// 初始化AOS动画库
+		document.addEventListener('DOMContentLoaded', function() {
+			AOS.init();
+
+			// 读取系统主题设置
+			const body = document.body;
+			const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+			// 根据系统设置设置初始主题
+			if (prefersDarkScheme.matches) {
+				body.classList.add('dark-mode');
+			} else {
+				body.classList.remove('dark-mode');
+			}
+
+			// 监听系统主题变化
+			prefersDarkScheme.addEventListener('change', function(e) {
+				if (e.matches) {
+					body.classList.add('dark-mode');
+				} else {
+					body.classList.remove('dark-mode');
+				}
+			});
+
+			// 返回首页按钮
+			document.getElementById('back-home-btn').addEventListener('click', function() {
+				window.location.href = './index.html';
+			});
+
+			// 发送留言按钮
+			document.getElementById('submit-btn').addEventListener('click', function() {
+				const name = document.getElementById('name').value;
+				const email = document.getElementById('email').value;
+				const subject = document.getElementById('subject').value;
+				const message = document.getElementById('message').value;
+
+				if (!name || !email || !subject || !message) {
+					alert('请填写所有必填字段');
+					return;
+				}
+
+				// 构建mailto链接
+				const mailtoLink = `mailto:Xmt20160124@Outlook.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`姓名: ${name}\n邮箱: ${email}\n留言内容:\n${message}`)}`;
+
+				// 打开邮箱客户端
+				window.location.href = mailtoLink;
+			});
+
+			// 模式切换按钮
+			document.getElementById('mode-toggle-btn').addEventListener('click', function() {
+				body.classList.toggle('dark-mode');
+			});
+
+			// 登录按钮
+			document.getElementById('login-btn').addEventListener('click', function() {
+				window.location.href = './login.html';
+			});
+		});
+	</script>
+</body>
+</html>

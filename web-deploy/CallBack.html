@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录回调 - ChickRubGo</title>
+    <link rel="icon" type="image/png" href="./favicon.png">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <script src="./Supabase-SDK.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .callback-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            width: 400px;
+            max-width: 90%;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #4f46e5;
+        }
+        
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .success-icon {
+            color: #10b981;
+        }
+        
+        .error-icon {
+            color: #ef4444;
+        }
+        
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #374151;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(79, 70, 229, 0.3);
+            border-radius: 50%;
+            border-top-color: #4f46e5;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background-color: #4338ca;
+        }
+        
+        /* 深色模式样式 */
+        body.dark-mode {
+            background-color: #121212;
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .callback-container {
+            background-color: rgba(31, 41, 55, 0.92);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        body.dark-mode .logo {
+            color: #6366F1;
+        }
+        
+        body.dark-mode .message {
+            color: #E5E7EB;
+        }
+        
+        body.dark-mode .btn {
+            background-color: #4F46E5;
+            color: #FFFFFF;
+        }
+        
+        body.dark-mode .btn:hover {
+            background-color: #4338ca;
+        }
+    </style>
+</head>
+<body>
+    <div class="callback-container">
+        <div class="logo">ChickRubGo</div>
+        
+        <div id="loading-state">
+            <div class="loading"></div>
+            <div class="message">正在处理登录，请稍候...</div>
+        </div>
+        
+        <div id="success-state">
+            <i class="fa-solid fa-check-circle status-icon success-icon"></i>
+            <div class="message">登录成功！正在跳转回首页...</div>
+        </div>
+        
+        <div id="error-state">
+            <i class="fa-solid fa-times-circle status-icon error-icon"></i>
+            <div class="message" id="error-message">登录失败，请重试</div>
+            <a href="./login.html" class="btn">重新登录</a>
+        </div>
+    </div>
+    
+    <script>
+        // 初始化Supabase客户端
+        const supabaseUrl = 'https://pyywrxrmtehucmkpqkdi.supabase.co';
+        const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // 加载主题设置
+        function loadTheme() {
+            const savedDarkMode = localStorage.getItem('darkMode');
+            const darkMode = savedDarkMode !== null ? savedDarkMode === 'true' : true; // 默认深色模式
+            
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        
+        // 处理回调
+        async function handleCallback() {
+            try {
+                // 在Supabase v2中，SDK会自动处理URL中的授权码
+                // 我们只需要尝试获取会话即可
+                const { data, error } = await supabaseClient.auth.getSession();
+                
+                if (error) {
+                    showError(`登录失败: ${error.message}`);
+                    return;
+                }
+                
+                if (!data.session) {
+                    // 尝试刷新会话
+                    const { data: refreshData, error: refreshError } = await supabaseClient.auth.refreshSession();
+                    
+                    if (refreshError || !refreshData.session) {
+                        showError('登录会话无效');
+                        return;
+                    }
+                    
+                    // 获取用户UUID并存储到localStorage
+                    const userId = refreshData.session.user.id;
+                    localStorage.setItem('userId', userId);
+                    console.log('用户UUID已存储:', userId);
+                } else {
+                    // 获取用户UUID并存储到localStorage
+                    const userId = data.session.user.id;
+                    localStorage.setItem('userId', userId);
+                    console.log('用户UUID已存储:', userId);
+                }
+                
+                // 登录成功，显示成功信息
+                showSuccess();
+                
+                // 跳转到首页
+                setTimeout(() => {
+                    window.location.href = './index.html';
+                }, 1500);
+            } catch (error) {
+                showError(`处理登录时出错: ${error.message}`);
+            }
+        }
+        
+        function showSuccess() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('success-state').style.display = 'block';
+            document.getElementById('error-state').style.display = 'none';
+        }
+        
+        function showError(message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('success-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+        
+        // 页面加载时应用主题并处理回调
+        window.addEventListener('load', function() {
+            loadTheme();
+            handleCallback();
+        });
+    </script>
+</body>
+</html>
