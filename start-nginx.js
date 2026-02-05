@@ -12,8 +12,8 @@ const CONFIG = {
   nginxConfPath: path.join(__dirname, 'nginx', 'error-handling.conf'),
   // 网站根目录
   webRoot: __dirname,
-  // 默认端口
-  port: 8080
+  // 默认端口（从环境变量读取，默认为8080）
+  port: process.env.PORT || 8080
 };
 
 // 检查系统是否安装了Nginx
@@ -68,7 +68,7 @@ function startNginx() {
 // 检查Nginx是否正在运行
 function checkNginxStatus() {
   return new Promise((resolve) => {
-    exec('netstat -ano | findstr :8080', (err, stdout) => {
+    exec(`netstat -ano | findstr :${CONFIG.port}`, (err, stdout) => {
       if (err || !stdout) {
         resolve(false);
         return;
@@ -267,7 +267,7 @@ http {
     
     # 服务器配置
         server {
-            listen       8080;
+            listen       ${CONFIG.port};
             server_name  localhost ruanmingze.github.io;
             
             # 网站根目录

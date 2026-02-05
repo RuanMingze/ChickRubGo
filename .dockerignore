@@ -1,0 +1,39 @@
+# Node.js相关
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+pnpm-lock.yaml
+
+# 开发文件
+.git/
+.gitignore
+.eslintrc*
+.prettierrc*
+.vscode/
+.idea/
+
+# 部署相关
+web-deploy/
+logs/
+temp/
+conf/
+
+# 扩展相关
+extension/
+
+# 脚本文件
+prepare-web-deploy.js
+push-to-github.js
+start-nginx.js
+Run-Server.js
+test-html.js
+validate.js
+
+# 配置文件
+eslint.config.js
+
+# 其他
+README.md
+ChickRubGo.url
