@@ -7,7 +7,8 @@
     "start": "node -e \"require('open')('index.html')\"",
     "server-start": "node Run-Server.js",
     "test": "node test-html.js",
-    "lint": "node validate.js"
+    "lint": "node validate.js",
+    "push": "node push-to-github.js"
   },
   "keywords": [
     "search",
