@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站地图 - ChickRubGo</title>
+    <link rel="icon" type="image/png" href="./favicon.png">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #6366F1;
+            --primary-dark: #4338CA;
+            --secondary: #EC4899;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --gray: #6B7280;
+            --white: #FFFFFF;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: #f8f9fa;
+            background-image: url('https://luckycola.com.cn/public/imgs/luckycola_Imghub_forever_cjIr5FKD17701864981356073.png');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 0;
+        }
+
+        .sitemap-content {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            margin-bottom: 40px;
+        }
+
+        .urlset {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .url {
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .url:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .url-loc {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .url-loc a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            display: inline-block;
+        }
+
+        .url-loc a:hover {
+            color: var(--primary-dark);
+        }
+
+        .url-loc a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--primary-light);
+            transition: width 0.3s ease;
+        }
+
+        .url-loc a:hover::after {
+            width: 100%;
+        }
+
+        .url-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .url-detail {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .url-detail i {
+            color: var(--primary);
+            font-size: 0.8rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-content p {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-dark);
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--primary-light);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
+        .back-home {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-home-btn {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            margin: 0 auto;
+            box-shadow: var(--shadow-md);
+        }
+
+        .back-home-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* 深色模式 */
+        body.dark-mode {
+            background-color: #121212;
+            background-image: url('https://luckycola.com.cn/public/imgs/luckycola_Imghub_forever_cjIr5FKD17701864981356073.png');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #E5E7EB;
+        }
+
+        body.dark-mode::before {
+            background: transparent;
+        }
+
+        body.dark-mode header {
+            background: rgba(31, 41, 55, 0.9);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .sitemap-content {
+            background: rgba(31, 41, 55, 0.9);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .url {
+            background: rgba(79, 70, 229, 0.15);
+        }
+
+        body.dark-mode .url:hover {
+            background: rgba(79, 70, 229, 0.25);
+        }
+
+        body.dark-mode p {
+            color: #9CA3AF;
+        }
+
+        body.dark-mode .url-details {
+            color: #9CA3AF;
+        }
+
+        body.dark-mode footer {
+            background: rgba(31, 41, 55, 0.9);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .footer-content p {
+            color: #9CA3AF;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            header {
+                padding: 20px;
+                margin-bottom: 30px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .sitemap-content {
+                padding: 20px;
+            }
+
+            .url {
+                padding: 15px;
+            }
+
+            .url-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fa-solid fa-sitemap"></i> 网站地图</h1>
+            <p>ChickRubGo 智能搜索引擎的页面导航</p>
+        </header>
+
+        <div class="sitemap-content">
+            <div class="urlset">
+                <!-- 首页 -->
+                <div class="url">
+                    <div class="url-loc">
+                        <i class="fa-solid fa-link"></i>
+                        <a href="./index.html">主页(index.html)</a>
+                    </div>
+                    <div class="url-details">
+                        <div class="url-detail">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>最后修改: 2026-02-05</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-sync-alt"></i>
+                            <span>更新频率: 频繁</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-star"></i>
+                            <span>优先级: 100.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 登录页 -->
+                <div class="url">
+                    <div class="url-loc">
+                        <i class="fa-solid fa-link"></i>
+                        <a href="./login.html">登录页(login.html)</a>
+                    </div>
+                    <div class="url-details">
+                        <div class="url-detail">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>最后修改: 2026-02-04</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-sync-alt"></i>
+                            <span>更新频率: 很少</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-star"></i>
+                            <span>优先级: 0.3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 注册页 -->
+                <div class="url">
+                    <div class="url-loc">
+                        <i class="fa-solid fa-link"></i>
+                        <a href="./register.html">注册页(register.html)</a>
+                    </div>
+                    <div class="url-details">
+                        <div class="url-detail">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>最后修改: 2026-02-04</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-sync-alt"></i>
+                            <span>更新频率: 很少</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-star"></i>
+                            <span>优先级: 0.3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 404页 -->
+                <div class="url">
+                    <div class="url-loc">
+                        <i class="fa-solid fa-link"></i>
+                        <a href="./404.html">404页(404.html)</a>
+                    </div>
+                    <div class="url-details">
+                        <div class="url-detail">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>最后修改: 2026-02-04</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-sync-alt"></i>
+                            <span>更新频率: 很少</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-star"></i>
+                            <span>优先级: 0.3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 回调页 -->
+                <div class="url">
+                    <div class="url-loc">
+                        <i class="fa-solid fa-link"></i>
+                        <a href="./callback.html">回调页(callback.html)</a>
+                    </div>
+                    <div class="url-details">
+                        <div class="url-detail">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>最后修改: 2026-02-04</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-sync-alt"></i>
+                            <span>更新频率: 很少</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-star"></i>
+                            <span>优先级: 0.3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 联系页 -->
+                <div class="url">
+                    <div class="url-loc">
+                        <i class="fa-solid fa-link"></i>
+                        <a href="./contact.html">联系页(contact.html)</a>
+                    </div>
+                    <div class="url-details">
+                        <div class="url-detail">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>最后修改: 2026-02-04</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-sync-alt"></i>
+                            <span>更新频率: 很少</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-star"></i>
+                            <span>优先级: 0.3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 错误页 -->
+                <div class="url">
+                    <div class="url-loc">
+                        <i class="fa-solid fa-link"></i>
+                        <a href="./error.html">错误页(error.html)</a>
+                    </div>
+                    <div class="url-details">
+                        <div class="url-detail">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>最后修改: 2026-02-05</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-sync-alt"></i>
+                            <span>更新频率: 很少</span>
+                        </div>
+                        <div class="url-detail">
+                            <i class="fa-solid fa-star"></i>
+                            <span>优先级: 0.3</span>
+                        </div>
+                    </div>
+                </div>
+
+    <footer>
+            <div class="footer-content">
+                <p>© 2026 ChickRubGo by Ruanm, Inc. 探索未知，一键直达</p>
+                <div class="footer-links">
+                    <a href="./index.html">首页</a>
+                    <a href="./contact.html">联系我们</a>
+                    <a href="./sitemap.xml">XML 版本</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 读取系统主题设置
+        const body = document.body;
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+        // 根据系统设置设置初始主题
+        if (prefersDarkScheme.matches) {
+            body.classList.add('dark-mode');
+        } else {
+            body.classList.remove('dark-mode');
+        }
+
+        // 监听系统主题变化
+        prefersDarkScheme.addEventListener('change', function(e) {
+            if (e.matches) {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+            }
+        });
+
+        // 为URL卡片添加点击跳转功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlCards = document.querySelectorAll('.url');
+            urlCards.forEach(card => {
+                const link = card.querySelector('.url-loc a');
+                if (link) {
+                    card.style.cursor = 'pointer';
+                    card.addEventListener('click', function() {
+                        window.location.href = link.getAttribute('href');
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
