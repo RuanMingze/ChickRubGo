@@ -4,7 +4,7 @@
   "description": "ChickRubGo - 智能搜索引擎",
   "main": "index.html",
   "scripts": {
-    "start": "node -e \"require('open')('index.html')\"",
+    "start": "node start-nginx.js",
     "server-start": "node Run-Server.js",
     "test": "node test-html.js",
     "lint": "node validate.js",
