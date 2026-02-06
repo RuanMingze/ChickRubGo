@@ -6,106 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-// 读取.gitignore文件内容
-function getGitignorePatterns() {
-  try {
-    const gitignoreContent = fs.readFileSync('.gitignore', 'utf8');
-    return gitignoreContent
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line && !line.startsWith('#'));
-  } catch (error) {
-    console.log('⚠️  未找到.gitignore文件，将备份所有文件');
-    return [];
-  }
-}
-
-// 检查路径是否应该被排除
-function shouldExclude(filePath, ignorePatterns) {
-  const relativePath = path.relative(process.cwd(), filePath);
-  
-  for (const pattern of ignorePatterns) {
-    // 简单的模式匹配
-    if (pattern.endsWith('/')) {
-      // 目录模式
-      if (fs.statSync(filePath).isDirectory() && relativePath === pattern.slice(0, -1)) {
-        return true;
-      }
-    } else {
-      // 文件模式
-      if (relativePath === pattern) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-// 复制文件到备份目录
-function copyFileToBackup(src, dest) {
-  const destDir = path.dirname(dest);
-  if (!fs.existsSync(destDir)) {
-    fs.mkdirSync(destDir, { recursive: true });
-  }
-  fs.copyFileSync(src, dest);
-}
-
-// 备份项目文件
-function backupProject() {
-  console.log('\n📁 正在备份项目文件...');
-  
-  const ignorePatterns = getGitignorePatterns();
-  const desktopPath = path.join(os.homedir(), 'Desktop');
-  const backupDir = path.join(desktopPath, 'ChickRubGo-Copy');
-  
-  function backupDirectory(dir) {
-    const files = fs.readdirSync(dir, { withFileTypes: true });
-    
-    for (const file of files) {
-      const filePath = path.join(dir, file.name);
-      
-      // 跳过.git目录
-      if (file.name === '.git') {
-        continue;
-      }
-      
-      // 检查是否应该被排除
-      if (shouldExclude(filePath, ignorePatterns)) {
-        continue;
-      }
-      
-      const relativePath = path.relative(process.cwd(), filePath);
-      const backupPath = path.join(backupDir, relativePath);
-      
-      if (file.isDirectory()) {
-        backupDirectory(filePath);
-      } else {
-        copyFileToBackup(filePath, backupPath);
-      }
-    }
-  }
-  
-  // 清空现有的备份目录
-  try {
-    if (fs.existsSync(backupDir)) {
-      fs.rmSync(backupDir, { recursive: true, force: true });
-    }
-    // 重新创建备份目录
-    fs.mkdirSync(backupDir, { recursive: true });
-  } catch (error) {
-    console.error('❌ 清空备份目录失败：', error.message);
-    return null;
-  }
-  
-  try {
-    backupDirectory(process.cwd());
-    console.log(`✅ 备份完成，备份目录：${backupDir}`);
-    return backupDir;
-  } catch (error) {
-    console.error('❌ 备份失败：', error.message);
-    return null;
-  }
-}
+// 备份功能已禁用
 
 // 创建读取用户输入的接口
 const rl = readline.createInterface({
@@ -147,14 +48,6 @@ rl.question('\n🤔 确认要推送这些更改到GitHub吗？(y/n): ', (answer)
     console.log('✅ 推送已取消');
     rl.close();
     process.exit(0);
-  }
-  
-  // 备份项目文件
-  const backupDir = backupProject();
-  if (!backupDir) {
-    console.error('❌ 备份失败，推送已取消');
-    rl.close();
-    process.exit(1);
   }
   
   // 添加所有更改

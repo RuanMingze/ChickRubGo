@@ -5,3 +5,26 @@ node_modules
 .qoder
 push-to-github.js
 prepare-web-deploy.js
+
+# Android build files
+android/.gradle
+android/local.properties
+android/.idea
+android/build
+android/app/build
+android/gradle-temp
+android/gradle-temp-9.3.1
+
+# Gradle files
+android/gradle/wrapper/gradle-wrapper.jar
+
+# Build outputs
+android/app/release
+android/app/debug
+
+# Logs
+android/app/src/main/assets/logs
+
+# IDE files
+android/.iml
+android/*.iml
