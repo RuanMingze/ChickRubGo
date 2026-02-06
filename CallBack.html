@@ -8,137 +8,320 @@
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <script src="./Supabase-SDK.js"></script>
     <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #6366F1;
+            --primary-dark: #4338CA;
+            --secondary: #EC4899;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --gray: #6B7280;
+            --white: #FFFFFF;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            background-image: url('https://luckycola.com.cn/public/imgs/luckycola_Imghub_forever_cjIr5FKD17701864981356073.png');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-dark);
+            line-height: 1.6;
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
         }
-        
-        .callback-container {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 40px;
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            width: 100%;
+        }
+
+        .callback-content {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            padding: 60px;
+            box-shadow: var(--shadow-lg);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
             text-align: center;
-            width: 400px;
-            max-width: 90%;
+            max-width: 500px;
+            margin: 0 auto;
         }
-        
-        .logo {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #4f46e5;
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
         }
-        
+
         .status-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
+            font-size: 64px;
+            margin-bottom: 30px;
+            transition: var(--transition);
         }
-        
+
         .success-icon {
             color: #10b981;
+            text-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
         }
-        
+
         .error-icon {
             color: #ef4444;
+            text-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
         }
-        
+
         .message {
-            font-size: 16px;
-            margin-bottom: 30px;
-            color: #374151;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            color: var(--text-light);
+            line-height: 1.6;
         }
-        
+
         .loading {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(79, 70, 229, 0.3);
+            width: 30px;
+            height: 30px;
+            border: 4px solid rgba(79, 70, 229, 0.3);
             border-radius: 50%;
-            border-top-color: #4f46e5;
+            border-top-color: var(--primary);
             animation: spin 1s ease-in-out infinite;
+            margin-bottom: 30px;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
+
         .btn {
             display: inline-block;
-            padding: 10px 20px;
-            background-color: #4f46e5;
-            color: white;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: var(--white);
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
+            border-radius: 25px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
             text-decoration: none;
+            box-shadow: var(--shadow-md);
         }
-        
+
         .btn:hover {
-            background-color: #4338ca;
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
-        
-        /* 深色模式样式 */
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            margin-top: 40px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-content p {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-dark);
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--primary-light);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
+        /* 深色模式 */
         body.dark-mode {
             background-color: #121212;
+            background-image: url('https://luckycola.com.cn/public/imgs/luckycola_Imghub_forever_cjIr5FKD17701864981356073.png');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             color: #E5E7EB;
         }
-        
-        body.dark-mode .callback-container {
-            background-color: rgba(31, 41, 55, 0.92);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+        body.dark-mode::before {
+            background: transparent;
         }
-        
-        body.dark-mode .logo {
-            color: #6366F1;
+
+        body.dark-mode .callback-content {
+            background: rgba(31, 41, 55, 0.9);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
-        
+
         body.dark-mode .message {
-            color: #E5E7EB;
+            color: #9CA3AF;
         }
-        
-        body.dark-mode .btn {
-            background-color: #4F46E5;
-            color: #FFFFFF;
+
+        body.dark-mode footer {
+            background: rgba(31, 41, 55, 0.9);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
         }
-        
-        body.dark-mode .btn:hover {
-            background-color: #4338ca;
+
+        body.dark-mode .footer-content p {
+            color: #9CA3AF;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .callback-content {
+                padding: 40px 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 20px;
+            }
+
+            .status-icon {
+                font-size: 48px;
+                margin-bottom: 20px;
+            }
+
+            .message {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+
+            .loading {
+                width: 25px;
+                height: 25px;
+                margin-bottom: 20px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            footer {
+                padding: 20px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="callback-container">
-        <div class="logo">ChickRubGo</div>
-        
-        <div id="loading-state">
-            <div class="loading"></div>
-            <div class="message">正在处理登录，请稍候...</div>
+    <div class="container">
+        <div class="callback-content">
+            <h1><i class="fa-solid fa-arrow-right-to-bracket"></i> 登录回调</h1>
+            
+            <div id="loading-state">
+                <div class="loading"></div>
+                <div class="message">正在处理登录，请稍候...</div>
+            </div>
+            
+            <div id="success-state">
+                <i class="fa-solid fa-check-circle status-icon success-icon"></i>
+                <div class="message">登录成功！正在跳转回首页...</div>
+            </div>
+            
+            <div id="error-state">
+                <i class="fa-solid fa-times-circle status-icon error-icon"></i>
+                <div class="message" id="error-message">登录失败，请重试</div>
+                <a href="./login.html" class="btn">重新登录</a>
+            </div>
         </div>
         
-        <div id="success-state">
-            <i class="fa-solid fa-check-circle status-icon success-icon"></i>
-            <div class="message">登录成功！正在跳转回首页...</div>
-        </div>
-        
-        <div id="error-state">
-            <i class="fa-solid fa-times-circle status-icon error-icon"></i>
-            <div class="message" id="error-message">登录失败，请重试</div>
-            <a href="./login.html" class="btn">重新登录</a>
-        </div>
+        <footer>
+            <div class="footer-content">
+                <p>© 2026 ChickRubGo by Ruanm, Inc. 探索未知，一键直达</p>
+                <div class="footer-links">
+                    <a href="./index.html">首页</a>
+                    <a href="./contact.html">联系我们</a>
+                    <a href="./sitemap.html">网站地图</a>
+                </div>
+            </div>
+        </footer>
     </div>
     
     <script>
@@ -147,17 +330,25 @@
         const supabaseKey = 'sb_publishable_Ztie93n2pi48h_rAIuviyA_ftjAIDuj';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
         
-        // 加载主题设置
-        function loadTheme() {
-            const savedDarkMode = localStorage.getItem('darkMode');
-            const darkMode = savedDarkMode !== null ? savedDarkMode === 'true' : true; // 默认深色模式
-            
-            if (darkMode) {
-                document.body.classList.add('dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-            }
+        // 读取系统主题设置
+        const body = document.body;
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+        // 根据系统设置设置初始主题
+        if (prefersDarkScheme.matches) {
+            body.classList.add('dark-mode');
+        } else {
+            body.classList.remove('dark-mode');
         }
+
+        // 监听系统主题变化
+        prefersDarkScheme.addEventListener('change', function(e) {
+            if (e.matches) {
+                body.classList.add('dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+            }
+        });
         
         // 处理回调
         async function handleCallback() {
@@ -216,9 +407,8 @@
             document.getElementById('error-message').textContent = message;
         }
         
-        // 页面加载时应用主题并处理回调
+        // 页面加载时处理回调
         window.addEventListener('load', function() {
-            loadTheme();
             handleCallback();
         });
     </script>
