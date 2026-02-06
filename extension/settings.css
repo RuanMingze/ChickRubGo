@@ -194,7 +194,6 @@ input[type="number"]:focus {
     box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
     .settings-container {
         padding: 20px;
