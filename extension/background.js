@@ -10,3 +10,11 @@ chrome.runtime.onInstalled.addListener((details) => {
         });
     }
 });
+
+// 监听扩展图标点击事件
+chrome.action.onClicked.addListener(() => {
+    chrome.tabs.create({
+        url: chrome.runtime.getURL('settings.html'),
+        active: true
+    });
+});

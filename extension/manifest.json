@@ -11,12 +11,17 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
+  "action": {
+    "default_icon": "favicon.png",
+    "default_title": "ChickRubGo设置"
+  },
   "background": {
     "service_worker": "background.js"
   },
   "permissions": [
     "storage",
-    "management"
+    "management",
+    "cookies"
   ],
   "host_permissions": [
     "https://ruanmingze.github.io/*",
