@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索 - ChickRubGo</title>
+    <link rel="icon" type="image/png" href="./favicon.png">
+</head>
+<body>
+    <script>
+        // 获取URL参数
+        function getUrlParams() {
+            const params = {};
+            const search = window.location.search.substring(1);
+            const pairs = search.split('&');
+            for (const pair of pairs) {
+                const [key, value] = pair.split('=');
+                if (key) {
+                    params[key] = decodeURIComponent(value || '');
+                }
+            }
+            return params;
+        }
+
+        // 搜索引擎映射
+        const searchEngines = {
+            'bing': 'https://cn.bing.com/search?q=%text%',
+            'google': 'https://www.google.com/search?q=%text%',
+            'duckduckgo': 'https://duckduckgo.com/?q=%text%',
+            'baidu': 'https://www.baidu.com/s?wd=%text%'
+        };
+
+        // 执行搜索
+        function performSearch() {
+            const params = getUrlParams();
+            const query = params.q?.trim() || '';
+            const engine = params.engine?.toLowerCase().trim() || 'bing';
+
+            if (!query) {
+                window.location.href = './index.html';
+                return;
+            }
+
+            // 确保使用有效的搜索引擎，默认使用 bing
+            const engineUrl = searchEngines[engine] || searchEngines.bing;
+            const searchUrl = engineUrl.replace('%text%', encodeURIComponent(query));
+
+            window.location.href = searchUrl;
+        }
+
+        // 页面加载时执行搜索
+        window.onload = performSearch;
+    </script>
+</body>
+</html>

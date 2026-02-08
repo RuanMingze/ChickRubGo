@@ -526,8 +526,8 @@ function handleSearch() {
 		engine = engineMap[searchEngineSelect.value] || 'bing';
 	}
 
-	// 构建 search.php 的 URL
-	const searchUrl = `./search.php?q=${encodeURIComponent(keyword)}&engine=${engine}`;
+	// 构建 search.html 的 URL
+	const searchUrl = `./search.html?q=${encodeURIComponent(keyword)}&engine=${engine}`;
 
 	// 获取搜索方式设置
 	const searchTarget = localStorage.getItem('searchTarget') || '_blank';
