@@ -114,7 +114,61 @@
 			<button class="cancel-settings" id="cancel-settings">放弃更改</button>
 		</div>
 	</div>
-	<div class="widgets-panel" id="widgets-panel">
+	<div class="about-panel" id="about-panel">
+		<div class="about-content">
+			<h3>关于 ChickRubGo</h3>
+			<div class="about-info">
+				<div class="about-logo">
+					<img src="./favicon.png" alt="ChickRubGo Logo" class="about-logo-img">
+				</div>
+				<div class="about-title">
+					<h4>ChickRubGo</h4>
+					<p class="about-version">版本 2.0.0</p>
+				</div>
+			</div>
+			<div class="about-description">
+				<p>ChickRubGo 是一个现代化的智能搜索引擎界面，集成丰富的小组件功能，致力于为用户提供简洁、高效的搜索体验。</p>
+				<p class="about-slogan">探索未知，一键直达</p>
+			</div>
+			<div class="about-features">
+				<h5>主要功能</h5>
+				<ul>
+					<li><i class="fa-solid fa-check"></i> 多搜索引擎支持</li>
+					<li><i class="fa-solid fa-check"></i> 丰富的小组件（记事本、天气、木鱼等）</li>
+					<li><i class="fa-solid fa-check"></i> 自定义壁纸和主题</li>
+					<li><i class="fa-solid fa-check"></i> 深色模式支持</li>
+					<li><i class="fa-solid fa-check"></i> 背景音乐播放</li>
+					<li><i class="fa-solid fa-check"></i> AI助手集成</li>
+				</ul>
+			</div>
+			<div class="about-links">
+				<h5>相关链接</h5>
+				<a href="https://github.com/RuanMingze/ChickRubGo" target="_blank" rel="noopener" class="about-link">
+					<i class="fa-brands fa-github"></i> ChickRubGo 仓库
+				</a>
+				<a href="mailto:Xmt20160124@Outlook.com" class="about-link">
+					<i class="fa-solid fa-envelope"></i> 联系邮箱
+				</a>
+			</div>
+			<div class="about-footer">
+				<p>© 2026 ChickRubGo by Ruanm, Inc.</p>
+			</div>
+		</div>
+	<button class="close-about" id="close-about">关闭</button>
+</div>
+<!-- 彩蛋视频播放框 -->
+<div class="egg-video-container" id="egg-video-container">
+	<div class="egg-video-wrapper">
+		<button class="close-egg-video" id="close-egg-video" title="关闭视频">
+			<i class="fa-solid fa-times"></i>
+		</button>
+		<video id="egg-video" class="egg-video" controls autoplay>
+			<source src="./Assets/egg.mp4" type="video/mp4">
+			您的浏览器不支持视频播放。
+		</video>
+	</div>
+</div>
+<div class="widgets-panel" id="widgets-panel">
 		<div class="widgets-content">
 			<h3>小组件</h3>
 			<div class="widgets-grid">
@@ -689,6 +743,9 @@
 		<div class="operation-section" data-aos="fade-right" data-aos-duration="800" data-aos-delay="200">
 			<button class="mode-toggle-btn" id="mode-toggle-btn" title="切换模式">
 				<i class="fa-solid fa-leaf"></i>
+			</button>
+			<button class="about-btn" id="about-btn" title="关于">
+				<i class="fa-solid fa-circle-info"></i>
 			</button>
 			<button class="refresh-wallpaper-btn" id="refresh-wallpaper-btn" title="刷新壁纸">
 				<i class="fa-solid fa-sync-alt"></i>

@@ -625,6 +625,14 @@ document.querySelectorAll('.search-tag').forEach(tag => {
 const settingsBtn = document.getElementById('settings-btn');
 const modeToggleBtn = document.getElementById('mode-toggle-btn');
 const refreshWallpaperBtn = document.getElementById('refresh-wallpaper-btn');
+const aboutBtn = document.getElementById('about-btn');
+const aboutPanel = document.getElementById('about-panel');
+const closeAbout = document.getElementById('close-about');
+const aboutVersion = document.querySelector('.about-version');
+const eggVideoContainer = document.getElementById('egg-video-container');
+const closeEggVideo = document.getElementById('close-egg-video');
+const eggVideo = document.getElementById('egg-video');
+let refreshWallpaperClickCount = 0;
 const settingsPanel = document.getElementById('settings-panel');
 const closeSettings = document.getElementById('close-settings');
 const saveOnlySettings = document.getElementById('save-only-settings');
@@ -870,6 +878,47 @@ function applySettings() {
 settingsBtn.addEventListener('click', () => {
 	settingsPanel.classList.add('active');
 });
+
+aboutBtn.addEventListener('click', () => {
+	aboutPanel.classList.add('active');
+});
+
+closeAbout.addEventListener('click', () => {
+	aboutPanel.classList.remove('active');
+});
+
+// 彩蛋功能：点击三次版本号播放视频
+let versionClickCount = 0;
+
+if (aboutVersion) {
+	aboutVersion.addEventListener('click', () => {
+		versionClickCount++;
+		
+		// 点击三次后显示视频并更换壁纸
+		if (versionClickCount >= 3) {
+			// 显示视频
+			eggVideoContainer.classList.add('active');
+			// 静默更换壁纸
+			const easterEggWallpaper = 'https://luckycola.com.cn/public/imgs/luckycola_Imghub_forever_J7SHAosC17705213468464618.png';
+			document.body.style.backgroundImage = `url('${easterEggWallpaper}')`;
+			localStorage.setItem('currentWallpaper', easterEggWallpaper);
+			localStorage.setItem('wallpaperType', 'online');
+			// 重置点击计数
+			versionClickCount = 0;
+		}
+	});
+}
+
+// 关闭彩蛋视频
+if (closeEggVideo) {
+	closeEggVideo.addEventListener('click', () => {
+		eggVideoContainer.classList.remove('active');
+		// 暂停视频
+		if (eggVideo) {
+			eggVideo.pause();
+		}
+	});
+}
 
 closeSettings.addEventListener('click', () => {
 	saveSettings();
@@ -2675,6 +2724,24 @@ showWallpaperCheckbox.addEventListener('change', (e) => {
 refreshWallpaperBtn.addEventListener('click', () => {
 	if (showWallpaperCheckbox.checked) {
 		loadWallpaper(true);
+		// 增加点击计数
+		refreshWallpaperClickCount++;
+		
+		// 连续点击3次后弹出推荐壁纸确认框
+		if (refreshWallpaperClickCount >= 3) {
+			ShowConfirmForConfirmPlay('壁纸推荐', '换不到心仪的壁纸？点击确认使用我们推荐的壁纸。', (confirmed) => {
+				if (confirmed) {
+					// 设置推荐壁纸
+					const recommendedWallpaper = 'https://luckycola.com.cn/public/imgs/luckycola_Imghub_forever_cjIr5FKD17701864981356073.png';
+					document.body.style.backgroundImage = `url('${recommendedWallpaper}')`;
+					localStorage.setItem('currentWallpaper', recommendedWallpaper);
+					localStorage.setItem('wallpaperType', 'online');
+					ShowAlert('成功', '已应用推荐壁纸！');
+				}
+				// 重置点击计数
+				refreshWallpaperClickCount = 0;
+			});
+		}
 	}
 });
 
