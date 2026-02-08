@@ -49,6 +49,30 @@ window.onerror = function(message, source, lineno, colno, error) {
 
 // 捕获未处理的Promise拒绝
 window.onunhandledrejection = function(event) {
+    // 过滤特定的错误
+    if (event.reason && typeof event.reason === 'string') {
+        // 过滤deleteProperty错误
+        if (event.reason.includes('deleteProperty') && event.reason.includes('__tm_start')) {
+            return;
+        }
+        // 过滤API请求失败的错误
+        if (event.reason.toLowerCase().includes('api')) {
+            return;
+        }
+        if (event.reason.toLowerCase().includes('fetch')) {
+            return;
+        }
+        if (event.reason.toLowerCase().includes('network')) {
+            return;
+        }
+        if (event.reason.toLowerCase().includes('404')) {
+            return;
+        }
+        if (event.reason.toLowerCase().includes('500')) {
+            return;
+        }
+    }
+    
     // 构建错误信息
     let errorInfo = '';
     if (event.reason) {

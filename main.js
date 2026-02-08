@@ -512,19 +512,22 @@ function handleSearch() {
 	}
 	localStorage.setItem('searchHistory', JSON.stringify(history));
 
+	// 获取选择的搜索引擎
 	const searchEngineSelect = document.getElementById('search-engine');
-	let searchUrl;
+	let engine = 'bing'; // 默认引擎
 
-	if (searchEngineSelect.value === 'custom') {
-		const customUrl = document.getElementById('custom-search-url').value.trim();
-		if (customUrl) {
-			searchUrl = customUrl.replace('%text%', encodeURIComponent(keyword));
-		} else {
-			searchUrl = `https://cn.bing.com/search?q=${encodeURIComponent(keyword)}`;
-		}
-	} else {
-		searchUrl = searchEngineSelect.value.replace('%text%', encodeURIComponent(keyword));
+	// 根据选择的搜索引擎映射为对应的引擎参数
+	const engineMap = {
+		'https://cn.bing.com/search?q=%text%': 'bing',
+		'https://www.baidu.com/s?wd=%text%': 'baidu'
+	};
+
+	if (searchEngineSelect.value !== 'custom') {
+		engine = engineMap[searchEngineSelect.value] || 'bing';
 	}
+
+	// 构建 search.php 的 URL
+	const searchUrl = `./search.php?q=${encodeURIComponent(keyword)}&engine=${engine}`;
 
 	// 获取搜索方式设置
 	const searchTarget = localStorage.getItem('searchTarget') || '_blank';
