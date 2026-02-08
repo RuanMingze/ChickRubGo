@@ -8,3 +8,4 @@
 2026/02/05 18:55:07 [error] 23468#11392: CreateFile() "D:\Desktop\Ruanm-Work\ChickRubGo/logs/nginx.pid" failed (2: The system cannot find the file specified)
 2026/02/05 18:55:45 [emerg] 16224#13800: CreateDirectory() "D:\Desktop\Ruanm-Work\ChickRubGo/temp/client_body_temp" failed (3: The system cannot find the path specified)
 2026/02/05 18:55:45 [emerg] 4548#13156: CreateDirectory() "D:\Desktop\Ruanm-Work\ChickRubGo/temp/client_body_temp" failed (3: The system cannot find the path specified)
+2026/02/08 17:50:20 [notice] 2740#5920: signal process started

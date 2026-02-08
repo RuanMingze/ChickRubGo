@@ -52,6 +52,13 @@
 				</label>
 			</div>
 			<div class="setting-item">
+				<label for="theme-color">主题颜色：</label>
+				<select id="theme-color">
+					<option value="blue-purple">蓝紫色</option>
+					<option value="warm-orange">暖黄+橙红 (beta)</option>
+				</select>
+			</div>
+			<div class="setting-item">
 				<label for="search-engine">搜索引擎：</label>
 				<select id="search-engine" onchange="updateCustomSearchInput()">
 					<option value="https://cn.bing.com/search?q=%text%">必应搜索</option>
@@ -819,16 +826,16 @@
 					<span>计算器</span>
 					<button class="remove-widget-btn" title="隐藏小组件">×</button>
 				</div>
-				<div class="widget-item" data-widget="daily-quote" data-aos="fade-up" data-aos-delay="1450">
-					<i class="fa-solid fa-quote-right"></i>
-					<span>每日一言</span>
-					<button class="remove-widget-btn" title="隐藏小组件">×</button>
-				</div>
-				<div class="widget-item" data-widget="food-decider" data-aos="fade-up" data-aos-delay="1500">
-					<i class="fa-solid fa-utensils"></i>
-					<span>今天吃什么</span>
-					<button class="remove-widget-btn" title="隐藏小组件">×</button>
-				</div>
+				<div class="widget-item" data-widget="daily-quote">
+						<i class="fa-solid fa-quote-right"></i>
+						<span>每日一言</span>
+						<button class="remove-widget-btn" title="隐藏小组件">×</button>
+					</div>
+					<div class="widget-item" data-widget="food-decider">
+						<i class="fa-solid fa-utensils"></i>
+						<span>今天吃什么</span>
+						<button class="remove-widget-btn" title="隐藏小组件">×</button>
+					</div>
 				<div class="widget-item" data-widget="time-calendar">
 					<i class="fa-solid fa-clock"></i>
 					<span>时光日历</span>

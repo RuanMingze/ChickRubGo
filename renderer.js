@@ -422,27 +422,68 @@ window.addEventListener('load', () => {
 
 	// 根据设置初始化AOS动画库
 	if (showAnimations) {
+		console.log('[AOS] 初始化动画库 -', new Date().toISOString());
 		AOS.init({
 			duration: 800,
 			easing: 'ease-in-out',
-			once: true
+			once: true,
+			offset: 20, // 提前20px触发动画
+			delay: 0
 		});
+		// 监听AOS动画事件
+		document.addEventListener('aos:in', (event) => {
+			console.log('[AOS] 元素动画开始:', event.detail.element.tagName, event.detail.element.className, '- 延迟:', event.detail.element.getAttribute('data-aos-delay'), '- 时间:', new Date().toISOString());
+		});
+		// 手动触发所有元素的动画检查
+		setTimeout(() => {
+			const aosElements = document.querySelectorAll('[data-aos]');
+			console.log('[AOS] 检查到', aosElements.length, '个带动画属性的元素 -', new Date().toISOString());
+			const viewportHeight = window.innerHeight;
+			console.log('[AOS] 视口高度:', viewportHeight);
+			aosElements.forEach((element, index) => {
+				const rect = element.getBoundingClientRect();
+				const isVisible = rect.top < viewportHeight && rect.bottom > 0;
+				console.log('[AOS] 元素', index + 1, ':', element.className, '- 延迟:', element.getAttribute('data-aos-delay'), '- 位置:', rect.top, '- 可见:', isVisible, '- 已动画:', element.classList.contains('aos-animate'));
+			});
+			// 强制刷新AOS
+			console.log('[AOS] 强制刷新AOS -', new Date().toISOString());
+			AOS.refreshHard();
+			
+			// 专门处理顶部的每日一言和今天吃什么小组件
+			const topWidgets = document.querySelectorAll('[data-widget="daily-quote"], [data-widget="food-decider"]');
+			if (topWidgets.length > 0) {
+				console.log('[AOS] 找到', topWidgets.length, '个顶部小组件，强制添加动画类 -', new Date().toISOString());
+				topWidgets.forEach(widget => {
+					// 直接添加动画类，跳过视口检测
+					if (!widget.classList.contains('aos-animate')) {
+						widget.classList.add('aos-animate');
+						console.log('[AOS] 强制动画元素:', widget.className, '- 时间:', new Date().toISOString());
+					}
+				});
+			}
+		}, 100);
 	} else {
 		// 当关闭动画时，确保所有元素可见且不显示动画
 		const animatedElements = document.querySelectorAll('[data-aos]');
+		console.log('[AOS] 关闭动画，移除', animatedElements.length, '个元素的动画属性 -', new Date().toISOString());
 		animatedElements.forEach(element => {
 			// 移除data-aos属性，防止AOS处理
 			element.removeAttribute('data-aos');
 			element.removeAttribute('data-aos-duration');
 			element.removeAttribute('data-aos-delay');
 			// 确保元素可见
-			element.style.opacity = '1';
-			element.style.visibility = 'visible';
-			element.style.transform = 'none';
-			element.style.transition = 'none';
-		});
-	}
-});
+				element.style.opacity = '1';
+				element.style.visibility = 'visible';
+				element.style.transform = 'none';
+				element.style.transition = 'none';
+			});
+		}
+		// 确保所有元素都已渲染，刷新AOS
+		if (typeof AOS !== 'undefined') {
+			console.log('[AOS] 刷新AOS -', new Date().toISOString());
+			AOS.refresh();
+		}
+	});
 setInterval(updateTime, 1000);
 
 function handleSearch() {
@@ -726,6 +767,13 @@ function loadSettings() {
 		document.getElementById('show-animations').checked = savedShowAnimations === 'true';
 	}
 
+	// 加载主题颜色设置
+	const savedThemeColor = localStorage.getItem('themeColor');
+	if (savedThemeColor) {
+		document.getElementById('theme-color').value = savedThemeColor;
+		applyThemeColor(savedThemeColor);
+	}
+
 	if (savedWeatherApiKey) {
 		weatherApiKeyInput.value = savedWeatherApiKey;
 	}
@@ -825,9 +873,10 @@ function saveSettings() {
 			throw new Error('localStorage不可用');
 		}
 		localStorage.setItem('showWallpaper', showWallpaperCheckbox.checked);
-		localStorage.setItem('darkMode', darkModeCheckbox.checked);
-		localStorage.setItem('showAnimations', document.getElementById('show-animations').checked);
-		localStorage.setItem('weatherApiKey', weatherApiKeyInput.value);
+	localStorage.setItem('darkMode', darkModeCheckbox.checked);
+	localStorage.setItem('showAnimations', document.getElementById('show-animations').checked);
+	localStorage.setItem('themeColor', document.getElementById('theme-color').value);
+	localStorage.setItem('weatherApiKey', weatherApiKeyInput.value);
 		localStorage.setItem('searchEngine', searchEngineSelect.value);
 		localStorage.setItem('customSearchUrl', customSearchUrlInput.value);
 		localStorage.setItem('searchTarget', document.getElementById('search-target').value);
@@ -844,6 +893,34 @@ function saveSettings() {
 		console.error('保存设置失败:', error);
 		ShowAlert('错误', '保存设置失败: ' + error.message);
 	}
+}
+
+function applyThemeColor(themeColor) {
+	const root = document.documentElement;
+	switch (themeColor) {
+		case 'warm-orange':
+			root.style.setProperty('--primary', '#FFD700');
+			root.style.setProperty('--primary-light', '#FFE44D');
+			root.style.setProperty('--primary-dark', '#FFB800');
+			root.style.setProperty('--secondary', '#FF4500');
+			root.style.setProperty('--secondary-dark', '#CC3700');
+			break;
+		case 'blue-purple':
+		default:
+			root.style.setProperty('--primary', '#4F46E5');
+			root.style.setProperty('--primary-light', '#6366F1');
+			root.style.setProperty('--primary-dark', '#4338CA');
+			root.style.setProperty('--secondary', '#EC4899');
+			root.style.setProperty('--secondary-dark', '#BE185D');
+			break;
+	}
+}
+
+const themeColorSelect = document.getElementById('theme-color');
+if (themeColorSelect) {
+	themeColorSelect.addEventListener('change', function() {
+		applyThemeColor(this.value);
+	});
 }
 
 function saveNotepad() {
@@ -903,6 +980,9 @@ if (aboutVersion) {
 			document.body.style.backgroundImage = `url('${easterEggWallpaper}')`;
 			localStorage.setItem('currentWallpaper', easterEggWallpaper);
 			localStorage.setItem('wallpaperType', 'online');
+			// 木鱼数量变成100000
+			meritCount.textContent = '100000';
+			localStorage.setItem('meritCount', '100000');
 			// 重置点击计数
 			versionClickCount = 0;
 		}
@@ -2285,6 +2365,8 @@ function initSearchSuggestions() {
 
 // 初始化彩蛋功能
 initEasterEgg();
+initKonamiCode();
+initEasterEggNotification();
 
 function initEasterEgg() {
 	let easterEggActive = false;
@@ -2324,6 +2406,183 @@ function initEasterEgg() {
 			// 取消激活：移除彩色背景类
 			document.body.classList.remove('easter-egg-active');
 		}
+	}
+}
+
+// Konami Code 彩蛋
+function initKonamiCode() {
+	const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+	let konamiIndex = 0;
+	let konamiTriggered = false;
+	let snowflakes = [];
+	let snowflakeCanvas = null;
+	let snowflakeCtx = null;
+	let snowAnimationId = null;
+
+	document.addEventListener('keydown', (e) => {
+		// 检查当前按键是否匹配 Konami Code 序列
+		if (e.key === konamiCode[konamiIndex]) {
+			konamiIndex++;
+			// 如果完成了整个序列
+			if (konamiIndex === konamiCode.length && !konamiTriggered) {
+				konamiTriggered = true;
+				// 更换壁纸
+				const konamiWallpaper = './Assets/new-year-Wallpaper.png';
+				document.body.style.backgroundImage = `url('${konamiWallpaper}')`;
+				localStorage.setItem('currentWallpaper', konamiWallpaper);
+				localStorage.setItem('wallpaperType', 'local');
+				// 显示提示
+				ShowAlert('彩蛋触发！', '🎮 Konami Code 已激活！壁纸已更换！', true, 3000);
+				// 启动雪花特效
+				startSnowEffect();
+				// 重置索引
+				konamiIndex = 0;
+				// 3秒后允许再次触发
+				setTimeout(() => {
+					konamiTriggered = false;
+				}, 3000);
+			}
+		} else {
+			// 如果按键不匹配，重置索引
+			konamiIndex = 0;
+		}
+	});
+
+	// 雪花下落特效
+	function startSnowEffect() {
+		// 创建 canvas
+		snowflakeCanvas = document.createElement('canvas');
+		snowflakeCanvas.id = 'snowflake-canvas';
+		snowflakeCanvas.style.position = 'fixed';
+		snowflakeCanvas.style.top = '0';
+		snowflakeCanvas.style.left = '0';
+		snowflakeCanvas.style.width = '100%';
+		snowflakeCanvas.style.height = '100%';
+		snowflakeCanvas.style.pointerEvents = 'none';
+		snowflakeCanvas.style.zIndex = '9999';
+		document.body.appendChild(snowflakeCanvas);
+
+		snowflakeCtx = snowflakeCanvas.getContext('2d');
+
+		// 设置 canvas 尺寸
+		function resizeCanvas() {
+			snowflakeCanvas.width = window.innerWidth;
+			snowflakeCanvas.height = window.innerHeight;
+		}
+		resizeCanvas();
+		window.addEventListener('resize', resizeCanvas);
+
+		// 创建雪花
+		function createSnowflakes() {
+			snowflakes = [];
+			const snowflakeCount = 100;
+			for (let i = 0; i < snowflakeCount; i++) {
+				snowflakes.push({
+					x: Math.random() * snowflakeCanvas.width,
+					y: Math.random() * snowflakeCanvas.height,
+					radius: Math.random() * 3 + 1,
+					speed: Math.random() * 2 + 1,
+					wind: Math.random() * 2 - 1,
+					opacity: Math.random() * 0.5 + 0.5
+				});
+			}
+		}
+		createSnowflakes();
+
+		// 绘制雪花
+		function drawSnowflakes() {
+			snowflakeCtx.clearRect(0, 0, snowflakeCanvas.width, snowflakeCanvas.height);
+
+			snowflakes.forEach(snowflake => {
+				snowflakeCtx.beginPath();
+				snowflakeCtx.arc(snowflake.x, snowflake.y, snowflake.radius, 0, Math.PI * 2);
+				snowflakeCtx.fillStyle = `rgba(255, 255, 255, ${snowflake.opacity})`;
+				snowflakeCtx.fill();
+
+				// 更新雪花位置
+				snowflake.y += snowflake.speed;
+				snowflake.x += snowflake.wind;
+
+				// 如果雪花超出屏幕底部，重新从顶部开始
+				if (snowflake.y > snowflakeCanvas.height) {
+					snowflake.y = -10;
+					snowflake.x = Math.random() * snowflakeCanvas.width;
+				}
+
+				// 如果雪花超出屏幕左右边界，从另一侧出现
+				if (snowflake.x > snowflakeCanvas.width) {
+					snowflake.x = 0;
+				} else if (snowflake.x < 0) {
+					snowflake.x = snowflakeCanvas.width;
+				}
+			});
+
+			snowAnimationId = requestAnimationFrame(drawSnowflakes);
+		}
+
+		drawSnowflakes();
+
+		// 30秒后停止雪花特效
+		setTimeout(() => {
+			stopSnowEffect();
+		}, 30000);
+	}
+
+	// 停止雪花特效
+	function stopSnowEffect() {
+		if (snowAnimationId) {
+			cancelAnimationFrame(snowAnimationId);
+			snowAnimationId = null;
+		}
+		if (snowflakeCanvas) {
+			document.body.removeChild(snowflakeCanvas);
+			snowflakeCanvas = null;
+			snowflakeCtx = null;
+		}
+		snowflakes = [];
+	}
+}
+
+// 复活节彩蛋提示
+function initEasterEggNotification() {
+	// 计算复活节日期
+	function getEasterDate(year) {
+		const a = year % 19;
+		const b = Math.floor(year / 100);
+		const c = year % 100;
+		const d = Math.floor(b / 4);
+		const e = b % 4;
+		const f = Math.floor((b + 8) / 25);
+		const g = Math.floor((b - f + 1) / 3);
+		const h = (19 * a + b - d - g + 15) % 30;
+		const i = Math.floor(c / 4);
+		const k = c % 4;
+		const l = (32 + 2 * e + 2 * i - h - k) % 7;
+		const m = Math.floor((a + 11 * h + 22 * l) / 451);
+		const month = Math.floor((h + l - 7 * m + 114) / 31);
+		const day = ((h + l - 7 * m + 114) % 31) + 1;
+		return new Date(year, month - 1, day);
+	}
+
+	// 检查今天是否是复活节
+	const today = new Date();
+	const currentYear = today.getFullYear();
+	const easterDate = getEasterDate(currentYear);
+
+	const isEasterToday = today.getDate() === easterDate.getDate() &&
+		today.getMonth() === easterDate.getMonth() &&
+		today.getFullYear() === easterDate.getFullYear();
+
+	if (isEasterToday) {
+		// 显示彩蛋提示
+		const eggMessage = `🐰 复活节快乐！\n\n🎮 彩蛋激活方式：\n\n` +
+			`1. 版本号彩蛋：点击"关于"面板中的版本号3次\n` +
+			`2. Ruanm彩蛋：依次输入 Ruanm（丰富模式下）\n` +
+			`3. Konami Code：依次按 ↑↑↓↓←→←→BA\n` +
+			`4. 木鱼彩蛋：功德值达到1000次\n\n` +
+			`祝你发现更多惊喜！🎉`;
+
+		ShowAlert('复活节彩蛋', eggMessage, false);
 	}
 }
 
@@ -2484,6 +2743,11 @@ woodenFish.addEventListener('click', () => {
 	// 保存功德值到本地存储
 	localStorage.setItem('meritCount', newCount.toString());
 
+	// 检查是否达到1000功德值
+	if (newCount === 1000) {
+		ShowAlert('太厉害了！', '🎉 恭喜你！功德值已达到1000！\n\n你太厉害了！\n愿你的生活充满好运和幸福！\n\n...话说，你该不会用了连点器吧？😏', true, 5000);
+	}
+
 	woodenFish.style.transform = 'scale(0.8)';
 
 	// 切换到敲击时的图片
@@ -2530,12 +2794,24 @@ function openWidgetWindow(widgetType) {
 		initCalculator();
 	} else if (widgetType === 'daily-quote') {
 		const window = document.getElementById('daily-quote-window');
-		if (window) window.style.display = 'flex';
-		loadDailyQuote();
+		if (window) {
+			window.style.display = 'flex';
+			loadDailyQuote();
+			// 手动触发AOS动画
+			if (typeof AOS !== 'undefined') {
+				AOS.refresh();
+			}
+		}
 	} else if (widgetType === 'food-decider') {
 		const window = document.getElementById('food-decider-window');
-		if (window) window.style.display = 'flex';
-		initFoodDecider();
+		if (window) {
+			window.style.display = 'flex';
+			initFoodDecider();
+			// 手动触发AOS动画
+			if (typeof AOS !== 'undefined') {
+				AOS.refresh();
+			}
+		}
 	} else if (widgetType === 'time-calendar') {
 		const window = document.getElementById('time-calendar-window');
 		if (window) window.style.display = 'flex';

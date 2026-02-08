@@ -9,7 +9,8 @@
     "server-start": "node Run-Server.js",
     "test": "node test-html.js",
     "lint": "node validate.js",
-    "push": "node push-to-github.js"
+    "push": "node start-nginx.js",
+    "push-to-github": "node push-to-github.js"
   },
   "keywords": [
     "search",
