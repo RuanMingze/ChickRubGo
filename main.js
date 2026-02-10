@@ -2847,8 +2847,18 @@ async function loadWeather() {
             `;
 
 	try {
-		// 获取用户填写的API Key，如果没有则尝试从环境变量获取
-		const apiKey = localStorage.getItem('weatherApiKey') || (typeof process !== 'undefined' && process.env && process.env.OPENWEATHERMAP_API_KEY) || '';
+		// 获取用户填写的API Key
+		let apiKey = localStorage.getItem('weatherApiKey') || '';
+		
+		// 检查是否在 Netlify 环境中运行
+		const isNetlify = typeof window !== 'undefined' && window.location.hostname.includes('netlify');
+		
+		// 如果在 Netlify 环境中，尝试从全局变量获取 API Key
+		// 注意：需要在 Netlify 构建时配置环境变量的暴露
+		if (!apiKey && isNetlify && typeof window !== 'undefined' && window.env) {
+			apiKey = window.env.OPENWEATHERMAP_API_KEY || '';
+		}
+		
 		if (!apiKey) {
 			throw new Error('请先在设置中填写 OpenWeatherMap API Key');
 		}
