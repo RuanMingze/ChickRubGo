@@ -3250,6 +3250,20 @@ function showPermissionDialog() {
 	});
 }
 
+// 获取 URL 参数
+function getURLParams() {
+	const params = {};
+	const search = window.location.search.substring(1);
+	const pairs = search.split('&');
+	for (const pair of pairs) {
+		const [key, value] = pair.split('=');
+		if (key) {
+			params[key] = decodeURIComponent(value || '');
+		}
+	}
+	return params;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
 	// 初始化 IndexedDB
 	try {
@@ -3261,6 +3275,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 	loadSettings();
 	loadModeSettings();
 	applySettings();
+
+	// 检查 ispaper 参数并控制下载链接的显示
+	const params = getURLParams();
+	const isPaper = params.ispaper === 'true';
+	const downloadLink = document.getElementById('download-browser-link');
+	if (downloadLink) {
+		if (isPaper) {
+			// ispaper 为 true 时隐藏下载链接
+			downloadLink.style.display = 'none';
+		} else {
+			// ispaper 为 false 或不存在时显示下载链接
+			downloadLink.style.display = 'block';
+		}
+	}
 
 	// 等待音频播放器初始化完成后再显示授权弹窗
 	setTimeout(showMusicPermissionPopup, 1000);
