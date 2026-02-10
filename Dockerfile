@@ -28,7 +28,7 @@ http {\
     uwsgi_temp_path /var/cache/nginx/uwsgi;\
     scgi_temp_path /var/cache/nginx/scgi;\
     server {\
-        listen $PORT;\
+        listen 8080;\
         server_name localhost ruanmingze.github.io;\
         root /usr/share/nginx/html;\
         index index.html index.htm;\
