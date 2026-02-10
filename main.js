@@ -2847,8 +2847,8 @@ async function loadWeather() {
             `;
 
 	try {
-		// 获取用户填写的API Key
-		const apiKey = localStorage.getItem('weatherApiKey') || '';
+		// 获取用户填写的API Key，如果没有则尝试从环境变量获取
+		const apiKey = localStorage.getItem('weatherApiKey') || (typeof process !== 'undefined' && process.env && process.env.OPENWEATHERMAP_API_KEY) || '';
 		if (!apiKey) {
 			throw new Error('请先在设置中填写 OpenWeatherMap API Key');
 		}
