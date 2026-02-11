@@ -50,25 +50,29 @@ window.onerror = function(message, source, lineno, colno, error) {
 // 捕获未处理的Promise拒绝
 window.onunhandledrejection = function(event) {
     // 过滤特定的错误
-    if (event.reason && typeof event.reason === 'string') {
+    if (event.reason) {
+        // 过滤AbortError错误
+        if (event.reason.name === 'AbortError' || (typeof event.reason === 'string' && event.reason.includes('AbortError'))) {
+            return;
+        }
         // 过滤deleteProperty错误
-        if (event.reason.includes('deleteProperty') && event.reason.includes('__tm_start')) {
+        if (typeof event.reason === 'string' && event.reason.includes('deleteProperty') && event.reason.includes('__tm_start')) {
             return;
         }
         // 过滤API请求失败的错误
-        if (event.reason.toLowerCase().includes('api')) {
+        if (typeof event.reason === 'string' && event.reason.toLowerCase().includes('api')) {
             return;
         }
-        if (event.reason.toLowerCase().includes('fetch')) {
+        if (typeof event.reason === 'string' && event.reason.toLowerCase().includes('fetch')) {
             return;
         }
-        if (event.reason.toLowerCase().includes('network')) {
+        if (typeof event.reason === 'string' && event.reason.toLowerCase().includes('network')) {
             return;
         }
-        if (event.reason.toLowerCase().includes('404')) {
+        if (typeof event.reason === 'string' && event.reason.toLowerCase().includes('404')) {
             return;
         }
-        if (event.reason.toLowerCase().includes('500')) {
+        if (typeof event.reason === 'string' && event.reason.toLowerCase().includes('500')) {
             return;
         }
     }
