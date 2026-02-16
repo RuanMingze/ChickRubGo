@@ -666,6 +666,100 @@ document.querySelectorAll('.search-tag').forEach(tag => {
 	});
 });
 
+// 雪花飘落特效
+let snowCanvas, snowCtx;
+let snowflakes = [];
+let animationId = null;
+
+function initSnowEffect() {
+	const showSnow = localStorage.getItem('showSnow') !== 'false';
+	if (!showSnow) {
+		return;
+	}
+
+	snowCanvas = document.createElement('canvas');
+	snowCanvas.id = 'snow-canvas';
+	snowCanvas.style.position = 'fixed';
+	snowCanvas.style.top = '0';
+	snowCanvas.style.left = '0';
+	snowCanvas.style.pointerEvents = 'none';
+	snowCanvas.style.zIndex = '9999';
+	document.body.appendChild(snowCanvas);
+
+	snowCtx = snowCanvas.getContext('2d');
+	resizeSnowCanvas();
+
+	window.addEventListener('resize', resizeSnowCanvas);
+
+	createSnowflakes();
+	animateSnowflakes();
+}
+
+function resizeSnowCanvas() {
+	snowCanvas.width = window.innerWidth;
+	snowCanvas.height = window.innerHeight;
+}
+
+function createSnowflakes() {
+	const snowflakeCount = 100;
+	for (let i = 0; i < snowflakeCount; i++) {
+		snowflakes.push({
+			x: Math.random() * snowCanvas.width,
+			y: Math.random() * snowCanvas.height,
+			radius: Math.random() * 3 + 1,
+			speed: Math.random() * 1 + 0.5,
+			wind: Math.random() * 0.5 - 0.25,
+			opacity: Math.random() * 0.5 + 0.3
+		});
+	}
+}
+
+function animateSnowflakes() {
+	snowCtx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
+
+	snowflakes.forEach(snowflake => {
+		snowflake.y += snowflake.speed;
+		snowflake.x += snowflake.wind;
+
+		if (snowflake.y > snowCanvas.height) {
+			snowflake.y = -10;
+			snowflake.x = Math.random() * snowCanvas.width;
+		}
+
+		if (snowflake.x > snowCanvas.width) {
+			snowflake.x = 0;
+		} else if (snowflake.x < 0) {
+			snowflake.x = snowCanvas.width;
+		}
+
+		snowCtx.beginPath();
+		snowCtx.arc(snowflake.x, snowflake.y, snowflake.radius, 0, Math.PI * 2);
+		snowCtx.fillStyle = `rgba(255, 255, 255, ${snowflake.opacity})`;
+		snowCtx.fill();
+	});
+
+	animationId = requestAnimationFrame(animateSnowflakes);
+}
+
+function stopSnowEffect() {
+	if (animationId) {
+		cancelAnimationFrame(animationId);
+		animationId = null;
+	}
+
+	if (snowCanvas) {
+		document.body.removeChild(snowCanvas);
+		snowCanvas = null;
+		snowCtx = null;
+	}
+
+	snowflakes = [];
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+	initSnowEffect();
+});
+
 const settingsBtn = document.getElementById('settings-btn');
 const modeToggleBtn = document.getElementById('mode-toggle-btn');
 const refreshWallpaperBtn = document.getElementById('refresh-wallpaper-btn');
@@ -768,6 +862,11 @@ function loadSettings() {
 
 	if (savedShowAnimations !== null) {
 		document.getElementById('show-animations').checked = savedShowAnimations === 'true';
+	}
+
+	const savedShowSnow = localStorage.getItem('showSnow');
+	if (savedShowSnow !== null) {
+		document.getElementById('show-snow').checked = savedShowSnow === 'true';
 	}
 
 	// 加载主题颜色设置
@@ -878,6 +977,7 @@ function saveSettings() {
 		localStorage.setItem('showWallpaper', showWallpaperCheckbox.checked);
 	localStorage.setItem('darkMode', darkModeCheckbox.checked);
 	localStorage.setItem('showAnimations', document.getElementById('show-animations').checked);
+	localStorage.setItem('showSnow', document.getElementById('show-snow').checked);
 	localStorage.setItem('themeColor', document.getElementById('theme-color').value);
 	localStorage.setItem('weatherApiKey', weatherApiKeyInput.value);
 		localStorage.setItem('searchEngine', searchEngineSelect.value);
@@ -3002,6 +3102,16 @@ showWallpaperCheckbox.addEventListener('change', (e) => {
 	} else {
 		document.body.classList.add('no-wallpaper');
 		document.body.style.backgroundImage = 'none';
+	}
+});
+
+const showSnowCheckbox = document.getElementById('show-snow');
+showSnowCheckbox.addEventListener('change', (e) => {
+	saveSettings();
+	if (e.target.checked) {
+		initSnowEffect();
+	} else {
+		stopSnowEffect();
 	}
 });
 

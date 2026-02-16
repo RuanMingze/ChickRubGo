@@ -8,7 +8,7 @@ const urlsToCache = [
   './test-html.js',
   './validate.js',
   './manifest.json',
-  './favicon.png',
+  './favicon-2.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css',
   'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js',

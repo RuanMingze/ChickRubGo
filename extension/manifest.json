@@ -4,15 +4,15 @@
   "version": "1.0.1",
   "description": "将新标签页替换为ChickRubGo智能搜索引擎",
   "icons": {
-    "16": "favicon.png",
-    "48": "favicon.png",
-    "128": "favicon.png"
+    "16": "favicon-2.png",
+    "48": "favicon-2.png",
+    "128": "favicon-2.png"
   },
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
   "action": {
-    "default_icon": "favicon.png",
+    "default_icon": "favicon-2.png",
     "default_title": "ChickRubGo设置"
   },
   "background": {

@@ -43,7 +43,7 @@
 extension/
 ├── manifest.json     # 扩展配置文件
 ├── index.html        # 新标签页入口文件
-├── favicon.png       # 扩展图标（复用项目图标）
+├── favicon-2.png       # 扩展图标（复用项目图标）
 └── README.md         # 说明文档
 ```
 
